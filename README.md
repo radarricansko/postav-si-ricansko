@@ -15,5 +15,5 @@ Mapová data © přispěvatelé OpenStreetMap (ODbL). Modely © Kenney (CC0).
 
 - **Netlify:** napojit repo, nastavení je v `netlify.toml` (publikuje `web/` a kopíruje do něj `world.json`).
 - **Cloudflare Pages:** build command `cp world.json web/world.json`, output `web`.
-- Hra načte `world.json`. Když soubor chybí nebo má `"ukazka": true`, ukáže ukázková data. Parametry URL: `?nicky=0` (jen čísla obyvatel), `?demo=1` (vynutit ukázku), `?data=URL` (jiný zdroj dat).
+- Hra načte `world.json`. Když soubor chybí nebo má `"ukazka": true`, ukáže ukázková data. Parametry URL: `?admin=1` (správcovské ovládání + generátor reelu; bez něj vidí hráči čisté rozhraní), `?nicky=0` (jen čísla obyvatel), `?post=0` (vypnout filmový post-processing na slabých zařízeních), `?demo=1` (vynutit ukázku), `?data=URL` (jiný zdroj dat).
 - Nová data se kontrolují každé 2 minuty a nové domky vyrostou s animací.
