@@ -10,7 +10,8 @@ const CONFIG={
  POLL_MS:120000,                            // jak často kontrolovat nová data
  DEMO:QS.get("demo")==="1",                 // vynutit ukázková data
  OPEN_AT:+(QS.get("mlha")||1),              // od kolika obyvatel je obec vidět (1 = bez mlhy)
- JOB_N:+(QS.get("povolani")||5)             // kolik lidí stejného povolání postaví jejich budovu
+ JOB_N:+(QS.get("povolani")||5),            // kolik lidí stejného povolání postaví jejich budovu
+ REVIVE:+(QS.get("ozivit")||5)              // pod tímto počtem obyvatel je obec „opuštěná“ (šedé opuštěné domy)
 };
 /* povolání → budova, kterou si postaví */
 const JOBS={hasic:{n:"Hasič",e:"🧑‍🚒",b:"hasicarna",t:o=>"SDH "+o},kuchar:{n:"Kuchař",e:"🧑‍🍳",b:"pizzerie",t:o=>"Kuchyně "+o},hospodsky:{n:"Hospodský",e:"🍺",b:"hospoda",t:o=>"Hospoda "+o},
@@ -110,7 +111,7 @@ async function loadModels(){
 /* ---------- obce ---------- */
 const TOWNS=MAP.towns.map((t,i)=>({i,n:t.n,x:t.c[0],y:t.c[1],church:t.church,mem:t.mem,cross:t.cross,R:12,d0:12/L,P:0,F:0,players:[],items:[],group:null}));
 const byName=Object.fromEntries(TOWNS.map(t=>[t.n,t]));
-function updTownParams(){TOWNS.forEach(t=>{t.d0=t.R/L;t.P=t.R*(1-S/L);t.F=1.55*t.P/S;t.lim=t.d0+t.F})}
+function updTownParams(){TOWNS.forEach(t=>{t.d0=t.R/L;t.P=t.R*(1-S/L);t.F=3.4*t.P/S;t.lim=t.d0+t.F})}
 /* zobrazovací mapování: metry -> svět (spojité, obce si drží měřítko L) */
 function F(x,y,o){let X=x*S,Y=y*S;for(let i=0;i<TOWNS.length;i++){const t=TOWNS[i];const dx=x-t.x,dy=y-t.y,lim=t.lim;if(dx>lim||dx<-lim||dy>lim||dy<-lim)continue;const d=Math.hypot(dx,dy);if(d>=lim)continue;
   let k;if(d<=t.d0)k=L-S;else k=(1-smooth((d-t.d0)/t.F))*t.P/d;X+=dx*k;Y+=dy*k}o[0]=X;o[1]=-Y;return o}
@@ -292,16 +293,22 @@ function buildRoads(){roadGroup.children.forEach(c=>c.geometry.dispose());roadGr
  const cm=new T.Mesh(geoFrom(caps.P,caps.U,caps.I),MAT.cap);cm.receiveShadow=true;roadGroup.add(cm)}
 
 /* ---------- domy, zahrady, lampy ---------- */
-const MAXH=6000;let HOUSE=[],GARDEN,DRIVE,YARD,LAMPS;const houseRef=[[],[],[],[]];
+const MAXH=6000;let HOUSE=[],ABAND=null,GARDEN,DRIVE,YARD,LAMPS;const houseRef=[[],[],[],[]];
 function initInstanced(){const hr=MODELS.b.r;
  HOUSE=ROOFS.map(c=>{const m=new T.InstancedMesh(hr.geo,MODELS.roofMat(hr,c),MAXH);m.castShadow=m.receiveShadow=true;m.count=0;m.frustumCulled=false;scene.add(m);return m});
+ {const img=hr.map.image;const c=document.createElement("canvas");c.width=img.width;c.height=img.height;const g=c.getContext("2d");g.filter="grayscale(1) brightness(.62) sepia(.25)";g.drawImage(img,0,0);const tx=new T.CanvasTexture(c);tx.flipY=false;
+  ABAND=new T.InstancedMesh(hr.geo,new T.MeshLambertMaterial({map:tx}),600);ABAND.castShadow=ABAND.receiveShadow=true;ABAND.count=0;ABAND.frustumCulled=false;scene.add(ABAND)}
  GARDEN=new T.InstancedMesh(new T.BoxGeometry(5.9,.06,5.9),MAT.garden,MAXH);GARDEN.receiveShadow=true;GARDEN.frustumCulled=false;scene.add(GARDEN);
  DRIVE=new T.InstancedMesh(new T.BoxGeometry(1,.07,1),MAT.drive,MAXH);DRIVE.receiveShadow=true;DRIVE.frustumCulled=false;scene.add(DRIVE);
  YARD=new T.InstancedMesh(MODELS.p.treeS.geo,MODELS.p.treeS.mat,MAXH);YARD.castShadow=true;YARD.frustumCulled=false;scene.add(YARD);
  LAMPS=new T.InstancedMesh(MODELS.p.lamp.geo,MODELS.p.lamp.mat,MAXH);LAMPS.castShadow=true;LAMPS.frustumCulled=false;scene.add(LAMPS)}
 const born=new Map();
-function placeHouses(now){const cnt=[0,0,0,0];let gi=0,di=0,yi=0,li=0;houseRef.forEach(a=>a.length=0);
- TOWNS.forEach(t=>{if(!t.open)return;const c=tc(t);t.items.forEach((it,idx)=>{const s=t.slots[idx];if(!s)return;
+function abandonedN(t){return Math.max(0,CONFIG.REVIVE-t.players.length)}
+function placeHouses(now){const cnt=[0,0,0,0];let gi=0,di=0,yi=0,li=0,ai=0;houseRef.forEach(a=>a.length=0);
+ TOWNS.forEach(t=>{const ab=abandonedN(t);if(ab){const c=tc(t);const base=t.items.length;for(let k=0;k<ab;k++){const s=t.slots[base+k];if(!s)break;const w=hashStr(t.n+k)%1000/1000;
+   Q.setFromEuler(new T.Euler((w-.5)*.12,s.ry-Math.PI/2,(w-.3)*.1));V.set(c.x+s.x,-.15,c.z+s.z);SC.set(HOUSE_S*.96,HOUSE_S*.96,HOUSE_S*.96);M4.compose(V,Q,SC);ABAND.setMatrixAt(ai++,M4)}}});
+ if(ABAND){ABAND.count=ai;ABAND.instanceMatrix.needsUpdate=true}
+ TOWNS.forEach(t=>{if(!t.items.length)return;const c=tc(t);t.items.forEach((it,idx)=>{const s=t.slots[idx];if(!s)return;
    if(it.k==="s"){return}
    let k=1;const key=t.n+"#"+idx;if(born.has(key)){const a=(now-born.get(key))/650;if(a<0)k=0.001;else if(a<1)k=a<.7?a/.7*1.12:1.12-(a-.7)/.3*.12;else born.delete(key)}
    Q.setFromAxisAngle(UP,s.ry-Math.PI/2);V.set(c.x+s.x,0,c.z+s.z);SC.set(HOUSE_S*k,HOUSE_S*k,HOUSE_S*k);M4.compose(V,Q,SC);houseRef[s.roof][cnt[s.roof]]={t,idx};HOUSE[s.roof].setMatrixAt(cnt[s.roof]++,M4);
@@ -325,7 +332,7 @@ function buildTown(t){if(t.group){scene.remove(t.group)}const g=new T.Group();t.
  for(let i=0;i<4;i++){const a=lm.ry+Math.PI/4+i*Math.PI/2;const x=lm.x+Math.cos(a)*(lm.r+1.2),z=lm.z+Math.sin(a)*(lm.r+1.2);const l=new T.Mesh(MODELS.p.lamp.geo,MODELS.p.lamp.mat);l.scale.setScalar(4.2);l.position.set(x,0,z);l.rotation.y=-a;l.castShadow=true;g.add(l)}
  t.dyn=new T.Group();g.add(t.dyn);t.specialObjs=[];refreshTown(t)}
 function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.userData.lbl.remove()});const g=t.dyn;g.children.forEach(c=>{c.traverse(m=>{if(m.geometry&&m.userData.tmp)m.geometry.dispose()})});g.clear();t.specialObjs=[];
- const used=t.open?Math.min(t.items.length,t.slots.length):0;
+ const used=Math.min(t.items.length,t.slots.length);
  // lawn pod obcí (zakryje pole)
  const lawn=new T.Mesh(new T.CircleGeometry(t.R+6,56).rotateX(-Math.PI/2),lawnMat(t.R+6));lawn.position.y=.03;lawn.receiveShadow=true;lawn.userData.tmp=1;g.add(lawn);
  // viditelné uličky
@@ -340,7 +347,7 @@ function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.user
  // speciální budovy
  for(let i=0;i<used;i++){const it=t.items[i];if(it.k!=="s")continue;const s=t.slots[i];const o=SPECIALS.build(it.id,it.text);o.position.set(s.x,0,s.z);o.rotation.y=s.ry;o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});
   o.userData.ref={t,idx:i};const key=t.n+"#"+i;if(born.has(key)){o.scale.setScalar(.01);o.userData.grow=born.get(key)}g.add(o);t.specialObjs.push(o)}
- if(t.open){townSigns(t,g);outskirts(t,g)}}
+ townSigns(t,g);outskirts(t,g)}
 const signTexC={};
 function townSignTex(n){if(signTexC[n])return signTexC[n];return signTexC[n]=canvasTex(512,200,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.strokeStyle="#111";g.lineWidth=10;g.strokeRect(16,16,w-32,h-32);
  g.fillStyle="#111";let f=96;g.font=`700 ${f}px Arial`;while(g.measureText(n).width>w-70&&f>30){f-=4;g.font=`700 ${f}px Arial`}g.textAlign="center";g.textBaseline="middle";g.fillText(n,w/2,h/2+4)})}
@@ -354,14 +361,14 @@ function townSigns(t,g){const rad=Math.max(t.R-.5,12);const placed=[];const tex=
 function outskirts(t,g){const r=rng(hashStr(t.n)+7);const tree=MODELS.p.tree;const n=Math.round(10+t.R*.5);const im=new T.InstancedMesh(tree.geo,tree.mat,n);let k=0;
  for(let i=0;i<n*3&&k<n;i++){const a=r()*6.283,d=t.R+1+r()*6;const x=Math.cos(a)*d,z=Math.sin(a)*d;if(t.mains.some(m=>m.pts.some(q=>(q.x-x)**2+(q.z-z)**2<16)))continue;
   Q.setFromAxisAngle(UP,r()*6.3);V.set(x,0,z);const h=3.6+r()*2.6;SC.set(h,h,h);M4.compose(V,Q,SC);im.setMatrixAt(k++,M4)}im.count=k;im.castShadow=true;im.userData.tmp=0;g.add(im)}
-function townRadius(t){const lm=t.lm;let R=Math.hypot(lm.x,lm.z)+lm.r+4;if(t.open){const n=Math.min(t.items.length,t.slots.length);for(let i=0;i<n;i++){const s=t.slots[i];R=Math.max(R,Math.hypot(s.x,s.z)+5)}}return Math.max(R,14)}
+function townRadius(t){const lm=t.lm;let R=Math.hypot(lm.x,lm.z)+lm.r+4;{const n=Math.min(t.items.length+abandonedN(t),t.slots.length);for(let i=0;i<n;i++){const s=t.slots[i];R=Math.max(R,Math.hypot(s.x,s.z)+5)}}return Math.max(R,14)}
 
 /* ---------- erby, mlha, popisky ---------- */
 const tierOf=n=>n>=100?"plat":n>=50?"gold":n>=20?"silver":"wood";
 function erbTexture(name,tier,gray){return new Promise(ok=>{const d=ERB.E.find(e=>e[0]===name)||ERB.E.find(e=>e[0]==="Křížkový Újezdec");const svg=ERB.erb(d,tier);const url="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
  const img=new Image();img.onload=()=>{const c=document.createElement("canvas");c.width=216;c.height=256;const g=c.getContext("2d");if(gray)g.filter="grayscale(1) brightness(1.15) opacity(.85)";g.drawImage(img,0,0,216,256);const t=new T.CanvasTexture(c);ok({t,url})};img.onerror=()=>ok({t:null,url});img.src=url})}
 const fogTex=canvasTex(128,128,(g,w,h)=>{const r=g.createRadialGradient(64,64,4,64,64,62);r.addColorStop(0,"rgba(255,255,255,.95)");r.addColorStop(.6,"rgba(240,244,248,.55)");r.addColorStop(1,"rgba(240,244,248,0)");g.fillStyle=r;g.fillRect(0,0,w,h)});
-async function setErb(t){const open=t.open;const tier=tierOf(t.players.length);const key=tier+(open?"":"g");if(t.erbKey===key)return;t.erbKey=key;const {t:tex,url}=await erbTexture(t.n,tier,!open);if(!tex)return;
+async function setErb(t){const open=t.players.length>=CONFIG.REVIVE;const tier=tierOf(t.players.length);const key=tier+(open?"":"g");if(t.erbKey===key)return;t.erbKey=key;const {t:tex,url}=await erbTexture(t.n,tier,!open);if(!tex)return;
  if(!t.erb){t.erb=new T.Sprite(new T.SpriteMaterial({map:tex,fog:false,transparent:true,depthWrite:false}));t.group.add(t.erb)}else{t.erb.material.map=tex;t.erb.material.needsUpdate=true}t.erbUrl=url}
 function setFog(t){if(t.open){if(t.fog){t.group.remove(t.fog);t.fog=null}return}if(t.fog)return;const f=new T.Group();const r=rng(hashStr(t.n)+1);
  for(let i=0;i<9;i++){const s=new T.Sprite(new T.SpriteMaterial({map:fogTex,transparent:true,depthWrite:false,opacity:.75+r()*.2}));const a=r()*6.28,d=r()*7;s.position.set(t.lm.x+Math.cos(a)*d,2+r()*5,t.lm.z+Math.sin(a)*d);const sc=10+r()*8;s.scale.set(sc,sc*.7,1);s.userData.ph=r()*6;f.add(s)}
@@ -445,17 +452,30 @@ function relayout(full){updTownParams();TOWNS.forEach(t=>{const c=tc(t);t.group.
  SIGNS.forEach(s=>{if(!s.g)s.g=bigSign(s.txt);const q=s.get();F(q[0],q[1],tmp2);s.g.position.set(tmp2[0]+(s.txt[0]==="↖"?-8:8),0,tmp2[1]+(s.txt[0]==="↖"?-8:8));s.g.lookAt(cam.position.x,0,cam.position.z)});
  if(full){sampleForest();placeForest()}
  scene.fog.near=180*S/0.09;scene.fog.far=2400*S/0.09;ctr.maxDistance=2400*S/0.09}
-function refreshAll(changed){let grew=false;(changed||TOWNS).forEach(t=>{const wasOpen=t.open;t.open=t.players.length>=CONFIG.OPEN_AT;const R=townRadius(t);if(Math.abs(R-t.R)>.01)grew=true;t.R=R;refreshTown(t);setFog(t);setErb(t);
+
+/* ---------- koruna týdne (putovní) ---------- */
+let crownObj=null,crownT=null;
+function weekGain(t){return t.players.filter(p=>p.day>DAY-7).length}
+function crownTown(){let best=null,bg=0;TOWNS.forEach(t=>{if(t.players.length<CONFIG.REVIVE||!t.group)return;const g=weekGain(t);if(g>bg||(g===bg&&best&&t.players.length>best.players.length)){bg=g;best=t}});return bg>0?best:null}
+function makeCrown(){const g=new T.Group();const gold=new T.MeshStandardMaterial({color:"#f4c430",metalness:.7,roughness:.32,emissive:"#7a5200",emissiveIntensity:.4,side:T.DoubleSide});
+ const ring=new T.Mesh(new T.CylinderGeometry(2.1,2.4,1.4,24,1,true),gold);g.add(ring);const base=new T.Mesh(new T.TorusGeometry(2.4,.24,10,32),gold);base.rotation.x=Math.PI/2;base.position.y=-.7;g.add(base);
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2;const sp=new T.Mesh(new T.ConeGeometry(.5,1.7,6),gold);sp.position.set(Math.cos(a)*2.15,1.5,Math.sin(a)*2.15);g.add(sp);
+  const gem=new T.Mesh(new T.SphereGeometry(.3,10,8),new T.MeshStandardMaterial({color:i%2?"#e63946":"#2f6df6",emissive:i%2?"#6a0a12":"#0b2a6e",emissiveIntensity:.6,roughness:.15,metalness:.1}));gem.position.set(Math.cos(a)*2.45,.25,Math.sin(a)*2.45);g.add(gem)}
+ const light=new T.PointLight("#ffd36a",.9,22);light.position.y=2;g.add(light);g.traverse(m=>{if(m.isMesh)m.castShadow=true});return g}
+function updCrown(){const t=crownTown();if(t===crownT&&crownObj)return;if(crownObj&&crownObj.parent)crownObj.parent.remove(crownObj);crownObj=null;const was=crownT;crownT=t;if(!t)return;
+ crownObj=makeCrown();crownObj.scale.setScalar(1.35);const top=t.lmObj?new T.Box3().setFromObject(t.lmObj).max.y:8;crownObj.userData.y=top+4.5;crownObj.position.set(t.lm.x,crownObj.userData.y,t.lm.z);t.group.add(crownObj);
+ if(ready&&was&&was!==t)toast(`👑 Koruna týdne putuje do obce ${t.n}!`,`největší přírůstek za 7 dní · +${weekGain(t)}`)}
+function refreshAll(changed){let grew=false;(changed||TOWNS).forEach(t=>{const wasOpen=t.open;const wasRev=t.rev;t.rev=t.players.length>=CONFIG.REVIVE;if(t.rev&&wasRev===false&&ready)toast(`🏡 ${t.n} ožila!`,`opuštěné domy mají nové obyvatele (${CONFIG.REVIVE}/${CONFIG.REVIVE})`);t.open=t.players.length>=CONFIG.OPEN_AT;const R=townRadius(t);if(Math.abs(R-t.R)>.01)grew=true;t.R=R;refreshTown(t);setFog(t);setErb(t);
   if(t.open&&!wasOpen&&ready)toast(`🏡 ${t.n} je na mapě!`,"první obyvatel postavil domek")});
  const need=requiredS();if(need>S*1.0005){Starget=need*1.04;animS={from:S,to:Starget,t0:performance.now()};if(ready)toast("🌍 Říčansko se rozrostlo!",`obce se od sebe odsunuly · měřítko světa ×${(Starget/S0).toFixed(2)}`)}
- relayout(grew&&!animS);updateUI()}
+ relayout(grew&&!animS);updCrown();updateUI()}
 
 /* ---------- UI ---------- */
 let S0=0.05,ready=false;
 const sel=$("sel");
 function updateUI(){if(window.GAME&&GAME.onUpdate)GAME.onUpdate();$("sDay").textContent=DAY;$("sPop").textContent=POP;$("sTowns").textContent=TOWNS.filter(t=>t.open).length+"/"+TOWNS.length;
  const cur=sel.value;sel.innerHTML=TOWNS.slice().sort((a,b)=>b.players.length-a.players.length).map(t=>`<option value="${t.n}">${t.n} · ${t.players.length}${t.open?"":" 🔒"}</option>`).join("");if(cur)sel.value=cur;
- TOWNS.forEach(t=>{t.lbl.className="lbl"+(t.open?"":" lock");t.lbl.innerHTML=t.open?`${t.n}<small>${t.players.length} obyvatel</small>`:(CONFIG.OPEN_AT>1?`${t.n}<small>🌫️ čeká ${t.players.length}/${CONFIG.OPEN_AT}</small>`:`${t.n}<small>zatím nikdo · buď první</small>`)})}
+ TOWNS.forEach(t=>{const n=t.players.length,rv=n>=CONFIG.REVIVE;t.lbl.className="lbl"+(rv?"":" lock");t.lbl.innerHTML=rv?`${t===crownT?"👑 ":""}${t.n}<small>${n} obyvatel</small>`:`${t.n}<small>🏚️ opuštěná · ${n}/${CONFIG.REVIVE}</small>`})}
 let tt;function toast(a,b){const e=$("toast");e.innerHTML=a+(b?`<small>${b}</small>`:"");e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),2800)}
 function addPlayers(t,n){const now=performance.now();for(let k=0;k<n;k++){newPlayer(t,DAY);const idx=addItem(t,{k:"h",p:t.players[t.players.length-1]});born.set(t.n+"#"+idx,now+k*90);const jb=jobBuild(t,DAY);if(jb>=0){born.set(t.n+"#"+jb,now+k*90+300);const it=t.items[jb];toast(`${JOBS[it.job].e} ${t.n}: ${CONFIG.JOB_N} ${JOBS[it.job].n.toLowerCase()}ů staví!`,it.text)}}
  if(t.players.length>=CONFIG.OPEN_AT&&t.players.length-n<CONFIG.OPEN_AT){t.items.forEach((it,i)=>born.set(t.n+"#"+i,now+i*60))}refreshAll([t])}
@@ -501,6 +521,10 @@ function regionBox(){let a=1e9,b=1e9,c=-1e9,d=-1e9;TOWNS.forEach(t=>{const p=tc(
 
 /* ---------- katalog ---------- */
 let catDone=false;
+let thumbs=null;
+function catalogThumbs(){if(thumbs)return thumbs;const rr=new T.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});rr.setSize(320,240);rr.setPixelRatio(1);const sc=new T.Scene();sc.add(new T.HemisphereLight("#e6f2ff","#7a8a5a",.7));const dl=new T.DirectionalLight("#ffe6c4",.9);dl.position.set(-4,8,6);sc.add(dl);
+ const cm=new T.PerspectiveCamera(30,4/3,.1,100);cm.position.set(7.5,7.2,11);cm.lookAt(0,1.2,0);const base=new T.Mesh(new T.CircleGeometry(5.2,40).rotateX(-Math.PI/2),new T.MeshLambertMaterial({color:"#9ccb6a"}));sc.add(base);
+ thumbs=SPECIALS.CAT.map(c=>{const o=SPECIALS.build(c.id,c.example);sc.add(o);rr.render(sc,cm);const url=rr.domElement.toDataURL("image/png");sc.remove(o);const job=Object.values(JOBS).find(j=>j.b===c.id);return Object.assign({},c,{img:url,job:job?{n:job.n,e:job.e}:null})});rr.dispose();return thumbs}
 function openCatalog(){$("cat").classList.add("on");if(catDone)return;catDone=true;const grid=$("catGrid");
  const rr=new T.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});rr.setSize(320,240);rr.setPixelRatio(1);const sc=new T.Scene();sc.add(new T.HemisphereLight("#e6f2ff","#7a8a5a",.7));const dl=new T.DirectionalLight("#ffe6c4",.9);dl.position.set(-4,8,6);sc.add(dl);
  const cm=new T.PerspectiveCamera(30,4/3,.1,100);cm.position.set(7.5,7.2,11);cm.lookAt(0,1.2,0);const base=new T.Mesh(new T.CircleGeometry(5.2,40).rotateX(-Math.PI/2),new T.MeshLambertMaterial({color:"#9ccb6a"}));sc.add(base);
@@ -535,13 +559,13 @@ function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const
   if(!l){const it=t.items[o.userData.ref.idx];const c=SPECIALS.CAT.find(x=>x.id===it.id);l=document.createElement("div");l.className="slbl";l.innerHTML=`<span>${c.emoji}</span>${String(it.text).replace(/</g,"&lt;")}`;l.onclick=()=>selectItem(t,o.userData.ref.idx);document.body.appendChild(l);o.userData.lbl=l}
   v.y+=5.2;v.project(cam);const vis=v.z<1&&Math.abs(v.x)<1&&Math.abs(v.y)<1;l.style.display=vis?"":"none";if(vis){l.style.left=(v.x*.5+.5)*innerWidth+"px";l.style.top=(-v.y*.5+.5)*innerHeight+"px";l.style.opacity=Math.min(1,(95-d)/25)}}));
  document.querySelector("#compass .n").style.transform=`rotate(${-ctr.getAzimuthalAngle()}rad)`;
- POST.render(Math.max(.35,Math.min(1,(700*S/0.09-dist)/(500*S/0.09))));frameCbs.forEach(f=>f(now))}
+ POST.render(Math.max(.35,Math.min(1,(700*S/0.09-dist)/(500*S/0.09))));if(crownObj){crownObj.rotation.y=now*.0009;crownObj.position.y=crownObj.userData.y+Math.sin(now*.0022)*.45}frameCbs.forEach(f=>f(now))}
 addEventListener("resize",()=>{if(aspectLock)return;cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);POST.resize()});
 let orbitSpeed=0,aspectLock=false;
 
 /* ---------- API pro generátor reelů ---------- */
 window.GAME={canvas,THREE:T,
- state:()=>({day:DAY,totalPlayers:POP,towns:TOWNS.map(t=>{const c=tc(t);return{name:t.n,players:t.players.length,open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl||null,erbSvg:(()=>{const d=ERB.E.find(e=>e[0]===t.n);return d?ERB.erb(d,tierOf(t.players.length)):''})(),center:{x:c.x,y:0,z:c.z},radius:t.R,
+ state:()=>({day:DAY,totalPlayers:POP,towns:TOWNS.map(t=>{const c=tc(t);return{name:t.n,players:t.players.length,abandoned:abandonedN(t),revive:CONFIG.REVIVE,open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl||null,erbSvg:(()=>{const d=ERB.E.find(e=>e[0]===t.n);return d?ERB.erb(d,tierOf(t.players.length)):''})(),center:{x:c.x,y:0,z:c.z},radius:t.R,
   houses:t.items.map((it,i)=>{const s=t.slots[i];return s&&it.k==="h"?{id:t.n+"#"+i,owner:it.p.nick,no:it.p.no,x:c.x+s.x,y:0,z:c.z+s.z}:null}).filter(Boolean)}})}),
  setAspect:(w,h)=>{aspectLock=!!w;if(w){R.setPixelRatio(1);R.setSize(w,h,false);cam.aspect=w/h}else{R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight}cam.updateProjectionMatrix();POST.resize()},
  flyTo:(o,ms)=>flyTo(new T.Vector3(o.target.x,o.target.y,o.target.z),new T.Vector3(o.pos.x,o.pos.y,o.pos.z),ms),
@@ -552,11 +576,24 @@ window.GAME={canvas,THREE:T,
  buildSpecial:n=>buildSpecial(byName[n]),
  dbg:n=>{const t=byName[n];return {lm:[t.lm.x|0,t.lm.z|0,t.lm.type],R:t.R|0,mains:t.mains.length,lanes:t.lanes.length,slots:t.slots.slice(0,Math.min(t.items.length,t.slots.length)).map(s=>Math.round(Math.hypot(s.x,s.z))).join(",")}},select:(n,idx)=>selectItem(byName[n],idx),closeInfo:()=>closeInfo(),
  find:q=>{q=String(q||"").toLowerCase().replace(/^@/,"").trim();if(!q)return [];const out=[];TOWNS.forEach(t=>t.items.forEach((it,i)=>{if(it.k==="h"&&t.slots[i]){const p=it.p;const nk=p.nick.toLowerCase().slice(1);if(nk.includes(q)||String(p.no)===q.replace(/^#|^0+/,""))out.push({town:t.n,idx:i,nick:CONFIG.SHOW_NICKS?p.nick:"Obyvatel č. "+String(p.no).padStart(4,"0"),no:p.no,open:t.open})}}));return out.slice(0,8)},
- townInfo:n=>{const t=byName[n];const nx=SPECIALS.CAT.find(c=>c.th>t.players.length);return{name:t.n,players:t.players.length,open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl,landmark:t.lm.name,specials:t.items.filter(x=>x.k==="s").map(x=>({text:x.text,id:x.id,author:CONFIG.SHOW_NICKS?x.author:null})),next:nx?{name:nx.name,th:nx.th,emoji:nx.emoji}:null,jobs:Object.entries(jobCounts(t)).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([j,n])=>({n:JOBS[j].n,e:JOBS[j].e,c:n,need:CONFIG.JOB_N,built:t.items.some(x=>x.k==="s"&&(x.job===j||x.id===JOBS[j].b)),b:SPECIALS.CAT.find(c=>c.id===JOBS[j].b).name})),founders:t.players.slice(0,5).map(p=>CONFIG.SHOW_NICKS?p.nick:"#"+String(p.no).padStart(4,"0"))}},
- ranking:()=>TOWNS.map(t=>({name:t.n,players:t.players.length,open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl,week:t.players.filter(p=>p.day>DAY-7).length})).sort((a,b)=>b.players-a.players),
- jobs:()=>Object.entries(JOBS).map(([k,v])=>({k,n:v.n,e:v.e,b:SPECIALS.CAT.find(c=>c.id===v.b).name})),jobN:()=>CONFIG.JOB_N,openAt:()=>CONFIG.OPEN_AT,info:()=>({day:DAY,pop:POP,open:TOWNS.filter(t=>t.open).length,total:TOWNS.length}),reload:()=>pollWorld(),get S(){return S},pairs:()=>{const o=[];for(let i=0;i<TOWNS.length;i++)for(let j=i+1;j<TOWNS.length;j++){const a=TOWNS[i],b=TOWNS[j];const d=Math.hypot(a.x-b.x,a.y-b.y);o.push([((SPREAD*(a.R+b.R)+GAP)/d).toFixed(4),a.n,b.n,Math.round(d),a.R.toFixed(0),b.R.toFixed(0)])}return o.sort((x,y)=>y[0]-x[0]).slice(0,6)},onFrame:cb=>frameCbs.push(cb),towns:()=>TOWNS.map(t=>t.n),
- dayData:()=>{const np=ALLP.filter(p=>p.day===DAY).map(p=>({town:p.town,owner:p.nick.slice(1),no:p.no}));const sp=TOWNS.flatMap(t=>t.items.filter(x=>x.k==="s"&&x.day===DAY).map(x=>({town:t.n,name:x.text,type:x.id})));
-  const auth=(ALLP[ALLP.length-1]||{nick:"@hrac_0001"}).nick;return{day:DAY,newPlayers:np,topComment:sp[0]?{author:auth,text:"Postavte "+sp[0].name+"!",likes:87}:{author:auth,text:"Chceme v obci hospodu U Zlatého Radaru 🍺",likes:64},newBuilding:sp[0]||null,expanded:false}}};
+ townInfo:n=>{const t=byName[n];const _ab=abandonedN(t);const nx=SPECIALS.CAT.find(c=>c.th>t.players.length);return{name:t.n,players:t.players.length,abandoned:_ab,revive:CONFIG.REVIVE,crown:t===crownT,weekGain:weekGain(t),open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl,landmark:t.lm.name,specials:t.items.filter(x=>x.k==="s").map(x=>({text:x.text,id:x.id,author:CONFIG.SHOW_NICKS?x.author:null})),next:nx?{name:nx.name,th:nx.th,emoji:nx.emoji}:null,jobs:Object.entries(jobCounts(t)).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([j,n])=>({n:JOBS[j].n,e:JOBS[j].e,c:n,need:CONFIG.JOB_N,built:t.items.some(x=>x.k==="s"&&(x.job===j||x.id===JOBS[j].b)),b:SPECIALS.CAT.find(c=>c.id===JOBS[j].b).name})),founders:t.players.slice(0,5).map(p=>CONFIG.SHOW_NICKS?p.nick:"#"+String(p.no).padStart(4,"0"))}},
+ ranking:()=>TOWNS.map(t=>({name:t.n,crown:t===crownT,players:t.players.length,open:t.players.length>=CONFIG.REVIVE,tier:tierOf(t.players.length),erbUrl:t.erbUrl,week:t.players.filter(p=>p.day>DAY-7).length})).sort((a,b)=>b.players-a.players),
+ jobs:()=>Object.entries(JOBS).map(([k,v])=>({k,n:v.n,e:v.e,b:SPECIALS.CAT.find(c=>c.id===v.b).name})),jobN:()=>CONFIG.JOB_N,openAt:()=>CONFIG.OPEN_AT,history:()=>{const days=[];for(let d=1;d<=DAY;d++)days.push(d);const tot=days.map(d=>ALLP.filter(p=>p.day<=d).length);const towns={};TOWNS.forEach(t=>{if(t.players.length)towns[t.n]=days.map(d=>t.players.filter(p=>p.day<=d).length)});return{days,total:tot,towns}},
+ dayLog:d=>{const np=ALLP.filter(p=>p.day===d);const byT={};np.forEach(p=>byT[p.town]=(byT[p.town]||0)+1);const top=Object.entries(byT).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const built=TOWNS.flatMap(t=>t.items.filter(x=>x.k==="s"&&x.day===d).map(x=>({town:t.n,text:x.text,job:x.job?JOBS[x.job].n:null,emoji:SPECIALS.CAT.find(c=>c.id===x.id).emoji})));
+  const firsts=TOWNS.filter(t=>t.players.length&&t.players[0].day===d).map(t=>t.n);const revived=TOWNS.filter(t=>t.players.length>=CONFIG.REVIVE&&t.players[CONFIG.REVIVE-1].day===d).map(t=>t.n);
+  return{day:d,count:np.length,total:ALLP.filter(p=>p.day<=d).length,top,built,firsts,revived}},
+ catalogThumbs:()=>catalogThumbs(),revive:()=>CONFIG.REVIVE,crown:()=>crownT?{name:crownT.n,week:weekGain(crownT),players:crownT.players.length}:null,
+ info:()=>({day:DAY,pop:POP,open:TOWNS.filter(t=>t.open).length,total:TOWNS.length}),reload:()=>pollWorld(),get S(){return S},pairs:()=>{const o=[];for(let i=0;i<TOWNS.length;i++)for(let j=i+1;j<TOWNS.length;j++){const a=TOWNS[i],b=TOWNS[j];const d=Math.hypot(a.x-b.x,a.y-b.y);o.push([((SPREAD*(a.R+b.R)+GAP)/d).toFixed(4),a.n,b.n,Math.round(d),a.R.toFixed(0),b.R.toFixed(0)])}return o.sort((x,y)=>y[0]-x[0]).slice(0,6)},onFrame:cb=>frameCbs.push(cb),towns:()=>TOWNS.map(t=>t.n),
+ dayData:()=>{const np=ALLP.filter(p=>p.day===DAY).map(p=>({town:p.town,owner:p.nick.slice(1),no:p.no}));
+  const sp=TOWNS.flatMap(t=>t.items.filter(x=>x.k==="s"&&x.day===DAY&&!x.job).map(x=>({town:t.n,name:x.text,type:x.id})));
+  const jb=TOWNS.flatMap(t=>t.items.filter(x=>x.k==="s"&&x.day===DAY&&x.job).map(x=>({town:t.n,job:JOBS[x.job].n,emoji:JOBS[x.job].e,building:SPECIALS.CAT.find(c=>c.id===x.id).name,name:x.text})));
+  const jobs=TOWNS.flatMap(t=>Object.entries(jobCounts(t)).filter(([j,n])=>n<CONFIG.JOB_N&&n>=CONFIG.JOB_N-2&&!t.items.some(x=>x.k==="s"&&(x.job===j||x.id===JOBS[j].b))).map(([j,n])=>({town:t.n,job:JOBS[j].n,emoji:JOBS[j].e,count:n,need:CONFIG.JOB_N,building:SPECIALS.CAT.find(c=>c.id===JOBS[j].b).name}))).sort((a,b)=>(b.count/b.need)-(a.count/a.need)).slice(0,2);
+  const ms=[100,250,500,1000,1500,2000,2026,3000].map(m=>ALLP.find(p=>p.no===m&&p.day===DAY)).filter(Boolean).map(p=>({no:p.no,owner:p.nick.slice(1),town:p.town}))[0]||null;
+  const nt=TOWNS.filter(t=>t.players.length&&t.players[0].day===DAY).map(t=>t.n);
+  const auth=(ALLP[ALLP.length-1]||{nick:"@hrac_0001"}).nick;
+  return{day:DAY,crown:crownT?{name:crownT.n,week:weekGain(crownT)}:null,newPlayers:np,topComment:sp[0]?{author:auth,text:"Postavte "+sp[0].name+"!",likes:87}:{author:auth,text:"Chceme v obci hospodu U Zlatého Radaru 🍺",likes:64},newBuilding:sp[0]||null,expanded:false,
+   jobs,jobBuilt:jb[0]||null,milestone:ms,newTowns:nt,findMe:np.slice(0,12).map(p=>p.owner)}}};
 
 /* ---------- start ---------- */
 (async()=>{try{setMsg("načítám 3D modely…");await loadModels()}catch(e){setMsg("Nepodařilo se načíst modely");throw e}
@@ -569,6 +606,6 @@ window.GAME={canvas,THREE:T,
  setMsg("krajina, lesy a pole…");await new Promise(r=>setTimeout(r,20));
  buildLandSource();TOWNS.forEach(buildTown);TOWNS.forEach(t=>{setFog(t);setErb(t)});relayout(true);initCars();updateUI();
  const t0=byName["Říčany"];const c=tc(t0);ctr.target.set(c.x,0,c.z);cam.position.set(c.x+260,300,c.z+420);
- $("load").remove();ready=true;requestAnimationFrame(loop);window.done=1;
+ $("load").remove();updCrown();updateUI();ready=true;requestAnimationFrame(loop);window.done=1;
  setTimeout(()=>focusTown(t0,2600,true),300);if(real)setInterval(pollWorld,CONFIG.POLL_MS)})();
 })();
