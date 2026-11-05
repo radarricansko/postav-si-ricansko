@@ -4,7 +4,7 @@ Verze 2 (5. 11. 2026). Teaser **čt 12. 11.**, start **po 16. 11.**, finále **�
 
 **Pravidla v 1 řádku:** Dej follow a napiš do komentáře svou obec (52 obcí ORP Říčany), klidně i s povoláním („Mukařov hasič“). Dostaneš domek na 3D mapě se svým nickem.
 
-**Změny oproti v1:** mlha už není mechanika (obec je na mapě od 1. obyvatele), přibylo 20 povolání a povolanské budovy, speciální budovy se odemykají jen podle počtu obyvatel (bez týdenního limitu), nicky a vyhledávání na webu, nové prahy lig erbů, souboj obcí je otevřený (sekce 5), svět se sám roztahuje a web se plní automaticky.
+**Změny oproti v1:** mlha už není mechanika (obec je na mapě od 1. obyvatele, pod 5 obyvatel je „opuštěná“ s rozpadlými domy), přibyla putovní **Koruna týdne** (rozhodnuto 5. 11.), přibylo 20 povolání a povolanské budovy, speciální budovy se odemykají jen podle počtu obyvatel (bez týdenního limitu), nicky a vyhledávání na webu, nové prahy lig erbů, souboj obcí je otevřený (sekce 5), svět se sám roztahuje a web se plní automaticky.
 
 ---
 
@@ -26,15 +26,16 @@ Verze 2 (5. 11. 2026). Teaser **čt 12. 11.**, start **po 16. 11.**, finále **�
 
 ## 1. Premisa a svět
 
-**Premisa:** Radar zapnul mapu Říčanska a ta je zatím skoro prázdná. Stojí na ní 52 obcí s erby a cedulkami „zatím nikdo · buď první“. Každý, kdo se ozve, dostane domek. Z prázdné mapy se do Vánoc stane živý region, kde má každý svůj dům, svou práci a svou partu.
+**Premisa:** Radar zapnul mapu Říčanska a ta je zatím skoro prázdná. Stojí na ní 52 **opuštěných obcí**: šedé erby a rozpadlé domy bez střech. Každý, kdo se ozve, jeden dům opraví a dostane ho se svým nickem. Při 5 obyvatelích obec **ožije** (erb se rozsvítí, domy se opraví). Z prázdné mapy se do Vánoc stane živý region, kde má každý svůj dům, svou práci a svou partu.
 
 **Svět:**
 - Uprostřed stojí **Radarová věž** (Říčany). Všech 52 obcí je na mapě vidět od prvního dne.
-- **Prázdná obec:** erb v šedé, popisek `zatím nikdo · buď první`. Po prvním obyvateli se erb obarví, domek má nick a obec dostane dřevěný rámeček.
+- **Opuštěná obec (0–4 obyvatelé):** šedý erb, 5 rozpadlých šedých domů, popisek `🏚️ opuštěná · 2/5`. Každý nový obyvatel jeden dům opraví (barevný, s nickem). Při 5. obyvateli obec **ožije**: erb se obarví, dřevěný rámeček, hláška „Babice ožila!“. Motivace je okamžitá a viditelná, nikdo nehraje „do prázdna“.
+- **Koruna týdne (putovní):** nad obcí s největším přírůstkem za posledních 7 dní se vznáší zlatá koruna. Jakmile ji jiná obec předběhne, koruna se přestěhuje (hláška „Koruna putuje do Mukařova!“). Kdo ji drží na Štědrý den, získá titul **Koruna Říčanska**. Reel: „Korunu má Mukařov (+16). Kdo mu ji vezme?“
 - **Povolání** dávají obcím charakter: v Mukařově se sejdou hasiči, v Sulicích skejťáci. 5 stejných = vlastní budova.
 - **Okraj světa:** za hranicí ORP je lehký opar. Je to jen vizuální a příběhový motiv („za oparem je ještě místo“). Když dojde místo, svět se do oparu roztáhne. Nic neskrývá a nic nepodmiňuje.
 - Každý reel je **„Hlášení z radaru · Den X“**. Rychlý přehled, žádný maskot ani vypravěč. Titulky typu `RADAR ZACHYTIL:`.
-- **Finále 24. 12.:** celý region se rozsvítí. Cíl komunity: **Plné Říčansko 52/52**, tedy žádná obec s popiskem „zatím nikdo“.
+- **Finále 24. 12.:** celý region se rozsvítí. Cíl komunity: **Plné Říčansko 52/52**, tedy žádná opuštěná obec.
 
 ---
 
@@ -54,7 +55,7 @@ Násobení, ne součet: když jeden prvek chybí (= 0), hra neroste.
 
 | Fáze | Slib | Vstupenka | Důkaz | Kmen | Série |
 |---|---|---|---|---|---|
-| 0 Signál | „Každý dostane domek“ | Komentáře se počítají už od teaseru | Teaser: prázdná mapa, která se v pondělí zaplní | 52 erbů „zatím nikdo“ | „V pondělí Den 1“ |
+| 0 Signál | „Každý dostane domek“ | Komentáře se počítají už od teaseru | Teaser: prázdná mapa, která se v pondělí zaplní | 52 opuštěných obcí | „V pondělí Den 1“ |
 | 1 Probuzení | Domek + nick + číslo obyvatele | Obec, nově i povolání | Den 1: první domky a nicky, web se vyhledáváním | První v obci, Zakladatel | Denní hlášení |
 | 2 Rozmach | Povolanská budova | Komentář s povoláním | První hasičárna / skatepark v reelu | Povolání v obci, ligy erbů | Odpočet „chybí 1 hasič“ |
 | 3 Svazky a Mikuláš | Společná stavba svazku | Návrh svazku v komentáři | Most / cyklostezka mezi obcemi | Svazek obcí | Mikuláš jako dějový bod |
@@ -69,7 +70,7 @@ Násobení, ne součet: když jeden prvek chybí (= 0), hra neroste.
 | Fáze | Start | Cíl | Co se odemyká | Hlavní event | Háček pro komentáře |
 |---|---|---|---|---|---|
 | **0 Signál** (teaser) | čt 12. 11. | První vlna, vysvětlit pravidla | Web s prázdnou mapou a 52 erby | Reel „Radar zapnul mapu“: 52 šedých erbů, věž se rozsvítí | „Napiš svou obec (a povolání). Kdo bude první obyvatel?“ |
-| **1 Probuzení** | po 16. 11. | 30 obydlených obcí, 300 obyvatel | Domky s nickem a číslem, odznaky Zakladatel a První v obci, povolání u domků, budovy od 5 obyvatel | **Den 1:** zaplnění mapy, první nicky. Denně „kdo přibyl“ | „Tvoje obec je pořád ‚zatím nikdo‘? Buď první.“ |
+| **1 Probuzení** | po 16. 11. | 30 obydlených obcí, 300 obyvatel | Domky s nickem a číslem, odznaky Zakladatel a První v obci, povolání u domků, budovy od 5 obyvatel | **Den 1:** zaplnění mapy, první nicky. Denně „kdo přibyl“ | „Tvoje obec je pořád opuštěná? Oprav první dům.“ |
 | **2 Rozmach** | po 23. 11. | 40 obydlených obcí, 600 obyvatel, první 3 povolanské budovy | Povolanské budovy (5 stejných), ligy erbů, silnice mezi obcemi, žebříček | **Den povolání:** odpočty „Mukařovu chybí 1 hasič“. Případně start souboje obcí (podle varianty ze sekce 5) | „Které povolání u vás chybí? Doplň ho.“ |
 | **3 Svazky a Mikuláš** | po 30. 11. | První 3 svazky, první zlatá liga | Svazek obcí (max. 3) a společná stavba (most / cyklostezka / rozhledna) | **Mikuláš 5. 12.:** anděl postaví dárek nejaktivnější obci, čert nasype uhlí na náves obce, která 3 dny nevyrostla (zmizí po 3 nových obyvatelích) | „S kým se spojíte? Navrhněte svazek.“ |
 | **4 Zima** | po 7. 12. | 46 obydlených obcí | Zimní budovy, sněžení, hokejisté odemykají kluziště | **Tajemná budova** v oparu na okraji mapy. Odhalí se, až okolní obce dohromady dosáhnou 50 lidí | „Co je ta tajemná budova?“ (nejlajkovanější tip = odznak Věštec) |
@@ -87,7 +88,7 @@ Pravidlo: event nikdy nesmaže domek ani budovu a nikdy nezhorší viditelnost o
 
 | # | Event | Spouštěč | Co se stane ve hře | Co v reelu |
 |---|---|---|---|---|
-| 1 | **První obyvatel** | Obec dostane 1. hráče | Erb se obarví, popisek „zatím nikdo“ zmizí, dřevěný rámeček | Radarový „ping“ a zoom, nick prvního obyvatele |
+| 1 | **První obyvatel** | Obec dostane 1. hráče | První rozpadlý dům se opraví a dostane nick; při 5. obyvateli obec ožije (erb se obarví, dřevěný rámeček) | Radarový „ping“ a zoom, nick prvního obyvatele |
 | 2 | **Povolanská budova** | 5 stejných povolání v obci | Postaví se budova povolání s cedulí a nicky všech 5 | „5 hasičů z Mukařova postavilo hasičárnu.“ |
 | 3 | **Chybí jeden** | Obci chybí 1 člověk do povolanské budovy | Rozestavěná budova s lešením a počítadlem `4/5` | „Mukařovu chybí 1 hasič do hasičárny.“ |
 | 4 | **Rozšíření světa** | Dojde místo v obci / na mapě | Obce se odsunou, okraj se rozšíří do oparu | Timelapse, text `SVĚT SE ROZTÁHL` |
@@ -116,7 +117,7 @@ Pozn.: event „Host ze skutečnosti“ (starosta stříhá pásku) z v1 vypouš
 
 ## 5. Souboj obcí: varianty k probrání
 
-**Nic z toho není rozhodnuté.** Hra funguje i bez souboje. Rozhodnout do pá 20. 11., aby šel případně spustit ve fázi 2.
+**Rozhodnuto 5. 11.:** základ je putovní **Koruna týdne** (viz sekce 1), bez párování obcí. Přepočet na velikost obce (D) zamítnut (pro mladé publikum je nesrozumitelný), výzvy v komentářích (C) odloženy. Otevřené zůstává **získávání území** (sousední obce si přetahují les, rybník nebo pole; hranice na mapě se posouvá) jako možná 2. fáze v prosinci. Varianty níže jsou archiv.
 
 | Varianta | Jak funguje | Plusy | Mínusy | Náročnost v Make | Riziko demotivace malých obcí |
 |---|---|---|---|---|---|
@@ -237,7 +238,7 @@ Popisek: pravidla v 1 řádku + odkaz na web („najdi svůj nick“) + opt-out 
 5. „Někdo v Kunicích chce kebab. A dostane ho.“
 6. „Radar zachytil něco, co tam včera nebylo…“
 7. „1000. obyvatel Říčanska je…“
-8. „Tvoje obec pořád říká ‚zatím nikdo‘. Fakt?“
+8. „Tvoje obec je pořád opuštěná. Fakt?“
 9. „Tohle je první zlatá obec Říčanska.“
 10. „Na Říčansku je 0 pilotů. Letiště nikde.“
 11. „Zbývají 3 obce do Plného Říčanska.“

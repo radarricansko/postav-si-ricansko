@@ -600,7 +600,7 @@ window.GAME={canvas,THREE:T,
  setMsg("plánuji 52 obcí podle skutečných silnic…");await new Promise(r=>setTimeout(r,20));
  TOWNS.forEach(planTown);initInstanced();
  setMsg("načítám herní data…");let real=CONFIG.DEMO?null:await fetchWorld();
- if(real){WORLD_REV=real.revize;applyEvents(worldEvents(real),false);DAY=real.den_hry||DAY}else{seedDemo();document.getElementById("demoTag").style.display=""}
+ if(real){WORLD_REV=real.revize;applyEvents(worldEvents(real),false);DAY=real.den_hry||DAY}else{seedDemo();document.getElementById("demoTag").style.display=""}if(+QS.get("den")>0)DAY=+QS.get("den");
  TOWNS.forEach(t=>{t.open=t.players.length>=CONFIG.OPEN_AT;t.R=townRadius(t)});
  S=Starget=S0=requiredS()*1.04;updTownParams();
  setMsg("krajina, lesy a pole…");await new Promise(r=>setTimeout(r,20));

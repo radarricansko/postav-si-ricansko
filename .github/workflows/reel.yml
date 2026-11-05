@@ -1,0 +1,37 @@
+name: Denní reel
+on:
+  schedule:
+    - cron: "30 4 * * *"   # 05:30 Praha (zimní čas)
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "Den hry (prázdné = podle world.json)"
+        required: false
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: npm i --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
+      - name: Render
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
+        run: node tools/video/render.js --out out ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reel
+          path: out/
+          retention-days: 14
+      - name: Telegram
+        if: ${{ env.TG != '' }}
+        env:
+          TG: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          f=$(ls out/*.mp4 | head -1); t=$(ls out/*.txt | head -1)
+          curl -sS -F chat_id="$CHAT" -F video=@"$f" -F supports_streaming=true -F caption="$(head -c 900 "$t")" "https://api.telegram.org/bot$TG/sendVideo" > /dev/null
