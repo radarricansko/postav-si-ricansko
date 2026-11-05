@@ -221,7 +221,7 @@ const MAT={
  drive:new T.MeshLambertMaterial({color:"#b9bcc4"}),
 };
 
-const lawnTex=canvasTex(256,256,(g,w,h)=>{const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.8,"rgba(255,255,255,1)");r.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=r;g.fillRect(0,0,w,h)});
+const lawnTex=canvasTex(256,256,(g,w,h)=>{const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.62,"rgba(255,255,255,1)");r.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=r;g.fillRect(0,0,w,h)});
 const lawnMats={};function lawnMat(R){const k=Math.round(R);return lawnMats[k]||(lawnMats[k]=new T.MeshLambertMaterial({color:"#93c063",alphaMap:lawnTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}))}
 /* ---------- pás silnice ---------- */
 function ribbonInto(pts,w,y,uvS,P,U,I){const n=pts.length/2;if(n<2)return;const base=P.length/3;let acc=0;
@@ -324,7 +324,7 @@ function buildTown(t){if(t.group){scene.remove(t.group)}const g=new T.Group();t.
  o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});o.position.set(lm.x,0,lm.z);o.rotation.y=lm.ry;g.add(o);t.lmObj=o;
  for(let i=0;i<4;i++){const a=lm.ry+Math.PI/4+i*Math.PI/2;const x=lm.x+Math.cos(a)*(lm.r+1.2),z=lm.z+Math.sin(a)*(lm.r+1.2);const l=new T.Mesh(MODELS.p.lamp.geo,MODELS.p.lamp.mat);l.scale.setScalar(4.2);l.position.set(x,0,z);l.rotation.y=-a;l.castShadow=true;g.add(l)}
  t.dyn=new T.Group();g.add(t.dyn);t.specialObjs=[];refreshTown(t)}
-function refreshTown(t){const g=t.dyn;g.children.forEach(c=>{c.traverse(m=>{if(m.geometry&&m.userData.tmp)m.geometry.dispose()})});g.clear();t.specialObjs=[];
+function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.userData.lbl.remove()});const g=t.dyn;g.children.forEach(c=>{c.traverse(m=>{if(m.geometry&&m.userData.tmp)m.geometry.dispose()})});g.clear();t.specialObjs=[];
  const used=t.open?Math.min(t.items.length,t.slots.length):0;
  // lawn pod obcí (zakryje pole)
  const lawn=new T.Mesh(new T.CircleGeometry(t.R+6,56).rotateX(-Math.PI/2),lawnMat(t.R+6));lawn.position.y=.03;lawn.receiveShadow=true;lawn.userData.tmp=1;g.add(lawn);
@@ -495,7 +495,7 @@ function closeInfo(){$("info").classList.remove("on");ring.visible=false}
 let fly=null;
 function flyTo(target,pos,ms=1500){return new Promise(ok=>{fly={from:ctr.target.clone(),to:target.clone(),cf:cam.position.clone(),ct:pos.clone(),t0:performance.now(),ms,ok}})}
 function flyToLocal(t,s,dist){const c=tc(t);const target=new T.Vector3(c.x+s.x,1.5,c.z+s.z);const az=ctr.getAzimuthalAngle();const el=.62;const pos=target.clone().add(new T.Vector3(Math.sin(az)*Math.cos(el),Math.sin(el),Math.cos(az)*Math.cos(el)).multiplyScalar(dist));return flyTo(target,pos,1300)}
-function focusTown(t,ms){sel.value=t.n;if(window.GAME&&GAME.onTownFocus)GAME.onTownFocus(t.n);const c=tc(t);const d=Math.max(60,t.R*2.6);const az=ctr.getAzimuthalAngle();return flyTo(new T.Vector3(c.x,0,c.z),new T.Vector3(c.x+Math.sin(az)*d*.62,d*.72,c.z+Math.cos(az)*d*.62),ms||1500)}
+function focusTown(t,ms,quiet){sel.value=t.n;if(!quiet&&window.GAME&&GAME.onTownFocus)GAME.onTownFocus(t.n);const c=tc(t);const d=Math.max(60,t.R*2.6);const az=ctr.getAzimuthalAngle();return flyTo(new T.Vector3(c.x,0,c.z),new T.Vector3(c.x+Math.sin(az)*d*.62,d*.72,c.z+Math.cos(az)*d*.62),ms||1500)}
 function overview(ms){const b=regionBox();const c=new T.Vector3((b[0]+b[2])/2,0,(b[1]+b[3])/2);const d=Math.max(b[2]-b[0],b[3]-b[1])*.78;return flyTo(c,new T.Vector3(c.x+d*.18,d*.82,c.z+d*.62),ms||1800)}
 function regionBox(){let a=1e9,b=1e9,c=-1e9,d=-1e9;TOWNS.forEach(t=>{const p=tc(t);a=Math.min(a,p.x);c=Math.max(c,p.x);b=Math.min(b,p.z);d=Math.max(d,p.z)});return[a,b,c,d]}
 
@@ -509,7 +509,11 @@ function openCatalog(){$("cat").classList.add("on");if(catDone)return;catDone=tr
 
 /* ---------- smyčka ---------- */
 let last=performance.now();const frameCbs=[];
-function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/1000);last=now;
+/* automatické snížení kvality, když se to seká (slabší telefony) */
+const PERF={acc:0,n:0,lvl:0,t0:performance.now()};
+function perfTick(dt,now){if(aspectLock||PERF.lvl>=3||QS.get("perf")==="0")return;PERF.acc+=dt;PERF.n++;if(now-PERF.t0<2500)return;const ms=PERF.acc/PERF.n*1000;PERF.acc=0;PERF.n=0;PERF.t0=now;
+ if(ms>38){PERF.lvl++;if(PERF.lvl===1){R.setPixelRatio(1);R.setSize(innerWidth,innerHeight);POST.resize()}else if(PERF.lvl===2){POST.on=false}else{sun.shadow.mapSize.set(1024,1024);sun.shadow.map&&sun.shadow.map.dispose();sun.shadow.map=null;FOREST.forEach(m=>m.castShadow=false)}}}
+function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const dt=Math.min(.05,rawDt);last=now;if(ready)perfTick(rawDt,now);
  if(animS){const a=Math.min(1,(now-animS.t0)/1600),e=a<.5?2*a*a:1-Math.pow(-2*a+2,2)/2;const prev=S;S=animS.from+(animS.to-animS.from)*e;const f=S/prev;ctr.target.x*=f;ctr.target.z*=f;cam.position.x*=f;cam.position.z*=f;
   if(fly){fly.from.x*=f;fly.from.z*=f;fly.to.x*=f;fly.to.z*=f;fly.cf.x*=f;fly.cf.z*=f;fly.ct.x*=f;fly.ct.z*=f}
   if(a>=1){animS=null;relayout(true)}else relayout(false)}
@@ -518,7 +522,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/
  if(orbitSpeed){const off=cam.position.clone().sub(ctr.target);off.applyAxisAngle(UP,orbitSpeed*dt);cam.position.copy(ctr.target).add(off)}
  ctr.update();moveCars(dt);
  const dist=cam.position.distanceTo(ctr.target);updClouds(now,dist);cam.near=Math.max(.8,dist*.02);cam.far=Math.max(3000,dist*12);cam.updateProjectionMatrix();
- FOREST.forEach(m=>m.castShadow=dist<420*S/0.09);scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
+ FOREST.forEach(m=>m.castShadow=PERF.lvl<3&&dist<420*S/0.09);scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
  const sh=Math.min(Math.max(dist*.9,60),700);const sc=sun.shadow.camera;if(Math.abs(sc.right-sh)>2){sc.left=-sh;sc.right=sh;sc.top=sh;sc.bottom=-sh;sc.near=1;sc.far=sh*4;sc.updateProjectionMatrix()}
  sun.position.copy(ctr.target).addScaledVector(SUNDIR,sh*1.8);sun.target.position.copy(ctr.target);
  if(ring.visible){const k=1+.08*Math.sin(now/180);ring.scale.set(k,1,k)}
@@ -527,6 +531,9 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/
   const c=tc(t);v.set(c.x+t.lm.x,(t.erb?(t.lm.type==="pomnik"?9:17)+8:10),c.z+t.lm.z).project(cam);const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;
   const far=cam.position.distanceTo(c);const show=vis&&(t.open?far<2600*S/0.09:far<900*S/0.09);t.lbl.style.display=show?"":"none";if(show){t.lbl.style.left=(v.x*.5+.5)*innerWidth+"px";t.lbl.style.top=(-v.y*.5+.5)*innerHeight+"px";t.lbl.style.fontSize=(t.open?13:11)+"px"}});
  SIGNS.forEach(s=>s.g&&s.g.lookAt(cam.position.x,s.g.position.y,cam.position.z));
+ TOWNS.forEach(t=>(t.specialObjs||[]).forEach(o=>{o.getWorldPosition(v);const d=cam.position.distanceTo(v);let l=o.userData.lbl;const show=d<95;if(!show){if(l)l.style.display="none";return}
+  if(!l){const it=t.items[o.userData.ref.idx];const c=SPECIALS.CAT.find(x=>x.id===it.id);l=document.createElement("div");l.className="slbl";l.innerHTML=`<span>${c.emoji}</span>${String(it.text).replace(/</g,"&lt;")}`;l.onclick=()=>selectItem(t,o.userData.ref.idx);document.body.appendChild(l);o.userData.lbl=l}
+  v.y+=5.2;v.project(cam);const vis=v.z<1&&Math.abs(v.x)<1&&Math.abs(v.y)<1;l.style.display=vis?"":"none";if(vis){l.style.left=(v.x*.5+.5)*innerWidth+"px";l.style.top=(-v.y*.5+.5)*innerHeight+"px";l.style.opacity=Math.min(1,(95-d)/25)}}));
  document.querySelector("#compass .n").style.transform=`rotate(${-ctr.getAzimuthalAngle()}rad)`;
  POST.render(Math.max(.35,Math.min(1,(700*S/0.09-dist)/(500*S/0.09))));frameCbs.forEach(f=>f(now))}
 addEventListener("resize",()=>{if(aspectLock)return;cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);POST.resize()});
@@ -563,5 +570,5 @@ window.GAME={canvas,THREE:T,
  buildLandSource();TOWNS.forEach(buildTown);TOWNS.forEach(t=>{setFog(t);setErb(t)});relayout(true);initCars();updateUI();
  const t0=byName["Říčany"];const c=tc(t0);ctr.target.set(c.x,0,c.z);cam.position.set(c.x+260,300,c.z+420);
  $("load").remove();ready=true;requestAnimationFrame(loop);window.done=1;
- setTimeout(()=>focusTown(t0,2600),300);if(real)setInterval(pollWorld,CONFIG.POLL_MS)})();
+ setTimeout(()=>focusTown(t0,2600,true),300);if(real)setInterval(pollWorld,CONFIG.POLL_MS)})();
 })();
