@@ -1,0 +1,9 @@
+# Netlify: publikuje složku web/ a world.json z kořene repa
+[build]
+  publish = "web"
+  command = "cp world.json web/world.json"
+
+[[headers]]
+  for = "/world.json"
+  [headers.values]
+    Cache-Control = "no-cache"

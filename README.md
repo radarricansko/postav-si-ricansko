@@ -10,3 +10,10 @@ IG minihra RADAR Říčansko: 3D mapa ORP Říčany, kde každý sledující má
 - `docs/`: příběh hry a fáze do Vánoc, dokumentace generátoru reelů
 
 Mapová data © přispěvatelé OpenStreetMap (ODbL). Modely © Kenney (CC0).
+
+## Hosting
+
+- **Netlify:** napojit repo, nastavení je v `netlify.toml` (publikuje `web/` a kopíruje do něj `world.json`).
+- **Cloudflare Pages:** build command `cp world.json web/world.json`, output `web`.
+- Hra načte `world.json`. Když soubor chybí nebo má `"ukazka": true`, ukáže ukázková data. Parametry URL: `?nicky=0` (jen čísla obyvatel), `?demo=1` (vynutit ukázku), `?data=URL` (jiný zdroj dat).
+- Nová data se kontrolují každé 2 minuty a nové domky vyrostou s animací.
