@@ -7,7 +7,7 @@ const fs=require('fs'),path=require('path'),http=require('http'),{execFileSync}=
 const {chromium}=require('playwright');
 const arg=(k,d)=>{const i=process.argv.indexOf('--'+k);return i>0?process.argv[i+1]:d};
 const ROOT=path.resolve(__dirname,'../..');const OUT=path.resolve(arg('out','out'));fs.mkdirSync(OUT,{recursive:true});
-const FPS=+arg('fps',30),HANDLE=arg('handle','@radar_ricansko'),MAXF=+arg('frames',0);
+const FPS=+arg('fps',25),HANDLE=arg('handle','@radar_ricansko'),MAXF=+arg('frames',0);
 const MIME={'.html':'text/html','.js':'text/javascript','.json':'application/json','.png':'image/png','.gltf':'model/gltf+json','.css':'text/css','.svg':'image/svg+xml'};
 
 /* statický server nad repem (web/ + world.json) */
@@ -16,7 +16,7 @@ function serve(){return new Promise(res=>{const s=http.createServer((rq,rs)=>{le
  rs.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(rs)});s.listen(0,'127.0.0.1',()=>res(s))})}
 
 /* ElevenLabs TTS – jeden segment → mp3 Buffer */
-async function tts(text){const key=process.env.ELEVENLABS_API_KEY,voice=process.env.ELEVENLABS_VOICE_ID;if(!key||!voice)return null;
+async function tts(text){const key=process.env.ELEVENLABS_API_KEY,voice=process.env.ELEVENLABS_VOICE_ID||'kOWmvbNszhdJeaeyEzJB';if(!key)return null;
  const r=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`,{method:'POST',headers:{'xi-api-key':key,'content-type':'application/json'},
   body:JSON.stringify({text,model_id:process.env.ELEVENLABS_MODEL||'eleven_multilingual_v2',voice_settings:{stability:.45,similarity_boost:.8,style:.35,use_speaker_boost:true}})});
  if(!r.ok){console.error('ElevenLabs',r.status,await r.text().catch(()=>''));return null}return Buffer.from(await r.arrayBuffer())}
@@ -31,13 +31,13 @@ async function tts(text){const key=process.env.ELEVENLABS_API_KEY,voice=process.
  await p.waitForFunction(()=>window.done===1,null,{timeout:180000});await p.waitForTimeout(2000);
  const info=await p.evaluate(()=>({day:GAME.info().day,pop:GAME.info().pop,hasReel:!!window.REEL}));console.log('hra:',info);if(!info.hasReel)throw new Error('REEL chybí');
  /* scénář */
- const script=await p.evaluate(h=>{const s=REEL.scriptFromDay(GAME.dayData(),{handle:h,lastHook:null});window.__script=s;const v=REEL.voiceScript(s);return{hook:s.hook,scenes:s.scenes.map(x=>x.type||x.name),vo:v,total:s.total||s.duration}},HANDLE);
+ const script=await p.evaluate(h=>{const s=REEL.scriptFromDay(GAME.dayData(),{handle:h,lastHook:null,narrator:'Pan Radar'});window.__script=s;const v=REEL.voiceScript(s);return{hook:s.hook,scenes:s.scenes.map(x=>x.type||x.name),vo:v,total:s.total||s.duration}},HANDLE);
  const tag=`reel-den-${info.day}`;fs.writeFileSync(path.join(OUT,tag+'.srt'),script.vo.srt);fs.writeFileSync(path.join(OUT,tag+'.txt'),script.vo.text);
  console.log('hook:',script.hook,'scény:',script.scenes.join(' › '));
  /* hlas po segmentech */
  const segs=script.vo.segments||[];let voiced=0;if(process.env.ELEVENLABS_API_KEY&&segs.length){const clips=[];for(const s of segs){const buf=await tts(s.text);clips.push(buf?buf.toString('base64'):null);if(buf)voiced++}
   await p.evaluate(async clips=>{const blobs=clips.map(c=>c?new Blob([Uint8Array.from(atob(c),ch=>ch.charCodeAt(0))],{type:'audio/mpeg'}):null);await REEL.setVoiceSegments(window.__script,blobs,{padMs:80})},clips);
-  console.log('hlas: segmentů',voiced,'/',segs.length)}else console.log('hlas: bez ElevenLabs (chybí ELEVENLABS_API_KEY / ELEVENLABS_VOICE_ID) – video bude jen s hudbou, text je v .txt/.srt');
+  console.log('hlas: segmentů',voiced,'/',segs.length)}else console.log('hlas: bez ElevenLabs (chybí ELEVENLABS_API_KEY) – video bude jen s hudbou, text je v .txt/.srt');
  fs.writeFileSync(path.join(OUT,tag+'.json'),JSON.stringify(await p.evaluate(()=>window.__script),null,1));
  /* snímky */
  const fdir=path.join(OUT,'frames');fs.rmSync(fdir,{recursive:true,force:true});fs.mkdirSync(fdir);

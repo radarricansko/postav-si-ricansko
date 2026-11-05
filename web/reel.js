@@ -872,6 +872,13 @@
       stretch.forEach(function (s) { s.durFixed = s.dur + Math.min(extra, 3000); });
       layout(script);
     }
+    // vypravěč „Pan Radar“ (opts.narrator): oslovení v hooku, podpis v outru
+    if (opts.narrator) {
+      var nm = typeof opts.narrator === 'string' ? opts.narrator : 'Pan Radar';
+      var h0 = script.scenes[0]; if (h0 && h0.vo) h0.vo = 'Tady ' + nm + '. ' + h0.vo;
+      var o0 = script.scenes[script.scenes.length - 1]; if (o0 && o0.type === 'outro') o0.vo = 'Zítra den ' + (d + 1) + '. ' + nm + ' končí hlášení.';
+      layout(script);
+    }
     writeHookMemo(d, hookId);
     return script;
   }
