@@ -52,7 +52,7 @@ const FOGC=new T.Color("#d7e2e2");scene.fog=new T.Fog(FOGC,600,2600);
 const cam=new T.PerspectiveCamera(34,innerWidth/innerHeight,2,9000);
 const ctr=new T.OrbitControls(cam,canvas);ctr.enableDamping=true;ctr.dampingFactor=.08;ctr.maxPolarAngle=1.32;ctr.minDistance=14;ctr.maxDistance=2600;ctr.screenSpacePanning=false;ctr.zoomSpeed=1.2;
 const hemi=new T.HemisphereLight("#d6e8ff","#6b6340",.5);scene.add(hemi);
-const sun=new T.DirectionalLight("#ffd6a3",1.18);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.0005;sun.shadow.normalBias=.02;scene.add(sun,sun.target);
+const sun=new T.DirectionalLight("#ffd6a3",1.18);sun.castShadow=true;sun.shadow.mapSize.set(+QS.get("shadow")||2048,+QS.get("shadow")||2048);sun.shadow.bias=-.0005;sun.shadow.normalBias=.02;scene.add(sun,sun.target);
 const fill=new T.DirectionalLight("#a8c6ff",.18);fill.position.set(-1,.6,1);scene.add(fill);
 const SUNDIR=new T.Vector3(-.62,.5,.6).normalize();
 
@@ -296,7 +296,7 @@ function buildRoads(){roadGroup.children.forEach(c=>c.geometry.dispose());roadGr
 const MAXH=6000;let HOUSE=[],ABAND=null,GARDEN,DRIVE,YARD,LAMPS;const houseRef=[[],[],[],[]];
 function initInstanced(){const hr=MODELS.b.r;
  HOUSE=ROOFS.map(c=>{const m=new T.InstancedMesh(hr.geo,MODELS.roofMat(hr,c),MAXH);m.castShadow=m.receiveShadow=true;m.count=0;m.frustumCulled=false;scene.add(m);return m});
- {const img=hr.map.image;const c=document.createElement("canvas");c.width=img.width;c.height=img.height;const g=c.getContext("2d");g.filter="grayscale(1) brightness(.62) sepia(.25)";g.drawImage(img,0,0);const tx=new T.CanvasTexture(c);tx.flipY=false;
+ {const img=hr.map.image;const c=document.createElement("canvas");c.width=img.width;c.height=img.height;const g=c.getContext("2d");g.filter="grayscale(1) brightness(.5) contrast(1.15) sepia(.18)";g.drawImage(img,0,0);const tx=new T.CanvasTexture(c);tx.flipY=false;
   ABAND=new T.InstancedMesh(hr.geo,new T.MeshLambertMaterial({map:tx}),600);ABAND.castShadow=ABAND.receiveShadow=true;ABAND.count=0;ABAND.frustumCulled=false;scene.add(ABAND)}
  GARDEN=new T.InstancedMesh(new T.BoxGeometry(5.9,.06,5.9),MAT.garden,MAXH);GARDEN.receiveShadow=true;GARDEN.frustumCulled=false;scene.add(GARDEN);
  DRIVE=new T.InstancedMesh(new T.BoxGeometry(1,.07,1),MAT.drive,MAXH);DRIVE.receiveShadow=true;DRIVE.frustumCulled=false;scene.add(DRIVE);
@@ -306,7 +306,7 @@ const born=new Map();
 function abandonedN(t){return Math.max(0,CONFIG.REVIVE-t.players.length)}
 function placeHouses(now){const cnt=[0,0,0,0];let gi=0,di=0,yi=0,li=0,ai=0;houseRef.forEach(a=>a.length=0);
  TOWNS.forEach(t=>{const ab=abandonedN(t);if(ab){const c=tc(t);const base=t.items.length;for(let k=0;k<ab;k++){const s=t.slots[base+k];if(!s)break;const w=hashStr(t.n+k)%1000/1000;
-   Q.setFromEuler(new T.Euler((w-.5)*.12,s.ry-Math.PI/2,(w-.3)*.1));V.set(c.x+s.x,-.15,c.z+s.z);SC.set(HOUSE_S*.96,HOUSE_S*.96,HOUSE_S*.96);M4.compose(V,Q,SC);ABAND.setMatrixAt(ai++,M4)}}});
+   Q.setFromEuler(new T.Euler((w-.5)*.24,s.ry-Math.PI/2+(w-.5)*.3,(w-.3)*.2));V.set(c.x+s.x,-.55-w*.3,c.z+s.z);SC.set(HOUSE_S*.96,HOUSE_S*(.72+w*.12),HOUSE_S*.96);M4.compose(V,Q,SC);ABAND.setMatrixAt(ai++,M4)}}});
  if(ABAND){ABAND.count=ai;ABAND.instanceMatrix.needsUpdate=true}
  TOWNS.forEach(t=>{if(!t.items.length)return;const c=tc(t);t.items.forEach((it,idx)=>{const s=t.slots[idx];if(!s)return;
    if(it.k==="s"){return}
@@ -455,7 +455,8 @@ function relayout(full){updTownParams();TOWNS.forEach(t=>{const c=tc(t);t.group.
 
 /* ---------- koruna týdne (putovní) ---------- */
 let crownObj=null,crownT=null;
-function weekGain(t){return t.players.filter(p=>p.day>DAY-7).length}
+function weekGain(t,d=DAY){return t.players.filter(p=>p.day>d-7&&p.day<=d).length}
+function crownAt(d){let best=null,bg=0;TOWNS.forEach(t=>{const n=t.players.filter(p=>p.day<=d).length;if(n<CONFIG.REVIVE)return;const g=weekGain(t,d);if(g>bg||(g===bg&&best&&n>best.players.filter(p=>p.day<=d).length)){bg=g;best=t}});return bg>0?best:null}
 function crownTown(){let best=null,bg=0;TOWNS.forEach(t=>{if(t.players.length<CONFIG.REVIVE||!t.group)return;const g=weekGain(t);if(g>bg||(g===bg&&best&&t.players.length>best.players.length)){bg=g;best=t}});return bg>0?best:null}
 function makeCrown(){const g=new T.Group();const gold=new T.MeshStandardMaterial({color:"#f4c430",metalness:.7,roughness:.32,emissive:"#7a5200",emissiveIntensity:.4,side:T.DoubleSide});
  const ring=new T.Mesh(new T.CylinderGeometry(2.1,2.4,1.4,24,1,true),gold);g.add(ring);const base=new T.Mesh(new T.TorusGeometry(2.4,.24,10,32),gold);base.rotation.x=Math.PI/2;base.position.y=-.7;g.add(base);
@@ -567,7 +568,7 @@ let orbitSpeed=0,aspectLock=false;
 window.GAME={canvas,THREE:T,
  state:()=>({day:DAY,totalPlayers:POP,towns:TOWNS.map(t=>{const c=tc(t);return{name:t.n,players:t.players.length,abandoned:abandonedN(t),revive:CONFIG.REVIVE,open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl||null,erbSvg:(()=>{const d=ERB.E.find(e=>e[0]===t.n);return d?ERB.erb(d,tierOf(t.players.length)):''})(),center:{x:c.x,y:0,z:c.z},radius:t.R,
   houses:t.items.map((it,i)=>{const s=t.slots[i];return s&&it.k==="h"?{id:t.n+"#"+i,owner:it.p.nick,no:it.p.no,x:c.x+s.x,y:0,z:c.z+s.z}:null}).filter(Boolean)}})}),
- setAspect:(w,h)=>{aspectLock=!!w;if(w){R.setPixelRatio(1);R.setSize(w,h,false);cam.aspect=w/h}else{R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight}cam.updateProjectionMatrix();POST.resize()},
+ setAspect:(w,h)=>{aspectLock=!!w;if(w){const k=Math.min(1,+QS.get("render")||1);R.setPixelRatio(1);R.setSize(Math.round(w*k),Math.round(h*k),false);cam.aspect=w/h}else{R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight}cam.updateProjectionMatrix();POST.resize()},
  flyTo:(o,ms)=>flyTo(new T.Vector3(o.target.x,o.target.y,o.target.z),new T.Vector3(o.pos.x,o.pos.y,o.pos.z),ms),
  focusTown:(n,ms)=>focusTown(byName[n],ms),
  focusHouse:(id,ms)=>{const [n,i]=id.split("#");const t=byName[n];const s=t.slots[+i];return s?flyToLocal(t,s,22):Promise.resolve()},
@@ -592,7 +593,7 @@ window.GAME={canvas,THREE:T,
   const ms=[100,250,500,1000,1500,2000,2026,3000].map(m=>ALLP.find(p=>p.no===m&&p.day===DAY)).filter(Boolean).map(p=>({no:p.no,owner:p.nick.slice(1),town:p.town}))[0]||null;
   const nt=TOWNS.filter(t=>t.players.length&&t.players[0].day===DAY).map(t=>t.n);
   const auth=(ALLP[ALLP.length-1]||{nick:"@hrac_0001"}).nick;
-  return{day:DAY,crown:crownT?{name:crownT.n,week:weekGain(crownT)}:null,newPlayers:np,topComment:sp[0]?{author:auth,text:"Postavte "+sp[0].name+"!",likes:87}:{author:auth,text:"Chceme v obci hospodu U Zlatého Radaru 🍺",likes:64},newBuilding:sp[0]||null,expanded:false,
+  return{day:DAY,date:new Date().toISOString().slice(0,10),crown:crownT?{name:crownT.n,week:weekGain(crownT),prev:(crownAt(DAY-1)||{}).n||null,changed:(crownAt(DAY-1)||{}).n!==crownT.n}:null,newPlayers:np,topComment:sp[0]?{author:auth,text:"Postavte "+sp[0].name+"!",likes:87}:{author:auth,text:"Chceme v obci hospodu U Zlatého Radaru 🍺",likes:64},newBuilding:sp[0]||null,expanded:false,
    jobs,jobBuilt:jb[0]||null,milestone:ms,newTowns:nt,findMe:np.slice(0,12).map(p=>p.owner)}}};
 
 /* ---------- start ---------- */

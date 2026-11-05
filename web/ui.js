@@ -107,7 +107,7 @@ function drawChart(cv,days,series){const dpr=Math.min(2,devicePixelRatio||1);con
 /* ---------- jak hrát ---------- */
 let infoDone=false;
 function renderInfo(){if(infoDone)return;infoDone=true;const rv=GAME.revive();const jn=GAME.jobN();
- const frames=["wood","silver","gold","plat"].map(t=>{const d=ERB.E.find(e=>e[0]==="Říčany");return`<div class="lg"><img src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(ERB.erb(d,t))}" alt=""><b>${TIERN[t]}</b><small>${{wood:"1–19",silver:"20–49",gold:"50–99",plat:"100+"}[t]} obyvatel</small></div>`}).join("");
+ const frames=["wood","silver","gold","plat"].map(t=>{const d=ERB.E.find(e=>e[0]==="Říčany");return`<div class="lg"><img src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(ERB.erb(d,t))}" alt=""><b>${TIERN[t]}</b><small>${{wood:"5–19",silver:"20–49",gold:"50–99",plat:"100+"}[t]} obyvatel</small></div>`}).join("");
  $("pane-info").innerHTML=`<div class="paneHead"><b>O co jde</b></div>
  <p class="lead">Radar zapnul mapu Říčanska. Je na ní 52 obcí, zatím opuštěných. <b>Každý, kdo se přidá, dostane domek se svým nickem.</b> Do Vánoc společně postavíme celé Říčansko.</p>
  <ol class="steps"><li><b>Sleduj @radar_ricansko</b><span>Hra běží na Instagramu Radaru.</span></li>
