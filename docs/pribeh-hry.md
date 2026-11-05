@@ -1,6 +1,10 @@
 # Postav si Říčansko: příběh, vývoj a retence
 
-Verze pro start 16. 11. 2026, plán do Vánoc. Hra běží na hlavním IG Radaru (cca 2 700 sledujících).
+Verze 2 (5. 11. 2026). Teaser **čt 12. 11.**, start **po 16. 11.**, finále **čt 24. 12.** Hra běží na hlavním IG Radaru (cca 2 700 sledujících).
+
+**Pravidla v 1 řádku:** Dej follow a napiš do komentáře svou obec (52 obcí ORP Říčany), klidně i s povoláním („Mukařov hasič“). Dostaneš domek na 3D mapě se svým nickem.
+
+**Změny oproti v1:** mlha už není mechanika (obec je na mapě od 1. obyvatele), přibylo 20 povolání a povolanské budovy, speciální budovy se odemykají jen podle počtu obyvatel (bez týdenního limitu), nicky a vyhledávání na webu, nové prahy lig erbů, souboj obcí je otevřený (sekce 5), svět se sám roztahuje a web se plní automaticky.
 
 ---
 
@@ -8,184 +12,257 @@ Verze pro start 16. 11. 2026, plán do Vánoc. Hra běží na hlavním IG Radaru
 
 | Princip | Odkud | Co z toho bereme |
 |---|---|---|
-| **Vzácnost a časový limit** | r/place: 1 pixel / 5 min, plátno jen 4 dny, v poslední hodině šla jen bílá | Hra má jasný konec (24. 12.), odznaky jen pro prvních X, akce s deadlinem |
-| **Svět se rozšiřuje** | r/place: plátno se 2× zvětšilo, a s tím se rozjel nový boj o místo | Mlha se postupně odhrnuje a svět se roztahuje. Každé rozšíření je událost, ne tichá změna |
-| **Frakce, aliance, rivalita** | r/place: „ambasády“ na Discordu, spojenectví sousedů, obrana proti „voidu“ | Obce = frakce, svazky (max. 3 obce), souboje sousedů |
-| **Hrozba zvenku** | r/place „Black Void“: každé dílo bylo ohrožené | Mlha / vichřice / sníh jako „nepřítel“, který nikoho nepoškodí natrvalo, ale vyžaduje akci |
-| **Lore od komunity** | Twitch Plays Pokémon: Helix Fossil se stal „bohem“, postavy dostaly přezdívky | Nejlepší vtipy z komentářů zakonzervovat jako kánon (cedule, legendy obcí) |
-| **Katastrofa + návrat** | TPP „Bloody Sunday“: ztráta vyvolala drama a lidi zůstali, aby viděli, jak to dopadne | Twisty se zvratem, který jde vždy napravit hráči (nikdy se nemaže, co si kdo postavil) |
-| **Milníky** | TPP: odznaky z gymů dávaly jasný postup | Odemykání budov podle počtu obyvatel, rámečky erbů, týdenní fáze |
-| **Viditelný status** | r/thebutton: barevné flairy, jedna jednorázová akce, tajemství | Odznaky u domků (Zakladatel, První v obci…), tajemná budova |
-| **Hra místo giveawaye** | chatplace.io: „giveaway je sugar rush, hra je zvyk“, veřejný TOP 10, reset žebříčku, aby měli šanci i nováčci | Týdenní žebříček obcí se resetuje, celkové skóre zůstává |
+| **Vzácnost a časový limit** | r/place: 1 pixel / 5 min, plátno jen 4 dny | Hra má jasný konec (24. 12.), odznaky jen pro prvních X, akce s deadlinem |
+| **Svět se rozšiřuje** | r/place: plátno se 2× zvětšilo, rozjel se nový boj o místo | Když dojde místo, mapa se roztáhne. Každé rozšíření je událost v reelu, ne tichá změna |
+| **Frakce, aliance, rivalita** | r/place: „ambasády“, spojenectví sousedů | Obce = frakce, svazky (max. 3 obce). Forma souboje se teprve vybírá (sekce 5) |
+| **Hrozba zvenku** | r/place „Black Void“ | Vichřice / závěje / sníh jako neosobní „nepřítel“, který nic nesmaže natrvalo a nikdy nebere viditelnost |
+| **Lore od komunity** | Twitch Plays Pokémon: Helix Fossil | Nejlepší vtipy z komentářů jako kánon (cedule s autorem, legendy obcí) |
+| **Katastrofa + návrat** | TPP „Bloody Sunday“ | Twisty se zvratem, který vždy napraví hráči |
+| **Milníky** | TPP: odznaky z gymů | Budovy podle počtu obyvatel, povolanské budovy při 5 stejných, ligy erbů |
+| **Viditelný status** | r/thebutton: flairy | Odznaky a nick u domku, vyhledávání sebe sama na webu |
+| **Hra místo giveawaye** | chatplace.io: „giveaway je sugar rush, hra je zvyk“ | Veřejný žebříček, žádné věcné ceny, jen virtuální status |
 
 ---
 
-## 1. Premise a svět
+## 1. Premisa a svět
 
-**Premisa:** Říčansko zmizelo v mlze a jediné, co jím prosvítí, je Radar. Každý nový obyvatel ho staví zpátky, domek po domku.
+**Premisa:** Radar zapnul mapu Říčanska a ta je zatím skoro prázdná. Stojí na ní 52 obcí s erby a cedulkami „zatím nikdo · buď první“. Každý, kdo se ozve, dostane domek. Z prázdné mapy se do Vánoc stane živý region, kde má každý svůj dům, svou práci a svou partu.
 
 **Svět:**
-- Uprostřed mapy stojí **Radarová věž** (Říčany). Na začátku vidí jen kousek kolem sebe.
-- Obec je pro radar viditelná, až když v ní žije **5 lidí**. Do té doby je to šedá silueta v mlze s počítadlem `3/5`.
-- **Mlha** je jediný „padouch“: neosobní, trochu vtipná, nikoho neuráží. Občas se vrací (eventy), ale nikdy nesmaže domek ani budovu.
-- Každý reel je **„Hlášení z radaru, den X“**. Je to rychlý přehled, ne pohádka. Žádný maskot s hlasem, žádný trapný vypravěč. Stačí krátké titulky typu `RADAR ZACHYTIL:`.
-- Finále: o Štědrém dni radar „dosvítí“ celý region. Kolik obcí zůstane v mlze, záleží na hráčích.
+- Uprostřed stojí **Radarová věž** (Říčany). Všech 52 obcí je na mapě vidět od prvního dne.
+- **Prázdná obec:** erb v šedé, popisek `zatím nikdo · buď první`. Po prvním obyvateli se erb obarví, domek má nick a obec dostane dřevěný rámeček.
+- **Povolání** dávají obcím charakter: v Mukařově se sejdou hasiči, v Sulicích skejťáci. 5 stejných = vlastní budova.
+- **Okraj světa:** za hranicí ORP je lehký opar. Je to jen vizuální a příběhový motiv („za oparem je ještě místo“). Když dojde místo, svět se do oparu roztáhne. Nic neskrývá a nic nepodmiňuje.
+- Každý reel je **„Hlášení z radaru · Den X“**. Rychlý přehled, žádný maskot ani vypravěč. Titulky typu `RADAR ZACHYTIL:`.
+- **Finále 24. 12.:** celý region se rozsvítí. Cíl komunity: **Plné Říčansko 52/52**, tedy žádná obec s popiskem „zatím nikdo“.
 
 ---
 
-## 2. Fáze do Vánoc
+## 2. Teorie růstu: Slib × Vstupenka × Důkaz × Kmen × Série
+
+Násobení, ne součet: když jeden prvek chybí (= 0), hra neroste.
+
+| Prvek | Co znamená | Jak ho držíme |
+|---|---|---|
+| **Slib** | Jednoduchá osobní odměna | „Dostaneš domek se svým nickem.“ Jedna věta, žádná pravidla navíc |
+| **Vstupenka** | Minimální akce | Follow + komentář s obcí (povolání je bonus, ne podmínka) |
+| **Důkaz** | Vidím, že to funguje | Další reel ukáže nové domky a nicky. Na webu se najdu přes vyhledávání do 2 h |
+| **Kmen** | Hraju za svoje | Obec (erb, liga) + povolání („chybí 1 hasič do hasičárny“) |
+| **Série** | Důvod přijít zítra | „Hlášení z radaru · Den X“, denní nápad dne, odemykání budov |
+
+**Jak fáze naplňují prvky:**
+
+| Fáze | Slib | Vstupenka | Důkaz | Kmen | Série |
+|---|---|---|---|---|---|
+| 0 Signál | „Každý dostane domek“ | Komentáře se počítají už od teaseru | Teaser: prázdná mapa, která se v pondělí zaplní | 52 erbů „zatím nikdo“ | „V pondělí Den 1“ |
+| 1 Probuzení | Domek + nick + číslo obyvatele | Obec, nově i povolání | Den 1: první domky a nicky, web se vyhledáváním | První v obci, Zakladatel | Denní hlášení |
+| 2 Rozmach | Povolanská budova | Komentář s povoláním | První hasičárna / skatepark v reelu | Povolání v obci, ligy erbů | Odpočet „chybí 1 hasič“ |
+| 3 Svazky a Mikuláš | Společná stavba svazku | Návrh svazku v komentáři | Most / cyklostezka mezi obcemi | Svazek obcí | Mikuláš jako dějový bod |
+| 4 Zima | Zimní budovy, hádání tajemné budovy | Tip v komentáři | Odhalení tajemné budovy | Okolní obce táhnou spolu | 3denní teaser |
+| 5 Vánoční trh | Stánek s cedulí od tebe | Název stánku v komentáři | Průlet trhem s cedulemi | Stánek obce | Odpočet do Vánoc |
+| 6 Finále | Tvůj nick ve štědrém reelu | Poslední šance pro prázdné obce | Rozsvícení regionu | Plné Říčansko 52/52 | Finále + epilog |
+
+---
+
+## 3. Fáze do Vánoc
 
 | Fáze | Start | Cíl | Co se odemyká | Hlavní event | Háček pro komentáře |
 |---|---|---|---|---|---|
-| **0 Signál** (teaser) | čt 12. 11. | Nahnat první vlnu a vysvětlit pravidla | Nic, jen mapa v mlze | Reel „Radar zachytil signál…“: mapa v mlze, věž se rozsvítí | „Napiš svou obec. Kdo vyleze z mlhy první?“ (komentáře se už počítají) |
-| **1 Probuzení** | po 16. 11. | 10 obcí z mlhy, 300 obyvatel | Domky se jménem a číslem, počítadla `x/5`, 1. speciální budova při 5 obyvatelích, odznak Zakladatel | **Den 1:** Říčany se odhalí jako první. Pak každý den „kdo vylezl z mlhy“ | „Tvoje obec má 3/5. Kdo z kámošů ji dotáhne?“ |
-| **2 Rozmach** | po 23. 11. | 25 obcí, 600 obyvatel | Žebříček obcí, dřevěné a stříbrné rámečky erbů, animované erby, silnice mezi obcemi | **Souboj sousedů:** 4 dvojice sousedních obcí, týden o nejvíc nových obyvatel | „Kdo vyhraje: Mukařov, nebo Tehovec?“ |
-| **3 Svazky a Mikuláš** | po 30. 11. | První 3 svazky, první zlatý rámeček | Svazek obcí (max. 3), společná stavba svazku (most / cesta / rozhledna), zlatý rámeček | **Mikuláš 5. 12.:** anděl postaví budovu nejaktivnější obci, čert „schová“ budovu obci, která 3 dny nevyrostla (vrátí se, když obec získá 3 nové obyvatele) | „S kým se spojíte? Navrhněte svazek.“ |
-| **4 Zima** | po 7. 12. | 40 obcí, výprava do mlhy | Zimní budovy (kluziště, sjezdovka na kopečku, zimní stadion), sněžení | **Tajemná budova** v mlze mezi obcemi. Odhalí se, až okolní obce dohromady dosáhnou 50 lidí | „Co je podle tebe ta tajemná budova?“ (nejlajkovanější tip vyhrává odznak Věštec) |
-| **5 Vánoční trh** | po 14. 12. | Každá viditelná obec má stánek | Vánoční stánky, stromek v každé obci, světýlka podle počtu obyvatel | **Vánoční trh na říčanském náměstí:** každá obec dostane stánek, který pojmenuje top komentář | „Co se prodává u vás na stánku?“ |
-| **6 Štědré finále** | po 21. 12. | Odhrnout poslední mlhu, max. obcí viditelných | Velký strom uprostřed mapy, ohňostroj, titul „Obec roku 2026“ | **Poslední 72 h:** každá obec, která do 23. 12. 23:59 dosáhne 5/5, se odhalí v reelu 24. 12. Celý region se rozsvítí | „Poslední šance: kterou obec ještě zachráníme z mlhy?“ |
-| **Epilog** | ne 27. 12. | Zjistit, jestli pokračovat | Nic nového, rekapitulace | Reel „Rok na radaru“ + 31. 12. ohňostroj. Cliffhanger: „Mlha se vrací v lednu?“ | „Má Říčansko pokračovat? 🔥 = jo“ (rozhodnutí podle dat) |
+| **0 Signál** (teaser) | čt 12. 11. | První vlna, vysvětlit pravidla | Web s prázdnou mapou a 52 erby | Reel „Radar zapnul mapu“: 52 šedých erbů, věž se rozsvítí | „Napiš svou obec (a povolání). Kdo bude první obyvatel?“ |
+| **1 Probuzení** | po 16. 11. | 30 obydlených obcí, 300 obyvatel | Domky s nickem a číslem, odznaky Zakladatel a První v obci, povolání u domků, budovy od 5 obyvatel | **Den 1:** zaplnění mapy, první nicky. Denně „kdo přibyl“ | „Tvoje obec je pořád ‚zatím nikdo‘? Buď první.“ |
+| **2 Rozmach** | po 23. 11. | 40 obydlených obcí, 600 obyvatel, první 3 povolanské budovy | Povolanské budovy (5 stejných), ligy erbů, silnice mezi obcemi, žebříček | **Den povolání:** odpočty „Mukařovu chybí 1 hasič“. Případně start souboje obcí (podle varianty ze sekce 5) | „Které povolání u vás chybí? Doplň ho.“ |
+| **3 Svazky a Mikuláš** | po 30. 11. | První 3 svazky, první zlatá liga | Svazek obcí (max. 3) a společná stavba (most / cyklostezka / rozhledna) | **Mikuláš 5. 12.:** anděl postaví dárek nejaktivnější obci, čert nasype uhlí na náves obce, která 3 dny nevyrostla (zmizí po 3 nových obyvatelích) | „S kým se spojíte? Navrhněte svazek.“ |
+| **4 Zima** | po 7. 12. | 46 obydlených obcí | Zimní budovy, sněžení, hokejisté odemykají kluziště | **Tajemná budova** v oparu na okraji mapy. Odhalí se, až okolní obce dohromady dosáhnou 50 lidí | „Co je ta tajemná budova?“ (nejlajkovanější tip = odznak Věštec) |
+| **5 Vánoční trh** | po 14. 12. | Stánek v každé obydlené obci | Stánky, stromek v každé obci, světýlka podle počtu obyvatel | **Vánoční trh na říčanském náměstí:** stánek pojmenuje top komentář obce | „Co se prodává u vás na stánku?“ |
+| **6 Štědré finále** | po 21. 12. | **Plné Říčansko 52/52** | Velký strom uprostřed mapy, ohňostroj, titul „Obec roku 2026“ | **Posledních 72 h:** odpočet prázdných obcí. 24. 12. se rozsvítí celý region | „Zbývají 3 obce bez obyvatele. Kdo tam má kámoše?“ |
+| **Epilog** | ne 27. 12. | Rozhodnout, jestli pokračovat | Rekapitulace | Reel „Rok na radaru“ + 31. 12. ohňostroj. Cliffhanger: „Za oparem je ještě místo. Sezóna 2?“ | „Má Říčansko pokračovat? 🔥 = jo“ |
 
-**Rytmus týdne:** po = nová fáze / velké odhalení, út–čt = denní hlášení, pá = výsledky souboje a žebříček týdne, víkend = kratší reel (event nebo „nejvtipnější komentáře týdne“).
+**Rytmus týdne:** po = nová fáze / velké odhalení, út–čt = denní hlášení, pá = žebříček týdne (a výsledek souboje, pokud ho zavedeme), víkend = kratší reel (event nebo „nejvtipnější komentáře týdne“).
 
 ---
 
-## 3. Katalog eventů a twistů (22)
+## 4. Katalog eventů a twistů (22)
 
-Pravidlo: event nikdy trvale nesmaže domek ani budovu, které si někdo postavil. Škoda se vždy dá opravit akcí hráčů.
+Pravidlo: event nikdy nesmaže domek ani budovu a nikdy nezhorší viditelnost obce. Škodu vždy opraví akce hráčů.
 
 | # | Event | Spouštěč | Co se stane ve hře | Co v reelu |
 |---|---|---|---|---|
-| 1 | **Odhalení z mlhy** | Obec dosáhne 5/5 | Mlha se rozplyne, objeví se erb s dřevěným rámečkem | Radarový „ping“ a zoom na obec. Jmenovitě 5 zakladatelů |
-| 2 | **Rozšíření světa** | Dojde místo v obci / v mapě | Obce se od sebe odsunou, přibude okolí | Timelapse „mapa se nafukuje“, text `SVĚT SE ROZTÁHL` |
-| 3 | **Souboj sousedů** | Po 23. 11. + každý týden nová dvojice (vybírá se z obcí s podobnou velikostí) | Vítěz dostane bonusovou budovu nebo vlajku na hranici | Split screen dvou erbů, počítadla jako ve fotbale |
-| 4 | **Závod o zlato** | První obec dosáhne 51 obyvatel | Zlatý rámeček + socha zakladatele na návsi | „První zlatá obec Říčanska je…“ (napětí, odhalení na konci) |
-| 5 | **Vichřice** | Náhodně 1× za fázi, nebo když celkový růst za 2 dny klesne pod 20 lidí | Odfoukne střechy u 1–3 obcí s nejmenším růstem. Opraví se, když obec získá 3 nové obyvatele | „Vichřice nad Říčanskem! Tyhle obce potřebují pomoc“ (tag obcí) |
-| 6 | **Mlha se vrací** | Obec 5 dní bez nového hráče | Lehký opar nad obcí (dál je vidět, jen šedivější). Zmizí po 1 novém obyvateli | „Pozor, Kunice mizí…“ |
-| 7 | **Mikuláš** | 5. 12. | Anděl dá dárek nejaktivnější obci, čert schová 1 budovu „líné“ obci (vrátí se po 3 nových) | Mikuláš, čert a anděl jako 3D postavičky letí nad mapou |
-| 8 | **Tajemná budova** | Fáze 4. Odhalí se při 50 obyvatelích v okolních obcích | Zahalená stavba s otazníkem, pak odhalení (např. rozhledna Radaru) | Teaser 3 dny, hádání v komentářích, odhalení |
-| 9 | **Sněžení** | Fáze 4 (nebo reálné sněžení v Říčanech, to je bonus) | Mapa zbělá, odemknou se zimní budovy | „Na Říčansku napadl sníh. I ve hře.“ |
-| 10 | **Vánoční trh** | Fáze 5 | Stánek v každé viditelné obci, název z top komentáře | Průlet trhem, cedule se jmény autorů |
-| 11 | **Soutěž o nejhezčí stromek** | Fáze 5, hlasování v IG story (anketa 2–4 obce) | Vítěz má stromek 2× větší + světla | Story anketa → reel s výsledkem |
-| 12 | **Ozvěna z mlhy** (vzácnost) | Náhodný den, jen 24 h | Komentáře v tento den dostanou zlatý domek (limitovaná edice) | „Jen dnes: zlatý domek. Zítra už ne.“ |
-| 13 | **Číslo dne** | Každý milník (100., 500., 1000., 2026. obyvatel) | Ten hráč dostane speciální odznak a domek s praporkem | „Obyvatel č. 1000 je @…“ (gratulace) |
-| 14 | **Svazek obcí** | 2–3 sousední obce mají každá ≥10 obyvatel + hlasování v komentářích obou obcí | Společná stavba mezi nimi (most, cyklostezka, rozhledna) | „Vzniká první svazek Říčanska“ |
-| 15 | **Hrdina obce** | Hráč, jehož komentář pozvaných kámošů přivedl nejvíc lidí (viz Kámoš mechanika) | Socha / lavička se jménem | Krátký „portrét“ domku + jméno |
-| 16 | **Noc v Říčansku** | Pá večer | Mapa ve tmě, svítí jen domky hráčů, kteří tento týden komentovali | Klidný, estetický reel. Funguje jako vizuální pauza |
-| 17 | **Výpadek radaru** (fake twist) | 1× za hru, např. 2. 12. | Reel začne „šumem“, mapa zmizí, po 3 s se vrátí s velkou novinkou | Glitch hook. Hodně funguje jako zastavovač scrollu |
-| 18 | **Návštěva z Prahy / Benešova** | Celkově 1000 obyvatel | Na ceduli „Praha“ přijede autobus turistů, ti postaví hotel v nejrychleji rostoucí obci | Vtipný reel s propojením na formát „turisti“ |
-| 19 | **Den otevřených dveří** | Hlasování: kterou obec navštívit | Radar natočí reálné místo z obce a porovná s herní verzí | Hybrid real + 3D, propojení s „Jeden den v obci“ |
-| 20 | **Host ze skutečnosti** | Obec dosáhne zlata a starosta/ka sám/sama souhlasí | Starosta/ka „přestřihne pásku“ budovy | Krátké video se skutečným člověkem. **Jen se souhlasem, bez politiky** |
-| 21 | **Štědrý ohňostroj** | 24. 12. | Celý region se rozsvítí, poslední odhalení obcí | Dlouhý reel se jmény všech zakladatelů (rychlý scroll titulků) |
-| 22 | **Rok na radaru** | 27.–31. 12. | Statistiky: nejrychlejší obec, nejlajkovanější nápad, první obyvatel | Recap + cliffhanger „Sezóna 2?“ |
+| 1 | **První obyvatel** | Obec dostane 1. hráče | Erb se obarví, popisek „zatím nikdo“ zmizí, dřevěný rámeček | Radarový „ping“ a zoom, nick prvního obyvatele |
+| 2 | **Povolanská budova** | 5 stejných povolání v obci | Postaví se budova povolání s cedulí a nicky všech 5 | „5 hasičů z Mukařova postavilo hasičárnu.“ |
+| 3 | **Chybí jeden** | Obci chybí 1 člověk do povolanské budovy | Rozestavěná budova s lešením a počítadlem `4/5` | „Mukařovu chybí 1 hasič do hasičárny.“ |
+| 4 | **Rozšíření světa** | Dojde místo v obci / na mapě | Obce se odsunou, okraj se rozšíří do oparu | Timelapse, text `SVĚT SE ROZTÁHL` |
+| 5 | **Postup v lize** | Obec překročí 20 / 50 / 100 | Nový rámeček erbu (stříbro / zlato / platina) | „První zlatá obec Říčanska je…“ |
+| 6 | **Souboj obcí** | Podle zvolené varianty (sekce 5) | Vítěz dostane vlajku nebo bonusovou dekoraci | Split screen dvou erbů, počítadla jako ve fotbale |
+| 7 | **Vichřice** | 1× za fázi, nebo když růst za 2 dny klesne pod 20 lidí | Odfoukne střechy u 1–3 obcí s nejmenším růstem. Opraví 3 noví obyvatelé | „Vichřice nad Říčanskem! Tyhle obce potřebují pomoc“ |
+| 8 | **Zapadlá obec** (místo „mlha se vrací“) | Obec 5 dní bez nového hráče | Závěj na cestě do obce, obec je dál plně vidět i s nicky. Odhrne ji 1 nový obyvatel | „Do Kunic nevede cesta. Kdo ji odhrne?“ |
+| 9 | **Mikuláš** | 5. 12. | Anděl: dárek nejaktivnější obci. Čert: uhlí na náves „líné“ obce (zmizí po 3 nových) | Mikuláš, čert a anděl letí nad mapou |
+| 10 | **Tajemná budova** | Fáze 4, odhalení při 50 lidech v okolních obcích | Zahalená stavba v oparu na okraji, pak odhalení (např. rozhledna Radaru) | 3denní teaser, hádání, odhalení |
+| 11 | **Sněžení** | Fáze 4 (reálný sníh v Říčanech = bonus) | Mapa zbělá, odemknou se zimní budovy | „Na Říčansku napadl sníh. I ve hře.“ |
+| 12 | **Vánoční trh** | Fáze 5 | Stánek v každé obydlené obci, název z top komentáře | Průlet trhem, cedule s nicky autorů |
+| 13 | **Nejhezčí stromek** | Fáze 5, story anketa (2–4 obce) | Vítěz má stromek 2× větší + světla | Anketa → reel s výsledkem |
+| 14 | **Zlatý den** (vzácnost) | Náhodný den, jen 24 h | Noví hráči dostanou zlatý domek (limitovaná edice) | „Jen dnes: zlatý domek. Zítra už ne.“ |
+| 15 | **Číslo dne** | 100., 500., 1000., 2026. obyvatel | Odznak a domek s praporkem | „Obyvatel č. 1000 je @…“ |
+| 16 | **Svazek obcí** | 2–3 sousední obce, každá ≥ 10 obyvatel + hlasování v komentářích | Společná stavba mezi nimi | „Vzniká první svazek Říčanska“ |
+| 17 | **Hrdina obce** | Hráč, jehož pozvánky přivedly nejvíc lidí | Socha / lavička s nickem | Krátký „portrét“ domku |
+| 18 | **Noc v Říčansku** | Pá večer | Mapa ve tmě, svítí okna hráčů aktivních tento týden | Klidný estetický reel |
+| 19 | **Výpadek radaru** (fake twist) | 1× za hru, např. 2. 12. | Šum, mapa zmizí, po 3 s se vrátí s velkou novinkou | Glitch hook, zastavovač scrollu |
+| 20 | **Turisti z Prahy** | Celkem 1000 obyvatel | Autobus turistů postaví hotel v nejrychleji rostoucí obci | Propojení s formátem „turisti“ |
+| 21 | **Den otevřených dveří** | Hlasování: kterou obec navštívit | Radar natočí reálné místo a porovná ho s herní verzí | Hybrid real + 3D, propojení s „Jeden den v obci“ |
+| 22 | **Štědré rozsvícení + Rok na radaru** | 24. 12. / 27.–31. 12. | Celý region se rozsvítí, statistiky (nejrychlejší obec, nejsilnější povolání, nápad roku) | Dlouhý reel s nicky (rychlý scroll), recap + „Sezóna 2?“ |
+
+Pozn.: event „Host ze skutečnosti“ (starosta stříhá pásku) z v1 vypouštíme. Riziko politického výkladu je vyšší než přínos.
 
 ---
 
-## 4. Mechaniky retence a jejich automatizace
+## 5. Souboj obcí: varianty k probrání
+
+**Nic z toho není rozhodnuté.** Hra funguje i bez souboje. Rozhodnout do pá 20. 11., aby šel případně spustit ve fázi 2.
+
+| Varianta | Jak funguje | Plusy | Mínusy | Náročnost v Make | Riziko demotivace malých obcí |
+|---|---|---|---|---|---|
+| **A: Automatické dvojice sousedů** | Statická tabulka sousedství, každý týden nové dvojice podle podobného počtu obyvatel. Vyhrává víc nových hráčů za týden | Běží samo, přirozená lokální rivalita, předvídatelný obsah na pátek | Některé dvojice jsou nudné (0 vs. 1). Algoritmus nezná kontext | Střední: tabulka sousedů + týdenní agregace + párovací logika | Střední: malá obec proti větší sousedce prohraje každý týden |
+| **B: Ruční výběr Radarem** | Tým každé pondělí vybere 1–3 dvojice podle toho, co je zajímavé | Nejlepší příběhy, flexibilita, dá se navázat na reálné dění | Práce navíc každý týden. Může působit jako protěžování | Nízká: Make jen počítá skóre vybraných obcí | Nízké: malé obce lze vybírat jen proti sobě |
+| **C: Výzva obce v komentářích** | Hráč napíše „Mukařov vyzývá Tehovec“. Souboj začne, když výzvu přijme aspoň 3 hráči z vyzvané obce | Vychází z komunity (Kmen), silné zapojení, obsah si tvoří hráči | Nepředvídatelné, může se nestát nic. Prostor pro hejt. Nutná moderace | Vysoká: parser výzev, potvrzování, stav souboje, timeouty | Nízké až střední: malé obce nikdo nevyzve (nejsou terčem, ale ani v centru pozornosti) |
+| **D: Žebříček v přepočtu na velikost obce** | Žádné dvojice, jen týdenní žebříček: noví hráči / skuteční obyvatelé obce (ČSÚ) | Malé obce mají reálnou šanci vyhrát, žádné párování | Méně emocí než přímý souboj. Přepočet je hůř vysvětlitelný v reelu | Nízká až střední: tabulka počtu obyvatel z ČSÚ + výpočet | Nejnižší: 5 hráčů v malé obci může porazit Říčany |
+
+**Otázky k rozhodnutí:** Chceme souboj vůbec, nebo stačí žebříček (D)? Kolik času týdně na něj tým má (B)? Soutěží Říčany s ostatními, nebo zvlášť? Lze kombinovat (např. D jako základ + 1 ručně vybraný souboj týdne z B).
+
+---
+
+## 6. Mechaniky retence a jejich automatizace
 
 **Technický základ (ověřit před startem):**
-- Komentáře: Instagram Graph API (Business/Creator účet) umí načítat komentáře pod vlastními příspěvky včetně počtu lajků (`like_count`) a posílat webhook na nový komentář. Napojit přes Make.com (už ho používáte) nebo Grok bota → databáze hráčů (Notion / Make data store / Google Sheet).
-- **Follow přes API zjistit nejde** (Graph API nedává seznam followerů). Řešení: (a) pravidlo na důvěru, (b) DM automat typu ManyChat, který podmínku „sleduje účet“ umí. Ověřit, jestli to platí i v aktuální verzi. (c) Ručně namátkově.
-- Parser komentáře: normalizovat název obce (bez diakritiky, překlepy, části obcí → obec, např. „Pacov“ → Říčany), whitelist 52 obcí ORP. Co se nerozpozná, jde do fronty ke kontrole.
-- 1 účet = 1 domek. Změna obce jen 1× (DM).
+- **Komentáře:** Instagram Graph API (Business/Creator) umí načítat komentáře pod vlastními příspěvky včetně `like_count` a posílat webhook na nový komentář. Make.com → databáze hráčů (Make data store / Notion / Google Sheet).
+- **Follow přes API zjistit nejde.** Řešení: (a) pravidlo na důvěru, (b) DM automat typu ManyChat s podmínkou „sleduje účet“ (ověřit v aktuální verzi), (c) ručně namátkově.
+- **Parser:** `obec [povolání]` v libovolném pořadí. Obec: bez diakritiky, překlepy, části obcí → obec, whitelist 52 obcí. Povolání: whitelist 20 + ženské tvary a synonyma (hasička, kuchařka, skejtař, skater…). Co se nerozpozná, jde do fronty ke kontrole.
+- **1 účet = 1 domek.** Povolání lze doplnit dalším komentářem, pokud ho hráč nemá. Změna obce nebo povolání jen 1× (DM).
+- **Web:** Make generuje `world.json` **každé 2 h**, web se doplňuje sám. Při nedostatku místa se svět automaticky roztáhne.
+- **Reel dne** generuje Radar z webu v **admin režimu** (skryté ovládání, kamera na obec, popisky, render).
 
 | Mechanika | Jak funguje | Automatizace |
 |---|---|---|
-| **Číslo obyvatele** | Pořadové číslo napříč regionem (#0001…) a v obci (#3 v Mukařově) | Autoinkrement v DB při prvním platném komentáři |
-| **Odznak Zakladatel obce** | Prvních 5 v každé obci (ti, co ji vytáhli z mlhy) | Pořadí v obci ≤ 5 → flag `zakladatel` → vlaječka na domku |
-| **Odznak Průkopník** | Prvních 300 hráčů celkem | Číslo obyvatele ≤ 300 |
-| **První v obci** | Úplně první hráč obce, domek nejblíž návsi | Pořadí = 1 |
-| **Autor stavby** | Jeho nápad se postavil, jméno na ceduli | Top komentář (`like_count`) pod denním reelem, filtr obce a moderace → fronta ke schválení |
-| **Věštec** | Uhodl tajemnou budovu / výsledek souboje | Klíčové slovo v komentáři + ruční vyhodnocení (1× týdně) |
-| **Aktivní obyvatel** (svítí okna) | Komentoval tento týden, takže mu svítí okno. Kdo nekomentuje, má zhasnuto | Poslední aktivita < 7 dní → okno svítí. Silný důvod se vracet |
-| **Žebříček obcí** | Týdenní (reset v pondělí, šance pro malé) + celkový. Zvlášť přepočet na podíl skutečných obyvatel obce, aby malé obce nebyly v nevýhodě | Agregace v DB, grafika z šablony (Make → Bořek / Figma / Canva API) |
-| **Rivalita sousedů** | Každá obec má 1–2 přiřazené „sousedy“, jejichž skóre ji vidí v reelu | Statická tabulka sousedství + diff skóre |
-| **Pozvi kámoše** | Komentář `@kámoš + obec`: když kámoš do 48 h sám napíše svou obec, oba mají domky vedle sebe a společný plot | Parse zmínky `@` v komentáři, párování s novým hráčem |
-| **Rámečky erbů** | Dřevo ≤20, stříbro 21–50, zlato 51–100, platina 100+ | Práh v DB, při překročení automaticky event „povýšení“ |
-| **Denní „co se změnilo“** | Diff od včerejška: noví hráči, odhalené obce, nové budovy | Denní snapshot DB, diff = scénář reelu |
-| **Najdi svůj domek** | V popisku: „najdi své jméno ve videu“. V pátek carousel s přiblížením obcí | Render obce s popisky jmen (zoom na obec) |
-| **Story anketa** | Hlasování o svazcích a stromcích | Ručně (story API anketu neumí), výsledek zapsat do DB |
+| **Nick u domku** | U domku je IG nick, na webu jde najít přes **vyhledávání** | Nick z komentáře → `world.json`. Vyhledávání na webu podle nicku, zoom na domek |
+| **Číslo obyvatele** | Napříč regionem (#0001…) a v obci (#3 v Mukařově) | Autoinkrement v DB |
+| **Povolání** | 20 povolání, ikona na domku | Pole `povolani` v DB, počítadlo podle obce a povolání |
+| **Povolanská budova** | 5 stejných povolání v obci → budova. Při 10 upgrade (např. hasičárna dostane auto) | Agregace obec × povolání, práh 5 / 10 → event |
+| **Odznak Zakladatel obce** | Prvních 5 obyvatel obce | Pořadí v obci ≤ 5 |
+| **První v obci** | Úplně první hráč, domek nejblíž návsi | Pořadí = 1 |
+| **Odznak Průkopník** | Prvních 300 hráčů | Číslo obyvatele ≤ 300 |
+| **Speciální budovy** | Podle počtu obyvatel obce, bez týdenního limitu (sekce 7) | Práh v DB → budova se přidá při nejbližším generování `world.json` |
+| **Nápad dne** | Nejlajkovanější nápad pod denním reelem se postaví s cedulí a nickem autora | Top `like_count` → fronta ke schválení člověkem → zápis do DB |
+| **Ligy erbů** | Dřevo do 20, stříbro 20–49, zlato 50–99, platina 100+ | Práh v DB, při překročení event „postup v lize“ |
+| **Věštec** | Uhodl tajemnou budovu | Klíčové slovo + ruční vyhodnocení |
+| **Aktivní obyvatel** | Komentoval tento týden → svítí mu okno | Poslední aktivita < 7 dní |
+| **Žebříček obcí** | Týdenní + celkový. Forma podle rozhodnutí v sekci 5 | Agregace v DB, grafika ze šablony |
+| **Pozvi kámoše** | `@kámoš + obec`: když kámoš do 48 h napíše svou obec, mají domky vedle sebe a společný plot | Parse `@`, párování s novým hráčem |
+| **Denní „co se změnilo“** | Diff od včerejška: noví hráči, nové budovy, odpočty povolání | Denní snapshot DB, diff = scénář reelu |
+| **Story anketa** | Svazky a stromky | Ručně, výsledek do DB |
 
 ---
 
-## 5. Katalog speciálních budov (25)
+## 7. Katalog budov
 
-Práh = počet obyvatel v obci, od kterého je budova v katalogu k dispozici. Konkrétní název na ceduli vybírá top komentář; níže jsou ukázky. Jeden 3D model na typ, jinak se mění jen cedule a barva, takže 25 modelů pokryje všech 52 obcí.
+### 7a. Povolanské budovy (20): 5 stejných povolání v obci
+
+| Povolání | Budova | Ukázka cedule |
+|---|---|---|
+| hasič | Hasičárna | „SDH Rychlí jak Wi-Fi“ |
+| kuchař | Restaurace | „U Plného talíře“ |
+| hospodský | Hospoda | „U Zlatého Radaru“ |
+| prodavač | Večerka | „Otevřeno do kdy se mi chce“ |
+| barista | Kavárna | „Kafe & drby“ |
+| fotbalista | Fotbalové hřiště | „Okresní přebor Arena“ |
+| sportovec | Sportovní hala / workout | „Workout pro ty, co tam fakt chodí“ |
+| skejťák | Skatepark | „Skatepark Odřená kolena“ |
+| řidič | Autobusové nádraží | „Zastávka Poslední 3 minuty“ |
+| strojvedoucí | Vlakové nádraží | „Vlak má zase zpoždění“ |
+| rybář | Rybník s molem | „Rybník, kde nikdo nic nechytil“ |
+| plavčík | Koupaliště | „Koupko Jen v červenci“ |
+| učitel | Škola | „ZŠ Domácí úkol zítra“ |
+| muzikant | Zkušebna / pódium | „Zkušebna Sousedi trpí“ |
+| hokejista | Zimní stadion | „Kluziště Bruslím jako žirafa“ |
+| programátor | Coworking / IT hub | „Wi-Fi rychlejší než D1“ |
+| filmař | Kino | „Letní kino i v prosinci“ |
+| turista | Rozhledna | „Rozhledna Vidím až na D1“ |
+| rytíř | Tvrz / hrad | „Tvrz Strážce okresu“ |
+| pilot | Letiště | „Letiště Václava Radara“ |
+
+### 7b. Speciální budovy podle počtu obyvatel (bez týdenního limitu)
+
+Odemknou se automaticky, jakmile obec dosáhne prahu. Konkrétní cedulku vybírá top komentář obce.
 
 | # | Budova | Práh | Ukázka cedule |
 |---|---|---|---|
-| 1 | Pomník / plácek na návsi | 5 | „Tady to celé začalo“ |
-| 2 | Kebab / bistro | 5 | „Kebab u Alenky“ |
+| 1 | Erb a cedule obce | 1 | (název obce) |
+| 2 | Plácek s pomníkem na návsi | 5 | „Tady to celé začalo“ |
 | 3 | Lavička s výhledem | 5 | „Lavička, kde se řeší všechno“ |
-| 4 | Zastávka busu | 8 | „Zastávka Poslední 3 minuty“ |
-| 5 | Večerka | 8 | „Večerka Otevřeno do kdy se mi chce“ |
-| 6 | Hospoda | 10 | „U Zlatého Radaru“ |
-| 7 | Hřiště / workout | 10 | „Workout pro ty, co tam fakt chodí“ |
-| 8 | Kavárna | 12 | „Kafe & drby“ |
-| 9 | Hasičárna | 15 | „SDH Rychlí jak Wi-Fi“ |
-| 10 | Fotbalové hřiště | 15 | „Stadion Okresní přebor Arena“ |
-| 11 | Pizzerie | 18 | „Pizza Alla Říčanská“ |
-| 12 | Rybník s molem | 20 | „Rybník, kde nikdo nic nechytil“ |
-| 13 | Knihovna / komunitní centrum | 25 | „Knihovna a Wi-Fi zdarma“ |
-| 14 | Skatepark | 25 | „Skatepark Odřená kolena“ |
-| 15 | Kino pod širákem | 30 | „Letní kino i v prosinci“ |
-| 16 | Nádraží / P+R | 30 | „Nádraží Vlak má zase zpoždění“ |
-| 17 | Koupaliště | 40 | „Koupko Jen v červenci“ |
-| 18 | Rozhledna | 40 | „Rozhledna Vidím až na D1“ |
-| 19 | Festivalové pódium | 50 | „Stage Celá vesnice na jednom místě“ |
-| 20 | Zimní stadion / kluziště | 50 | „Kluziště Bruslím jako žirafa“ |
-| 21 | Hrad / tvrz (stylizovaný) | 60 | „Tvrz Strážce okresu“ |
-| 22 | Startup hub / coworking | 75 | „Coworking Wi-Fi rychlejší než D1“ |
-| 23 | Stadion se střechou | 100 | „Aréna Říčanský derby“ |
-| 24 | Metro (vtipný sen) | 100 | „Stanice metra Konečně!“ |
-| 25 | Letiště (platina, meme) | 150 | „Letiště Václava Radara“ |
+| 4 | Kebab / bistro | 8 | „Kebab u Alenky“ |
+| 5 | Dětské hřiště | 10 | „Houpačka pro dospělé zakázána“ |
+| 6 | Pizzerie | 12 | „Pizza Alla Říčanská“ |
+| 7 | Knihovna / komunitní centrum | 15 | „Knihovna a Wi-Fi zdarma“ |
+| 8 | Park | 20 | „Park Na procházku se psem“ |
+| 9 | Výdejní box | 25 | „Box, kde je vždycky plno“ |
+| 10 | Festivalové pódium | 40 | „Celá vesnice na jednom místě“ |
+| 11 | Radarová vysílačka obce | 50 | „Tady vysílá Radar“ |
+| 12 | Stadion se střechou | 100 | „Aréna Říčanský derby“ |
+| 13 | Metro (vtipný sen) | 100 | „Stanice metra Konečně!“ |
 
-**Pravidla cedulek:** max. 30 znaků; reálné podniky jen v pozitivním tónu (nebo raději vymyšlené); žádná jména nehráčů; autor cedule = autor komentáře. Volba „nic nestavět, šetříme“ = budova se odloží a obec si příště vybere ze 2 budov.
+### 7c. Nápad dne
+
+Každý den se postaví **nejlajkovanější nápad** pod denním reelem, v obci autora, s cedulí a nickem autora. Model se vybere z existující knihovny (jeden 3D model na typ, mění se cedule a barva).
+
+**Pravidla cedulek:** max. 30 znaků; reálné podniky jen v pozitivním tónu (raději vymyšlené); žádná jména nehráčů; autor = autor komentáře; vždy schvaluje člověk. Když nevhodný nápad vyhraje, staví se druhý nejlajkovanější.
 
 ---
 
-## 6. Šablona denního reelu (15–25 s)
+## 8. Šablona denního reelu (15–25 s)
+
+Reel dne vzniká z webu v admin režimu (kamera, zoomy na obce, popisky).
 
 | Čas | Blok | Obsah |
 |---|---|---|
-| 0–2 s | **Hook** | Číslo / šok / otázka + nejdramatičtější záběr dne (odhalení obce, vichřice). Text na obrazovce velkým písmem, `HLÁŠENÍ Z RADARU · DEN 7` |
-| 2–10 s | **Co se změnilo** | 3 rychlé střihy: +X obyvatel, které obce vylezly z mlhy, nová budova. Počítadla se odpočítávají (`3/5 → 5/5`) |
-| 10–16 s | **TOP komentář** | Karta `TOP KOMENTÁŘ` s @jménem, textem a lajky, pak stavba budovy s cedulí |
-| 16–20 s | **Teaser zítřka** | „Zítra: Souboj Kunice vs. Strančice“ / „Do mlhy chybí 1 člověk“ |
-| 20–22 s | **CTA** | „Dej follow + napiš svou obec. Nejlajkovanější nápad se postaví zítra.“ |
+| 0–2 s | **Hook** | Číslo / šok / otázka + nejsilnější záběr dne. `HLÁŠENÍ Z RADARU · DEN 7` |
+| 2–10 s | **Co se změnilo** | 3 střihy: +X obyvatel, nové obce s 1. obyvatelem, nová budova. Odpočty (`hasiči 4/5`) |
+| 10–16 s | **Nápad dne** | Karta `TOP KOMENTÁŘ` s @nickem a lajky, pak stavba s cedulí |
+| 16–20 s | **Teaser zítřka** | „Zítra: Mukařovu chybí 1 hasič“ / „Zbývá 5 obcí bez obyvatele“ |
+| 20–22 s | **CTA** | „Dej follow + napiš obec a povolání. Najdi se na webu.“ |
 
-Popisek: pravidla v 1 řádku + „najdi své jméno“ + opt-out přes DM.
+Popisek: pravidla v 1 řádku + odkaz na web („najdi svůj nick“) + opt-out přes DM.
 
-**10 hooků:**
-1. „Tahle obec dneska vylezla z mlhy.“
-2. „Mukařovu chybí JEDEN člověk.“
-3. „Vichřice smetla střechy ve 3 obcích.“
-4. „Někdo v Kunicích chce kebab. A dostane ho.“
-5. „Radar zachytil něco, co tam včera nebylo…“
-6. „1000. obyvatel Říčanska je…“
-7. „Souboj: Sulice vs. Strančice. Rozdíl? 2 lidi.“
-8. „Tvoje obec je pořád v mlze. Fakt?“
+**12 hooků:**
+1. „Mukařovu chybí 1 hasič do hasičárny.“
+2. „5 skejťáků z jedné obce. Víte, co to znamená.“
+3. „Tahle obec měla včera nulu. Dneska…“
+4. „Vichřice smetla střechy ve 3 obcích.“
+5. „Někdo v Kunicích chce kebab. A dostane ho.“
+6. „Radar zachytil něco, co tam včera nebylo…“
+7. „1000. obyvatel Říčanska je…“
+8. „Tvoje obec pořád říká ‚zatím nikdo‘. Fakt?“
 9. „Tohle je první zlatá obec Říčanska.“
-10. „Radar vypadl. Tohle jsme našli, když naběhl.“
+10. „Na Říčansku je 0 pilotů. Letiště nikde.“
+11. „Zbývají 3 obce do Plného Říčanska.“
+12. „Radar vypadl. Tohle jsme našli, když naběhl.“
 
 ---
 
-## 7. Rizika a řešení
+## 9. Rizika a řešení
 
 | Riziko | Řešení |
 |---|---|
-| **Stagnace** (po 1. týdnu klesne přírůstek) | Pondělní velký event, eventy navázané na pokles růstu (vichřice, mlha se vrací), souboje sousedů, zapojit lokální školy a spolky (sdílení do story), vzácné 24h akce. Tvrdé KPI: pokud týdenní přírůstek klesne pod 100, přidat crossover s formáty Jeden den v obci / turisti |
-| **Spam** (stejný účet 20×, boti) | 1 účet = 1 domek. Další komentáře se počítají jen jako nápady, ne obyvatelé. Účty bez profilovky a s 0 příspěvky odložit do kontroly. Neodpovídat automaticky na všechno, aby IG nevyhodnotil spam |
-| **Trolling a rivalita přeroste v hejt** | Rivalita jen o čísla, nikdy o lidi. Moderovat komentáře (IG skryté slovo + ruční kontrola). Event nikdy nebere trvale. Vulgární komentáře ignorovat (nedostanou budovu, i když mají lajky) |
-| **Nevhodná jména na cedulích** | Top komentář → fronta ke schválení člověkem (vždy). Blacklist slov, žádná jména nehráčů, reálné osoby a firmy jen pozitivně nebo vůbec. Když nevhodný vyhraje, staví se 2. nejlajkovanější |
-| **Nevhodné @jméno hráče** | Domek se zobrazí, ale bez jména (jen číslo obyvatele) |
-| **Nezletilí a soukromí** | Zobrazovat jen IG handle (veřejný údaj), opt-out přes DM v každém popisku, nic nepárovat s reálnou adresou |
-| **Politika** (Maty je zastupitel, téma obcí) | Žádné strany, kampaně ani hodnocení starostů. Skuteční starostové jen se souhlasem a jen jako „host“. Hra je o lidech, ne o radnicích |
-| **Malé obce bez šance** | Přepočet na podíl skutečných obyvatel, týdenní reset žebříčku, prahy budov od 5 |
-| **Velké Říčany převálcují všechno** | Říčany = hlavní město, ale soutěží zvlášť (nebo podle částí). Souboje jen mezi podobně velkými obcemi |
-| **Přetížení týmu** | Max. 1 reel denně, víkend lehčí. Šablona renderu + DB diff = scénář. Člověk dělá jen schválení cedulí a výběr hooku (cca 15 min denně) |
-| **Follow nelze ověřit** | Viz sekce 4. Hra funguje i bez 100% kontroly, follow je hlavně CTA |
-| **Meta pravidla** | Nesoutěžit o věcné ceny (jinak nastávají pravidla promotions a zákonné náležitosti spotřebitelských soutěží). Hra je jen o virtuálním statusu |
+| **Stagnace** po 1. týdnu | Pondělní velký event, odpočty povolání („chybí 1“), vichřice a zapadlé obce navázané na pokles růstu, vzácné 24h akce. KPI: týdenní přírůstek pod 100 → crossover s „Jeden den v obci“ / „turisti“ |
+| **Prázdné obce působí smutně** | Popisek „buď první“ je výzva, ne prázdnota. Odpočet ke 52/52 jako společný cíl. Cílené sdílení do story místních spolků a škol |
+| **Spam** (stejný účet 20×, boti) | 1 účet = 1 domek, další komentáře jen jako nápady. Účty bez profilovky a s 0 příspěvky do kontroly. Neodpovídat automaticky na všechno |
+| **Falešné povolání** (všichni „pilot“) | Je to hra, ne životopis. Povolání se neověřuje. Limit: 1 povolání na hráče, změna 1× |
+| **Trolling, rivalita přeroste v hejt** | Rivalita jen o čísla, nikdy o lidi. IG skrytá slova + ruční kontrola. Výzvy obcí (pokud varianta C) moderovat. Vulgární komentáře nedostanou budovu |
+| **Nevhodná jména na cedulích** | Schvaluje vždy člověk, blacklist slov, žádná jména nehráčů |
+| **Nevhodný nick hráče** | Domek se zobrazí, ale jen s číslem obyvatele |
+| **Nezletilí a soukromí** | Na webu jen veřejný IG nick (a jen pokud hráč nedal opt-out), nic nepárovat s adresou, vyhledávání jen podle nicku. Opt-out přes DM v každém popisku → domek zůstane bez nicku |
+| **Politika** (Maty je zastupitel) | Žádné strany, kampaně, radnice ani hodnocení starostů. Žádní starostové v reelech. Hra je o lidech, ne o radnicích |
+| **Malé obce bez šance** | Budovy od 5 obyvatel, povolanské budovy jen za 5 lidí, žebříček v přepočtu (varianta D), týdenní reset |
+| **Velké Říčany převálcují všechno** | Říčany = hlavní město, v žebříčku zvlášť nebo podle částí |
+| **Přetížení týmu** | Max. 1 reel denně, víkend lehčí. `world.json` a web běží samy (Make, 2 h), reel z admin režimu. Člověk schvaluje cedule a vybírá hook (cca 15 min denně) |
+| **Follow nelze ověřit** | Viz sekce 6. Follow je hlavně CTA |
+| **Pravidla soutěží** | Žádné věcné ceny, jen virtuální status |
 
 ---
 
@@ -199,4 +276,4 @@ Popisek: pravidla v 1 řádku + „najdi své jméno“ + opt-out přes DM.
 - https://medium.com/@clinton/the-insidious-design-behind-the-button-46fcae896c39
 - https://blog.chatplace.io/en/instagram-gamification-for-engagement/
 
-Pozn.: Konkrétní případové studie IG/TikTok her typu „every follower gets a house“ ani YouTube formátů „every subscriber…“ jsem přes vyhledávání nenašel (výsledky byly jen statistiky kanálů a SEO spam). Principy výše proto stojí na r/place, Twitch Plays Pokémon, r/thebutton a gamifikaci IG a na inspiraci z briefu (interaktivni.pribehy, valkamest, duskh0ll0w, kryt.003).
+Pozn.: Konkrétní případové studie IG/TikTok her typu „every follower gets a house“ jsem nenašel. Principy stojí na r/place, Twitch Plays Pokémon, r/thebutton a gamifikaci IG a na inspiraci z briefu (interaktivni.pribehy, valkamest, duskh0ll0w, kryt.003).

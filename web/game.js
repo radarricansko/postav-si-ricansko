@@ -339,7 +339,21 @@ function refreshTown(t){const g=t.dyn;g.children.forEach(c=>{c.traverse(m=>{if(m
  if(cP.length){const m=new T.Mesh(geoFrom(cP,cU,cI),new T.MeshLambertMaterial({color:"#7d828c",polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));m.userData.tmp=1;m.receiveShadow=true;g.add(m)}
  // speciální budovy
  for(let i=0;i<used;i++){const it=t.items[i];if(it.k!=="s")continue;const s=t.slots[i];const o=SPECIALS.build(it.id,it.text);o.position.set(s.x,0,s.z);o.rotation.y=s.ry;o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});
-  o.userData.ref={t,idx:i};const key=t.n+"#"+i;if(born.has(key)){o.scale.setScalar(.01);o.userData.grow=born.get(key)}g.add(o);t.specialObjs.push(o)}}
+  o.userData.ref={t,idx:i};const key=t.n+"#"+i;if(born.has(key)){o.scale.setScalar(.01);o.userData.grow=born.get(key)}g.add(o);t.specialObjs.push(o)}
+ if(t.open){townSigns(t,g);outskirts(t,g)}}
+const signTexC={};
+function townSignTex(n){if(signTexC[n])return signTexC[n];return signTexC[n]=canvasTex(512,200,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.strokeStyle="#111";g.lineWidth=10;g.strokeRect(16,16,w-32,h-32);
+ g.fillStyle="#111";let f=96;g.font=`700 ${f}px Arial`;while(g.measureText(n).width>w-70&&f>30){f-=4;g.font=`700 ${f}px Arial`}g.textAlign="center";g.textBaseline="middle";g.fillText(n,w/2,h/2+4)})}
+function townSigns(t,g){const rad=Math.max(t.R-.5,12);const placed=[];const tex=townSignTex(t.n);const face=new T.MeshLambertMaterial({map:tex});const back=new T.MeshLambertMaterial({color:"#e7e9ee"});
+ t.mains.forEach(m=>{const p=m.pts;for(let i=1;i<p.length;i++){const a=Math.hypot(p[i-1].x,p[i-1].z),b=Math.hypot(p[i].x,p[i].z);if((a-rad)*(b-rad)>0)continue;
+  if(placed.some(q=>Math.hypot(q.x-p[i].x,q.z-p[i].z)<18)||placed.length>=4)continue;const dx=p[i].x-p[i-1].x,dz=p[i].z-p[i-1].z,l=Math.hypot(dx,dz)||1;let ox=dx/l,oz=dz/l;if(b<a){ox=-ox;oz=-oz}
+  const nx=-oz,nz=ox;const x=p[i].x+nx*(m.w/2+1.1),z=p[i].z+nz*(m.w/2+1.1);const sg=new T.Group();
+  const board=new T.Mesh(new T.BoxGeometry(2.6,1.02,.08),[back,back,back,back,face,back]);board.position.y=2.25;board.castShadow=true;sg.add(board);
+  const post=new T.Mesh(new T.CylinderGeometry(.07,.07,2.2,6),SPECIALS.M("#8e95a1"));post.position.y=1.1;post.castShadow=true;sg.add(post);
+  sg.position.set(x,0,z);sg.rotation.y=Math.atan2(ox,oz)+Math.PI;g.add(sg);placed.push({x:p[i].x,z:p[i].z})}})}
+function outskirts(t,g){const r=rng(hashStr(t.n)+7);const tree=MODELS.p.tree;const n=Math.round(10+t.R*.5);const im=new T.InstancedMesh(tree.geo,tree.mat,n);let k=0;
+ for(let i=0;i<n*3&&k<n;i++){const a=r()*6.283,d=t.R+1+r()*6;const x=Math.cos(a)*d,z=Math.sin(a)*d;if(t.mains.some(m=>m.pts.some(q=>(q.x-x)**2+(q.z-z)**2<16)))continue;
+  Q.setFromAxisAngle(UP,r()*6.3);V.set(x,0,z);const h=3.6+r()*2.6;SC.set(h,h,h);M4.compose(V,Q,SC);im.setMatrixAt(k++,M4)}im.count=k;im.castShadow=true;im.userData.tmp=0;g.add(im)}
 function townRadius(t){const lm=t.lm;let R=Math.hypot(lm.x,lm.z)+lm.r+4;if(t.open){const n=Math.min(t.items.length,t.slots.length);for(let i=0;i<n;i++){const s=t.slots[i];R=Math.max(R,Math.hypot(s.x,s.z)+5)}}return Math.max(R,14)}
 
 /* ---------- erby, mlha, popisky ---------- */
@@ -412,9 +426,22 @@ function seedDemo(){const r=rng(77);const big={"Říčany":72,"Mnichovice":34,"V
 /* ---------- roztahování světa ---------- */
 function requiredS(){let s=0.02;for(let i=0;i<TOWNS.length;i++){const a=TOWNS[i];for(let j=i+1;j<TOWNS.length;j++){const b=TOWNS[j];const d=Math.hypot(a.x-b.x,a.y-b.y);s=Math.max(s,(SPREAD*(a.R+b.R)+GAP)/d)}}return s}
 let animS=null;
+const stationG=new T.Group();scene.add(stationG);let stations=null;
+function stationObj(name){const g=new T.Group();const pl=new T.Mesh(new T.BoxGeometry(1.6,.45,12),SPECIALS.M("#cfc9bc"));pl.position.y=.22;pl.castShadow=pl.receiveShadow=true;g.add(pl);
+ const rf=new T.Mesh(new T.BoxGeometry(1.8,.12,4),SPECIALS.M("#2f72d6"));rf.position.y=2.4;rf.castShadow=true;g.add(rf);[-1.6,1.6].forEach(z=>{const c=new T.Mesh(new T.CylinderGeometry(.06,.06,2,6),SPECIALS.M("#9aa1ad"));c.position.set(.5,1.4,z);g.add(c)});
+ const tex=canvasTex(512,128,(c,w,h)=>{c.fillStyle="#1f3c8f";c.fillRect(0,0,w,h);c.fillStyle="#fff";let f=64;c.font=`700 ${f}px Arial`;while(c.measureText(name).width>w-30&&f>24){f-=4;c.font=`700 ${f}px Arial`}c.textAlign="center";c.textBaseline="middle";c.fillText(name,w/2,h/2+3)});
+ const b=new T.Mesh(new T.PlaneGeometry(3,.75),new T.MeshBasicMaterial({map:tex,side:T.DoubleSide}));b.position.set(.85,2,0);b.rotation.y=Math.PI/2;g.add(b);return g}
+function placeStations(){if(!stations){const rail=ROADS.filter(r=>r.c==="Z");stations=MAP.stations.filter(st=>{const near=TOWNS.some(t=>Math.hypot(t.x-st[0][0],t.y-st[0][1])<2500);return near}).map(st=>{let best=null,bd=1e18,rd=null,bi=0;rail.forEach(r=>r.m.forEach((q,i)=>{const d=(q[0]-st[0][0])**2+(q[1]-st[0][1])**2;if(d<bd){bd=d;best=q;rd=r;bi=i}}));
+  if(!best||bd>250*250)return null;const o=stationObj(st[1]);o.traverse(m=>{if(m.isMesh)m.castShadow=true});stationG.add(o);return{o,rd,bi}}).filter(Boolean)}
+ stations.forEach(s=>{const m=s.rd.m;const a=m[Math.max(0,s.bi-1)],b=m[Math.min(m.length-1,s.bi+1)],c=m[s.bi];F(a[0],a[1],tmp2);const ax=tmp2[0],az=tmp2[1];F(b[0],b[1],tmp2);const bx=tmp2[0],bz=tmp2[1];F(c[0],c[1],tmp2);
+  const dx=bx-ax,dz=bz-az,l=Math.hypot(dx,dz)||1;s.o.position.set(tmp2[0]-dz/l*2.1,0,tmp2[1]+dx/l*2.1);s.o.rotation.y=Math.atan2(dx,dz)})}
+const cloudTex=canvasTex(256,128,(g,w,h)=>{for(let i=0;i<14;i++){const x=40+Math.random()*176,y=50+Math.random()*30,r=26+Math.random()*30;const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,"rgba(255,255,255,.95)");gr.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,7);g.fill()}});
+const clouds=[];for(let i=0;i<14;i++){const sp=new T.Sprite(new T.SpriteMaterial({map:cloudTex,transparent:true,depthWrite:false,opacity:0,fog:false}));sp.userData={u:Math.random(),v:Math.random(),sz:.7+Math.random()*.8};scene.add(sp);clouds.push(sp)}
+function updClouds(now,dist){const b=regionBox();const W=b[2]-b[0],H=b[3]-b[1];const op=Math.max(0,Math.min(.42,(dist-600*S/0.06)/(1400*S/0.06)));
+ clouds.forEach(c=>{const u=(c.userData.u+now*.000004)%1;c.position.set(b[0]-W*.1+u*W*1.2,dist*.45,b[1]+c.userData.v*H);const s=W*.16*c.userData.sz;c.scale.set(s,s*.5,1);c.material.opacity=op})}
 function relayout(full){updTownParams();TOWNS.forEach(t=>{const c=tc(t);t.group.position.copy(c)});
  const span=60000*S;ground.scale.set(span,span,1);ground.position.set(0,0,0);
- mapLand();buildRoads();placeHouses(performance.now());
+ mapLand();buildRoads();placeHouses(performance.now());placeStations();
  SIGNS.forEach(s=>{if(!s.g)s.g=bigSign(s.txt);const q=s.get();F(q[0],q[1],tmp2);s.g.position.set(tmp2[0]+(s.txt[0]==="↖"?-8:8),0,tmp2[1]+(s.txt[0]==="↖"?-8:8));s.g.lookAt(cam.position.x,0,cam.position.z)});
  if(full){sampleForest();placeForest()}
  scene.fog.near=180*S/0.09;scene.fog.far=2400*S/0.09;ctr.maxDistance=2400*S/0.09}
@@ -490,7 +517,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/
  if(fly){const a=Math.min(1,(now-fly.t0)/fly.ms),e=a<.5?4*a*a*a:1-Math.pow(-2*a+2,3)/2;ctr.target.lerpVectors(fly.from,fly.to,e);cam.position.lerpVectors(fly.cf,fly.ct,e);if(a>=1){const ok=fly.ok;fly=null;ok&&ok()}}
  if(orbitSpeed){const off=cam.position.clone().sub(ctr.target);off.applyAxisAngle(UP,orbitSpeed*dt);cam.position.copy(ctr.target).add(off)}
  ctr.update();moveCars(dt);
- const dist=cam.position.distanceTo(ctr.target);cam.near=Math.max(.8,dist*.02);cam.far=Math.max(3000,dist*12);cam.updateProjectionMatrix();
+ const dist=cam.position.distanceTo(ctr.target);updClouds(now,dist);cam.near=Math.max(.8,dist*.02);cam.far=Math.max(3000,dist*12);cam.updateProjectionMatrix();
  FOREST.forEach(m=>m.castShadow=dist<420*S/0.09);scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
  const sh=Math.min(Math.max(dist*.9,60),700);const sc=sun.shadow.camera;if(Math.abs(sc.right-sh)>2){sc.left=-sh;sc.right=sh;sc.top=sh;sc.bottom=-sh;sc.near=1;sc.far=sh*4;sc.updateProjectionMatrix()}
  sun.position.copy(ctr.target).addScaledVector(SUNDIR,sh*1.8);sun.target.position.copy(ctr.target);
