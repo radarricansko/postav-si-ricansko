@@ -278,3 +278,31 @@ Popisek: pravidla v 1 řádku + odkaz na web („najdi svůj nick“) + opt-out 
 - https://blog.chatplace.io/en/instagram-gamification-for-engagement/
 
 Pozn.: Konkrétní případové studie IG/TikTok her typu „every follower gets a house“ jsem nenašel. Principy stojí na r/place, Twitch Plays Pokémon, r/thebutton a gamifikaci IG a na inspiraci z briefu (interaktivni.pribehy, valkamest, duskh0ll0w, kryt.003).
+
+---
+
+## 10. Návrhy k rozhodnutí (5. 11. večer)
+
+### 10a. Pan Radar: vypravěč
+Starší, klidný hlas (ElevenLabs), který „vidí celé Říčansko z radaru“. Není to maskot na obrázku, jen hlas a podpis: každý reel začíná „Tady Pan Radar. Den 7…“ a končí „Pan Radar končí hlášení.“ Výhody: postava, kterou si lidi zapamatují, dá se mu psát do komentářů („Pane Radare, kdy bude Tehov?“), a unese záhadu.
+
+### 10b. Záhada, kterou sledující řeší s Panem Radarem (varianty)
+| Varianta | Jak funguje | Proč by táhla | Náročnost |
+|---|---|---|---|
+| **Signál z opuštěné obce** | Pan Radar každý týden „zachytí signál“ z jedné opuštěné obce (šifra, zvuk, útržek fotky z reálného místa). Kdo obec uhodne a napíše ji do komentářů, oživí ji rychleji (první 3 komentáře = 3 domy) | Mapa + reálná místa z regionu, lidi fotku poznají, chtějí být první | Nízká: 1 fotka týdně, Make jen počítá komentáře |
+| **Zmizelá stavba** | Na mapě se přes noc něco objeví nebo zmizí (rozhledna, socha). Pan Radar se ptá „kdo to byl?“. Stopy v dalších reelech, odpověď v neděli | Open loop přes celý týden, lidi se vracejí | Střední: ruční objekt na mapě, scénář stop |
+| **Pamětník** | Pan Radar vypráví skutečné drobné příběhy z historie obcí (1 za den) a vždy končí otázkou. Správná odpověď v komentářích = bonusový domek obci | Vzdělává, oslovuje i rodiče, lokální hrdost | Nízká: potřebuje rešerši (kroniky, weby obcí) |
+| **Kdo je Pan Radar?** | Meta záhada na celý prosinec: útržky o tom, kdo mluví. Finále 24. 12.: odhalení (třeba hlas patří „radarové věži“ v Říčanech, nebo reálnému člověku z regionu, který souhlasí) | Nejsilnější dlouhá smyčka, ale musí mít dobrý konec | Střední: scénář na 6 týdnů |
+
+Doporučení: **Signál z opuštěné obce** jako týdenní rituál (neděle), protože přímo pomáhá hlavnímu cíli (žádná opuštěná obec) a Pan Radar je v něm přirozený.
+
+### 10c. Jak rozhýbat lidi, aby se přidali (varianty)
+1. **Zakladatelé obcí (prvních 5)**: trvalý odznak „Zakladatel“ u domku + jméno na ceduli obce. V reelu „Mukařov má 3 zakladatele, chybí 2“. Motivace: vzácnost, hraje se o místa, ne o počet.
+2. **Výzva s hodinami**: „Do půlnoci 10 lidí ze Strančic, nebo koruna putuje.“ Konkrétní číslo, konkrétní čas, viditelný ukazatel ve storce.
+3. **Pozvi souseda**: kdo označí v komentáři kamaráda, který se přidá, dostane „Sousedé“ (domky vedle sebe, společný plot). Nejlevnější růst: přivádí lidi mimo dosah Radaru.
+4. **Místní partneři**: hospoda, hasiči, fotbal v obci dostanou v reelu „jejich“ budovu, až se sejde 5 jejich lidí. Oni sdílejí reel sami (mají důvod).
+5. **Obecní FB skupiny**: po reelu jeden post do skupiny obce „Vaše obec je na mapě opuštěná. Kdo ji oživí?“ (ručně, 3 obce denně). Starší publikum pošle děti.
+6. **Hall of fame v reelu**: každý den 3–6 nicků „najdi se“. Lidi sdílejí reel, ve kterém jsou. Už je zabudováno.
+7. **Souboj o korunu ve storce**: anketa „Kdo zítra vezme korunu? Mukařov / Strančice“. Lidi hlasují a pak jdou komentovat, aby vyhráli.
+
+Doporučení pro start (16.–22. 11.): 1 + 2 + 6 od prvního dne, 3 od 2. týdne, 5 průběžně.
