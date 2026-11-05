@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kontrola follow</title>
+<meta name="description" content="RADAR Říčansko – kontrola, kteří hráči hry Postav si Říčansko sledují @radar_ricansko. Vše běží jen v prohlížeči.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0b1430;
+    --navy-2: #111d42;
+    --navy-3: #1a2a5c;
+    --blue-light: #4f8dff;
+    --blue-mid: #1f4fd1;
+    --accent: #ffd23f;
+    --text: #eef2ff;
+    --muted: #9fb0d9;
+    --line: rgba(159, 176, 217, 0.18);
+    --ok: #5ee0a0;
+    --bad: #ff7a7a;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--navy);
+    color: var(--text);
+    font: 15px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 16px; }
+
+  header.hero {
+    background: linear-gradient(160deg, var(--blue-light) 0%, var(--blue-mid) 45%, var(--navy) 100%);
+    padding: 28px 0 68px;
+  }
+  .brand {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 900 13px/1 "Archivo", sans-serif; letter-spacing: .18em;
+    background: var(--navy); color: var(--accent);
+    padding: 7px 10px; border-radius: 6px;
+  }
+  .brand i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  h1 {
+    font: 900 clamp(28px, 7vw, 46px)/1.05 "Archivo", sans-serif;
+    margin: 18px 0 10px; letter-spacing: -.01em;
+  }
+  h1 span { color: var(--accent); }
+  .lead { margin: 0; max-width: 60ch; color: #dbe5ff; }
+  .privacy {
+    margin-top: 18px; display: flex; gap: 10px; align-items: flex-start;
+    background: rgba(11, 20, 48, .55); border: 1px solid rgba(255,255,255,.18);
+    border-radius: var(--radius); padding: 12px 14px; font-size: 14px; max-width: 60ch;
+  }
+  .privacy svg { flex: none; margin-top: 2px; }
+
+  main.wrap { padding-top: 24px; padding-bottom: 48px; }
+  .inputs { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; margin-top: -40px; }
+  @media (max-width: 640px) { .inputs { grid-template-columns: 1fr; } }
+
+  .drop {
+    position: relative; display: block; cursor: pointer;
+    background: var(--navy-2); border: 1.5px dashed var(--line);
+    border-radius: var(--radius); padding: 18px; min-height: 150px;
+    transition: border-color .15s, background .15s;
+  }
+  .drop:hover, .drop.drag { border-color: var(--accent); background: var(--navy-3); }
+  .drop.loaded { border-style: solid; border-color: rgba(94, 224, 160, .55); }
+  .drop.error { border-style: solid; border-color: var(--bad); }
+  .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+  .step { font: 700 12px/1 "Archivo", sans-serif; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
+  .drop h2 { font: 700 19px/1.2 "Archivo", sans-serif; margin: 8px 0 6px; }
+  .drop p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  .drop code { color: var(--text); background: rgba(255,255,255,.07); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  .status { margin-top: 10px !important; font-size: 13.5px; color: var(--text) !important; font-weight: 500; }
+  .drop.loaded .status { color: var(--ok) !important; }
+  .drop.error .status { color: var(--bad) !important; }
+
+  details.howto {
+    margin-top: 14px; background: var(--navy-2); border-radius: var(--radius);
+    border: 1px solid var(--line); padding: 12px 16px;
+  }
+  details.howto summary { cursor: pointer; font-weight: 600; }
+  details.howto ol { margin: 10px 0 4px; padding-left: 20px; color: var(--muted); }
+  details.howto li { margin: 4px 0; }
+  details.howto b { color: var(--text); font-weight: 600; }
+
+  .results { margin-top: 26px; }
+  .hidden { display: none !important; }
+  .stats { display: grid; gap: 12px; grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 520px) { .stats { grid-template-columns: 1fr 1fr; } .stats .stat:first-child { grid-column: 1 / -1; } }
+  .stat { background: var(--navy-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .stat .num { font: 900 34px/1 "Archivo", sans-serif; font-variant-numeric: tabular-nums; }
+  .stat .lbl { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .stat.ok .num { color: var(--ok); }
+  .stat.bad { background: linear-gradient(160deg, var(--navy-3), var(--navy-2)); border-color: rgba(255, 210, 63, .45); }
+  .stat.bad .num { color: var(--accent); }
+  .meta { color: var(--muted); font-size: 13px; margin: 10px 2px 0; }
+  .warn { margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(255, 210, 63, .1); border: 1px solid rgba(255, 210, 63, .4); font-size: 14px; }
+
+  .listhead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 26px 0 10px; }
+  .listhead h2 { font: 700 20px/1.2 "Archivo", sans-serif; margin: 0; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  button, .btn {
+    font: 600 14px/1 "Inter", sans-serif; border-radius: 10px; padding: 11px 14px;
+    border: 1px solid var(--line); background: var(--navy-3); color: var(--text); cursor: pointer;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px; min-height: 42px;
+  }
+  button.primary { background: var(--accent); color: var(--navy); border-color: var(--accent); }
+  button:hover { filter: brightness(1.08); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .toast { font-size: 13px; color: var(--ok); min-height: 18px; margin: 0 2px 6px; }
+
+  .filter { width: 100%; margin-bottom: 10px; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--line); background: var(--navy-2); color: var(--text); font: inherit; }
+  .filter::placeholder { color: var(--muted); }
+
+  .tablewrap { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--navy-2); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  th { font: 600 12px/1.2 "Inter", sans-serif; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; background: rgba(255,255,255,.03); }
+  tr:last-child td { border-bottom: 0; }
+  td.num { font-variant-numeric: tabular-nums; }
+  td a { color: var(--text); text-decoration: none; border-bottom: 1px solid rgba(255,210,63,.5); }
+  td a:hover { color: var(--accent); }
+  .empty { padding: 22px 16px; text-align: center; color: var(--ok); font-weight: 600; }
+  @media (max-width: 560px) {
+    thead { display: none; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    tr { padding: 10px 14px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; }
+    td { border: 0; padding: 0; }
+    td.c-ig { font-weight: 600; font-size: 15px; }
+    td.c-obec { grid-column: 1; color: var(--muted); }
+    td.c-cislo { grid-column: 2; grid-row: 1; text-align: right; color: var(--accent); font-weight: 700; }
+    td.c-cislo::before { content: "#"; }
+    td.c-datum { grid-column: 2; grid-row: 2; text-align: right; color: var(--muted); font-size: 13px; }
+  }
+  footer { color: var(--muted); font-size: 12.5px; padding: 0 0 32px; }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="brand"><i></i>RADAR ŘÍČANSKO</span>
+    <h1>Postav si Říčansko:<br><span>kontrola follow</span></h1>
+    <p class="lead">Nahraj týdenní export sledujících z Instagramu a aktuální <code>world.json</code>. Stránka ukáže, kteří hráči nesledují @radar_ricansko.</p>
+    <div class="privacy" role="note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffd23f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <span><b>Vše běží jen v tomto prohlížeči.</b> Soubory se nikam neodesílají ani neukládají. Po zavření stránky zmizí.</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="inputs">
+    <label class="drop" id="dropFollowers">
+      <input type="file" id="fileFollowers" accept=".json,application/json" multiple>
+      <div class="step">Krok 1</div>
+      <h2>Sledující z IG</h2>
+      <p><code>followers_1.json</code> z exportu. Pokud jich je víc (<code>followers_2.json</code>…), vyber všechny najednou.</p>
+      <p class="status" id="statusFollowers">Klikni nebo sem přetáhni soubor</p>
+    </label>
+    <label class="drop" id="dropWorld">
+      <input type="file" id="fileWorld" accept=".json,application/json">
+      <div class="step">Krok 2</div>
+      <h2>Herní svět</h2>
+      <p><code>world.json</code> z repa hry (stáhni aktuální verzi z GitHubu).</p>
+      <p class="status" id="statusWorld">Klikni nebo sem přetáhni soubor</p>
+    </label>
+  </section>
+
+  <details class="howto">
+    <summary>Jak stáhnout export sledujících z Instagramu</summary>
+    <ol>
+      <li>Na účtu @radar_ricansko: <b>Nastavení → Středisko účtů → Vaše informace a oprávnění → Stáhnout informace</b>.</li>
+      <li>Zvol <b>Některé tvoje informace → Sledující a sledovaní</b> (Followers and following).</li>
+      <li>Formát <b>JSON</b>, období <b>Celou dobu</b>. Stáhnout na zařízení.</li>
+      <li>Až přijde e-mail, stáhni ZIP a rozbal. Soubor je ve složce <b>connections/followers_and_following/</b>.</li>
+    </ol>
+  </details>
+
+  <section class="results hidden" id="results" aria-live="polite">
+    <div class="stats">
+      <div class="stat"><div class="num" id="nHraci">0</div><div class="lbl">hráčů ve hře</div></div>
+      <div class="stat ok"><div class="num" id="nSleduji">0</div><div class="lbl">hráčů sleduje</div></div>
+      <div class="stat bad"><div class="num" id="nNesleduji">0</div><div class="lbl">hráčů nesleduje</div></div>
+    </div>
+    <p class="meta" id="meta"></p>
+    <div class="warn hidden" id="warn"></div>
+
+    <div class="listhead">
+      <h2>Nesledující hráči</h2>
+      <div class="actions">
+        <button type="button" class="primary" id="btnCopy">Kopírovat seznam</button>
+        <button type="button" id="btnCsv">Export CSV</button>
+      </div>
+    </div>
+    <p class="toast" id="toast"></p>
+    <input class="filter" id="filter" type="search" placeholder="Hledat podle jména nebo obce…" aria-label="Filtrovat seznam">
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>IG</th><th>Obec</th><th>Č. obyvatele</th><th>Ve hře od</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty hidden" id="empty">Všichni hráči sledují.</div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">RADAR Říčansko · interní nástroj pro hru Postav si Říčansko · data zůstávají v tomto zařízení</footer>
+
+<script>
+(function () {
+  "use strict";
+  var state = { followers: null, followerFiles: 0, world: null, rows: [], nonFollowers: [] };
+
+  function $(id) { return document.getElementById(id); }
+  function norm(u) { return String(u || "").trim().replace(/^@/, "").toLowerCase(); }
+
+  // --- IG export: bare array, nebo {relationships_followers: [...]}, username ve value / title / href
+  function usernameFromEntry(entry) {
+    if (!entry || typeof entry !== "object") return null;
+    var sld = Array.isArray(entry.string_list_data) ? entry.string_list_data : [];
+    for (var i = 0; i < sld.length; i++) {
+      var d = sld[i] || {};
+      if (d.value) return norm(d.value);
+      if (d.href) {
+        var m = String(d.href).match(/instagram\.com\/(?:_u\/)?([A-Za-z0-9._]+)/);
+        if (m) return norm(m[1]);
+      }
+    }
+    if (entry.title) return norm(entry.title);
+    if (entry.value) return norm(entry.value);
+    return null;
+  }
+
+  function parseFollowers(data) {
+    var list = null, kind = "followers";
+    if (Array.isArray(data)) list = data;
+    else if (data && typeof data === "object") {
+      if (Array.isArray(data.relationships_followers)) list = data.relationships_followers;
+      else if (Array.isArray(data.relationships_following)) { list = data.relationships_following; kind = "following"; }
+      else {
+        for (var k in data) { if (Array.isArray(data[k]) && data[k].length && data[k][0] && data[k][0].string_list_data) { list = data[k]; break; } }
+      }
+    }
+    if (!list) throw new Error("Soubor nevypadá jako export sledujících z Instagramu.");
+    var set = new Set();
+    list.forEach(function (e) { var u = usernameFromEntry(e); if (u) set.add(u); });
+    if (list.length && !set.size) throw new Error("V souboru jsem nenašel žádná uživatelská jména.");
+    return { set: set, kind: kind };
+  }
+
+  function parseWorld(data) {
+    if (!data || !Array.isArray(data.obce)) throw new Error("Chybí pole „obce“. Je to opravdu world.json?");
+    var rows = [];
+    data.obce.forEach(function (o) {
+      (o.hraci || []).forEach(function (h) {
+        if (!h || !h.ig) return;
+        rows.push({ ig: String(h.ig).replace(/^@/, ""), igNorm: norm(h.ig), obec: o.nazev || o.id || "", obecId: o.id || "", cislo: h.cislo_obyvatele, datum: h.datum || "" });
+      });
+    });
+    rows.sort(function (a, b) { return a.obec.localeCompare(b.obec, "cs") || (a.cislo || 0) - (b.cislo || 0); });
+    return { rows: rows, meta: data };
+  }
+
+  function readJson(file) {
+    return file.text().then(function (t) {
+      t = t.replace(/^﻿/, "");
+      try { return JSON.parse(t); } catch (e) { throw new Error("„" + file.name + "“ není platný JSON."); }
+    });
+  }
+
+  function setStatus(which, ok, text) {
+    var drop = $(which === "f" ? "dropFollowers" : "dropWorld");
+    drop.classList.toggle("loaded", ok === true);
+    drop.classList.toggle("error", ok === false);
+    $(which === "f" ? "statusFollowers" : "statusWorld").textContent = text;
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric" });
+  }
+  function plural(n, one, few, many) { return n === 1 ? one : (n >= 2 && n <= 4 ? few : many); }
+
+  function handleFollowers(files) {
+    if (!files || !files.length) return;
+    Promise.all(Array.prototype.map.call(files, readJson)).then(function (datas) {
+      var all = new Set(), kinds = [];
+      datas.forEach(function (d) { var r = parseFollowers(d); kinds.push(r.kind); r.set.forEach(function (u) { all.add(u); }); });
+      state.followers = all; state.followerFiles = files.length;
+      state.followingWarning = kinds.indexOf("following") !== -1;
+      setStatus("f", true, "Načteno: " + all.size.toLocaleString("cs-CZ") + " " + plural(all.size, "sledující", "sledující", "sledujících") + (files.length > 1 ? " (" + files.length + " soubory)" : ""));
+      render();
+    }).catch(function (e) { state.followers = null; setStatus("f", false, e.message); render(); });
+  }
+
+  function handleWorld(files) {
+    if (!files || !files.length) return;
+    readJson(files[0]).then(function (d) {
+      var r = parseWorld(d);
+      state.world = r.meta; state.rows = r.rows;
+      setStatus("w", true, "Načteno: " + r.rows.length + " " + plural(r.rows.length, "hráč", "hráči", "hráčů") + " v " + d.obce.length + " " + plural(d.obce.length, "obci", "obcích", "obcích"));
+      render();
+    }).catch(function (e) { state.world = null; state.rows = []; setStatus("w", false, e.message); render(); });
+  }
+
+  function render() {
+    var res = $("results");
+    if (!state.followers || !state.world) { res.classList.add("hidden"); return; }
+    res.classList.remove("hidden");
+    var f = state.followers;
+    state.nonFollowers = state.rows.filter(function (r) { return !f.has(r.igNorm); });
+    var n = state.rows.length, bad = state.nonFollowers.length;
+    $("nHraci").textContent = n;
+    $("nSleduji").textContent = n - bad;
+    $("nNesleduji").textContent = bad;
+    var w = state.world;
+    $("meta").textContent = "world.json revize " + (w.revize != null ? w.revize : "?") + ", den hry " + (w.den_hry != null ? w.den_hry : "?") +
+      (w.aktualizovano ? ", aktualizováno " + fmtDate(w.aktualizovano) : "") + " · export obsahuje " + f.size.toLocaleString("cs-CZ") + " " + plural(f.size, "sledujícího", "sledující", "sledujících") + ".";
+    var warn = $("warn");
+    if (state.followingWarning) {
+      warn.textContent = "Pozor: jeden ze souborů je seznam účtů, které Radar sleduje (following), ne sledujících. Nahraj followers_1.json.";
+      warn.classList.remove("hidden");
+    } else warn.classList.add("hidden");
+    $("btnCopy").disabled = $("btnCsv").disabled = bad === 0;
+    renderTable();
+  }
+
+  function renderTable() {
+    var q = norm($("filter").value);
+    var rows = state.nonFollowers.filter(function (r) { return !q || r.igNorm.indexOf(q) !== -1 || norm(r.obec).indexOf(q) !== -1; });
+    var tb = $("tbody");
+    tb.textContent = "";
+    rows.forEach(function (r) {
+      var tr = document.createElement("tr");
+      var tdIg = document.createElement("td"); tdIg.className = "c-ig";
+      var a = document.createElement("a"); a.href = "https://www.instagram.com/" + encodeURIComponent(r.ig) + "/"; a.target = "_blank"; a.rel = "noopener"; a.textContent = "@" + r.ig;
+      tdIg.appendChild(a);
+      var tdO = document.createElement("td"); tdO.className = "c-obec"; tdO.textContent = r.obec;
+      var tdC = document.createElement("td"); tdC.className = "c-cislo num"; tdC.textContent = r.cislo != null ? r.cislo : "";
+      var tdD = document.createElement("td"); tdD.className = "c-datum"; tdD.textContent = fmtDate(r.datum);
+      tr.appendChild(tdIg); tr.appendChild(tdO); tr.appendChild(tdC); tr.appendChild(tdD);
+      tb.appendChild(tr);
+    });
+    $("empty").classList.toggle("hidden", state.nonFollowers.length !== 0);
+    if (state.nonFollowers.length === 0) $("empty").textContent = "Všichni hráči sledují.";
+  }
+
+  function toast(msg) { var t = $("toast"); t.textContent = msg; clearTimeout(toast._t); toast._t = setTimeout(function () { t.textContent = ""; }, 3500); }
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly", "");
+      ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy") ? resolve() : reject(new Error("copy")); } catch (e) { reject(e); } finally { document.body.removeChild(ta); }
+    });
+  }
+
+  $("btnCopy").addEventListener("click", function () {
+    var text = state.nonFollowers.map(function (r) { return "@" + r.ig + " (" + r.obec + ", #" + r.cislo + ")"; }).join("\n");
+    copyText(text).then(function () { toast("Zkopírováno " + state.nonFollowers.length + " " + plural(state.nonFollowers.length, "jméno", "jména", "jmen") + "."); })
+      .catch(function () { toast("Kopírování se nepovedlo, použij export CSV."); });
+  });
+
+  function csvCell(v) { v = v == null ? "" : String(v); return /[";\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  $("btnCsv").addEventListener("click", function () {
+    var lines = [["ig", "obec", "obec_id", "cislo_obyvatele", "ve_hre_od", "profil"].join(";")];
+    state.nonFollowers.forEach(function (r) {
+      lines.push([r.ig, r.obec, r.obecId, r.cislo, r.datum, "https://www.instagram.com/" + r.ig + "/"].map(csvCell).join(";"));
+    });
+    var blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "nesledujici-hraci-" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    toast("CSV staženo.");
+  });
+
+  $("filter").addEventListener("input", renderTable);
+  $("fileFollowers").addEventListener("change", function (e) { handleFollowers(e.target.files); });
+  $("fileWorld").addEventListener("change", function (e) { handleWorld(e.target.files); });
+
+  [["dropFollowers", handleFollowers], ["dropWorld", handleWorld]].forEach(function (p) {
+    var el = $(p[0]);
+    el.addEventListener("dragover", function (e) { e.preventDefault(); el.classList.add("drag"); });
+    el.addEventListener("dragleave", function () { el.classList.remove("drag"); });
+    el.addEventListener("drop", function (e) { e.preventDefault(); el.classList.remove("drag"); p[1](e.dataTransfer.files); });
+  });
+})();
+</script>
+</body>
+</html>

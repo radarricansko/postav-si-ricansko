@@ -6,14 +6,15 @@ Stav k 5. 11. 2026. Nic není zapnuté ani spuštěné, na Instagram se nic nepo
 
 | Věc | ID | Stav |
 |---|---|---|
-| Scénář **[NÁVRH] Postav si Říčansko – komentáře → world.json** | **8385083** | neaktivní, chybí webhook a connection |
+| Scénář **[NÁVRH] Postav si Říčansko – komentáře → data store** | **8385083** | neaktivní, chybí webhook a connection |
+| Scénář **[NÁVRH] Postav si Říčansko – publikace world.json (každé 2 h)** | **8387398** | neaktivní, chybí HTTP connection |
 | Data store **postav_hraci** (1 MB) | **246350** | prázdný, struktura 681250 |
 | Data store **postav_obce** (1 MB) | **246351** | prázdný, struktura 681251 |
 
 Existující data store `radar-videne-clanky` i všechny scénáře RADAR BOT zůstaly beze změny. Nové názvy s ničím nekolidují.
 
 Soubory v této složce:
-- `blueprint.json`: přesně to, co je ve scénáři 8385083. Když se scénář smaže, dá se z něj znovu naimportovat.
+- `blueprint.json`: původní jednoscénářová verze (13 modulů), už **není** v Make, slouží jako záloha. Když se scénář smaže, dá se z něj znovu naimportovat.
 - `world.schema.json` a `world.sample.json`: datový model a vzorek s 5 obcemi a vymyšlenými hráči `hrac_01`–`hrac_09`. Vzorek prošel validací proti schématu.
 - `obce.json`: 52 obcí ORP Říčany, každá má `id` (slug) a 208 aliasů celkem.
 
@@ -52,16 +53,52 @@ Scénář má zapnuté **sekvenční zpracování**. Bez něj by dva komentáře
 - **Změnu obce** zatím dělá Radar ručně po DM: v `postav_hraci` přepsat `obec_id` a v `postav_obce` přesunout hráče mezi obcemi. Později se dá udělat přes Telegram bota (RADAR BOT2).
 - **Filtr nevhodných jmen** je regex nad usernamem: `kurv|pic[ae]|kokot|curak|zmrd|mrd|debil|hitler|nazi|negr|cigan|buzn|porn|fuck|shit|hovn|prdel|sex|onlyfans`. Je to startovní seznam, rozšiř ho podle potřeby. Stejný filtr použij i na texty cedulí speciálních budov.
 
+## Úsporná varianta (aktivní návrh)
+
+Stav k 5. 11. 2026 ráno. Oba scénáře jsou **neaktivní** a nic se nespustilo. Původní jednoscénářová verze je jen v `blueprint.json` (záloha).
+
+| Scénář | ID | Moduly | Plánování |
+|---|---|---|---|
+| **[NÁVRH] Postav si Říčansko – komentáře → data store** | **8385083** | 1–7 (webhook → normalizace → dedup → zápis do `postav_hraci` a `postav_obce`) | okamžitě (webhook), sekvenčně |
+| **[NÁVRH] Postav si Říčansko – publikace world.json (každé 2 h)** | **8387398** | search `postav_obce` → aggregator → GitHub GET → parse → transform → GitHub PUT | každých 7 200 s, jen 08:00–23:00, sekvenčně |
+
+Blueprinty: `blueprint-komentare.json` a `blueprint-publikace.json` (přesně to, co je v Make). Publikační blueprint i plánování prošly validací schématu, oba scénáře Make uložil bez chyby (`isinvalid: false`).
+
+**Co se změnilo proti původnímu toku**
+- Scénář 8385083 končí modulem 7. Modul 5 už skládá jen objekt hráče (událost pro log zmizela, nebyla by kam ji zapsat).
+- Scénář 8387398 má v modulu 5 filtr **„publikovat jen při změně“**. Spočítá `podpis` = součet hráčů, počet speciálních budov, počet odznaků a md5 seznamu usernamů a textů cedulí. Pokud se shoduje s polem `podpis` v aktuálním `world.json` na GitHubu, transform ani PUT neproběhnou (žádný commit). Když `podpis` chybí, publikuje se vždy. **Vynutit publikaci** = smazat `podpis` z `world.json` v repu.
+- `world.json` má nové volitelné pole `podpis` (doplněno do `world.schema.json`, vzorek dál validní).
+- `log_udalosti` se přenáší beze změny. Události `novy_hrac` už automaticky nepřibývají (stálo by to další modul). Hra je má odvodit z `obce[].hraci[].datum` (např. „noví od minulé návštěvy“). `novy_den`, `nova_budova` apod. dál zapisuje Radar ručně.
+- Proč ne záznam `_meta` v data storu: ten by stál +1 operaci u každého nového hráče. Porovnání s `world.json` je zadarmo, protože GET kvůli `sha` stejně běží.
+
+**Při nastavení navíc oproti krokům níže:** HTTP connection (GitHub token) se mapuje v 8387398 do modulů 3 a 6. V 8385083 už je potřeba jen Instagram webhook. Zapínají se **oba** scénáře.
+
+### Nový odhad operací
+
+| Událost | Operace |
+|---|---|
+| komentář pod jiným postem | 1 |
+| komentář pod herním postem, ale ne obec | 2 |
+| hráč už existuje | 3 |
+| **nový hráč** | **7** |
+| běh publikace bez změny | 4 |
+| běh publikace se změnou (commit) | 6 |
+
+- Publikace: 8 běhů denně (8, 10, … 22 h) → **32–48 operací denně**, nezávisle na počtu hráčů.
+- Běžný den (10 nových hráčů, 10 duplicit, 30 jiných komentářů): 70 + 30 + 30 + ~45 ≈ **175 operací** (dřív 190). V klidném dni úspora malá, většinu tvoří komentáře pod jinými posty.
+- Spuštění hry (150 hráčů za den): 1 050 + ~48 ≈ **1 100 operací** (dřív ~2 100). Pořád nad denním průměrem 200, ale jednorázově to měsíční rezerva (~6 500) unese.
+- Daň za úsporu: nový domek se na webu objeví až s příštím během, nejpozději do 2 h (v noci až v 8:00). Do pravidel: „Domek se na mapě objeví do 2 hodin.“
+
 ## Co musí Maty ráno udělat ručně
 
 1. **GitHub:** vytvořit repo `radarricansko/postav-si-ricansko` a do `main` dát `world.json` jako minimální platný soubor, např. `{"verze":1,"revize":0,"den_hry":1,"aktualizovano":"2026-11-05T00:00:00Z","obce":[],"navrhy_dne":[],"log_udalosti":[]}`. Bez souboru vrátí GET 404 a scénář spadne. K tomu nahrát `obce.json`.
 2. **Hosting:** GitHub Pages z **privátního** repa na free účtu nejde (potřebuje Pro/Team). Možnosti: repo zveřejnit, nebo stránku hostovat na Cloudflare Pages / Netlify / Vercel napojeném na privátní repo (zdarma). Pozor: `world.json` na veřejné stránce ukazuje IG usernamy hráčů, mezi nimi i lidí od 13 let. Do pravidel hry napiš, že se username zobrazí, a zvaž, jestli na webu nezobrazovat jen číslo obyvatele.
 3. **GitHub token:** fine-grained PAT jen pro toto repo, oprávnění *Contents: Read and write*, s expirací.
-4. **Make: HTTP connection** v modulech 10 a 13. Typ „API key“: hlavička `Authorization`, hodnota `Bearer <token>`, povolená URL `https://api.github.com/`. Token nevkládej jako text do hlaviček modulu.
+4. **Make: HTTP connection** ve scénáři 8387398, moduly 3 a 6. Typ „API key“: hlavička `Authorization`, hodnota `Bearer <token>`, povolená URL `https://api.github.com/`. Token nevkládej jako text do hlaviček modulu.
 5. **Make: Instagram connection + webhook** v modulu 1. Vytvoř webhook → přihlas se Facebook účtem s admin právy ke stránce propojené s @radar_ricansko (musí jít o Business účet, Creator nefunguje).
 6. **Herní post:** v filtru před modulem 2 nahradit `DOPLNIT_ID_HERNIHO_PRISPEVKU` za ID příspěvku (zjistíš ho modulem „Get post“ nebo „List posts“).
-7. **Test:** spustit „Run once“ a z druhého účtu napsat komentář (např. „Mukařov“). Zkontrolovat záznamy v data storech a commit v repu. Hlavně ověřit, že `obce`, `den_hry` a `log_udalosti` mají v JSON správné typy (pole a čísla, ne text). Pokud ne, upravit mapování v modulu 12.
-8. Teprve potom scénář **zapnout**.
+7. **Test:** spustit „Run once“ a z druhého účtu napsat komentář (např. „Mukařov“). Zkontrolovat záznamy v data storech a commit v repu. Hlavně ověřit, že `obce`, `den_hry` a `log_udalosti` mají v JSON správné typy (pole a čísla, ne text). Pokud ne, upravit mapování v modulu 5 scénáře 8387398. Publikaci při testu spusť ručně (Run once na 8387398).
+8. Teprve potom **zapnout oba** scénáře (8385083 i 8387398).
 
 ## Ověření follow
 

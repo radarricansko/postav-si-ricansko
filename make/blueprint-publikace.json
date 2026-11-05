@@ -1,0 +1,217 @@
+{
+ "name": "[NÁVRH] Postav si Říčansko – publikace world.json (každé 2 h)",
+ "flow": [
+  {
+   "id": 1,
+   "module": "datastore:SearchRecord",
+   "version": 1,
+   "parameters": {
+    "datastore": 246351,
+    "limit": 100
+   },
+   "mapper": {
+    "filter": [
+     [
+      {
+       "a": "id",
+       "o": "exist",
+       "b": ""
+      }
+     ]
+    ],
+    "sort": [
+     {
+      "key": "id",
+      "order": 1
+     }
+    ]
+   },
+   "metadata": {
+    "designer": {
+     "x": 0,
+     "y": 0,
+     "name": "Všechny obce"
+    }
+   }
+  },
+  {
+   "id": 2,
+   "module": "builtin:BasicAggregator",
+   "version": 1,
+   "parameters": {
+    "feeder": 1
+   },
+   "mapper": {
+    "id": "{{1.id}}",
+    "nazev": "{{1.nazev}}",
+    "pocet_hracu": "{{1.pocet_hracu}}",
+    "hraci": "{{1.hraci}}",
+    "specialni_budovy": "{{1.specialni_budovy}}"
+   },
+   "metadata": {
+    "designer": {
+     "x": 300,
+     "y": 0,
+     "name": "Agregace obcí"
+    }
+   }
+  },
+  {
+   "id": 3,
+   "module": "http:MakeRequest",
+   "version": 4,
+   "parameters": {
+    "authenticationType": "apiKeyConnection"
+   },
+   "mapper": {
+    "url": "https://api.github.com/repos/radarricansko/postav-si-ricansko/contents/world.json",
+    "method": "get",
+    "headers": [
+     {
+      "name": "Accept",
+      "value": "application/vnd.github+json"
+     },
+     {
+      "name": "X-GitHub-Api-Version",
+      "value": "2022-11-28"
+     },
+     {
+      "name": "User-Agent",
+      "value": "radar-postav-si-ricansko-make"
+     }
+    ],
+    "queryParameters": [
+     {
+      "name": "ref",
+      "value": "main"
+     }
+    ],
+    "contentType": "",
+    "parseResponse": true
+   },
+   "metadata": {
+    "designer": {
+     "x": 600,
+     "y": 0,
+     "name": "GitHub GET world.json (sha + data)"
+    }
+   }
+  },
+  {
+   "id": 4,
+   "module": "json:ParseJSON",
+   "version": 1,
+   "parameters": {},
+   "mapper": {
+    "json": "{{toString(toBinary(replace(3.data.content; \"/\\n/g\"; \"\"); \"base64\"))}}"
+   },
+   "metadata": {
+    "designer": {
+     "x": 900,
+     "y": 0,
+     "name": "Parsuj aktuální world.json"
+    }
+   }
+  },
+  {
+   "id": 5,
+   "module": "json:TransformToJSON",
+   "version": 1,
+   "parameters": {
+    "space": "2"
+   },
+   "mapper": {
+    "object": {
+     "verze": 1,
+     "revize": "{{ifempty(4.revize; 0) + 1}}",
+     "den_hry": "{{ifempty(4.den_hry; 1)}}",
+     "aktualizovano": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ss[Z]\"; \"UTC\")}}",
+     "podpis": "{{sum(map(2.array; \"pocet_hracu\"))}}-{{length(flatten(map(2.array; \"specialni_budovy\")))}}-{{length(flatten(map(flatten(map(2.array; \"hraci\")); \"odznaky\")))}}-{{md5(join(map(flatten(map(2.array; \"hraci\")); \"ig\"); \",\"))}}-{{md5(join(map(flatten(map(2.array; \"specialni_budovy\")); \"nazev_cedule\"); \",\"))}}",
+     "obce": "{{2.array}}",
+     "navrhy_dne": "{{ifempty(4.navrhy_dne; emptyarray)}}",
+     "log_udalosti": "{{ifempty(4.log_udalosti; emptyarray)}}"
+    }
+   },
+   "metadata": {
+    "designer": {
+     "x": 1200,
+     "y": 0,
+     "name": "Sestav nový world.json"
+    }
+   },
+   "filter": {
+    "name": "Jen když se od poslední publikace něco změnilo",
+    "conditions": [
+     [
+      {
+       "a": "{{sum(map(2.array; \"pocet_hracu\"))}}-{{length(flatten(map(2.array; \"specialni_budovy\")))}}-{{length(flatten(map(flatten(map(2.array; \"hraci\")); \"odznaky\")))}}-{{md5(join(map(flatten(map(2.array; \"hraci\")); \"ig\"); \",\"))}}-{{md5(join(map(flatten(map(2.array; \"specialni_budovy\")); \"nazev_cedule\"); \",\"))}}",
+       "o": "text:notequal",
+       "b": "{{4.podpis}}"
+      }
+     ],
+     [
+      {
+       "a": "{{4.podpis}}",
+       "o": "notexist"
+      }
+     ]
+    ]
+   }
+  },
+  {
+   "id": 6,
+   "module": "http:MakeRequest",
+   "version": 4,
+   "parameters": {
+    "authenticationType": "apiKeyConnection"
+   },
+   "mapper": {
+    "url": "https://api.github.com/repos/radarricansko/postav-si-ricansko/contents/world.json",
+    "method": "put",
+    "headers": [
+     {
+      "name": "Accept",
+      "value": "application/vnd.github+json"
+     },
+     {
+      "name": "X-GitHub-Api-Version",
+      "value": "2022-11-28"
+     },
+     {
+      "name": "User-Agent",
+      "value": "radar-postav-si-ricansko-make"
+     }
+    ],
+    "contentType": "json",
+    "inputMethod": "jsonString",
+    "jsonStringBodyContent": "{\"message\":\"Postav si Ricansko: publikace rev {{ifempty(4.revize; 0) + 1}}\",\"content\":\"{{base64(5.json)}}\",\"sha\":\"{{3.data.sha}}\",\"branch\":\"main\"}",
+    "parseResponse": true
+   },
+   "metadata": {
+    "designer": {
+     "x": 1500,
+     "y": 0,
+     "name": "GitHub PUT world.json"
+    }
+   }
+  }
+ ],
+ "metadata": {
+  "version": 1,
+  "scenario": {
+   "roundtrips": 1,
+   "maxErrors": 3,
+   "autoCommit": true,
+   "autoCommitTriggerLast": true,
+   "sequential": true,
+   "slots": null,
+   "confidential": false,
+   "dataloss": false,
+   "dlq": false,
+   "freshVariables": false
+  },
+  "designer": {
+   "orphans": []
+  }
+ }
+}

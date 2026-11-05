@@ -37,7 +37,7 @@ Hotové texty pro teaser a start, pravidla, šablony DM a denní rutina. Fáze a
 - **Odstranit ze hry:** „Jasně, domek jsme smazali. Kdyby sis to rozmyslel/a, stačí napsat obec znovu do komentářů 🙌“
 - **Změna obce (jen 1×):** „Hotovo, stěhuješ se do {obec}. Další stěhování už bohužel nejde, aby to bylo fér 😄“
 - **Obec není v ORP:** „Hra je zatím jen pro 52 obcí ORP Říčany. Máš kus Říčanska rád/a? Vyber si obec, ke které máš nejblíž 💙“
-- **Nevidím svůj domek:** „Domky se do mapy propisují zhruba každé 2 hodiny. Když tam do zítřka nebudeš, napiš nám nick a podíváme se.“
+- **Nevidím svůj domek:** „Domky se do mapy propisují zhruba každé 2 hodiny (8–23 h). Když tam do zítřka nebudeš, napiš nám nick a podíváme se.“
 
 ## 4. Denní rutina (cca 20 min)
 
