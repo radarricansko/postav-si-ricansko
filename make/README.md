@@ -53,6 +53,17 @@ Scénář má zapnuté **sekvenční zpracování**. Bez něj by dva komentáře
 - **Změnu obce** zatím dělá Radar ručně po DM: v `postav_hraci` přepsat `obec_id` a v `postav_obce` přesunout hráče mezi obcemi. Později se dá udělat přes Telegram bota (RADAR BOT2).
 - **Filtr nevhodných jmen** je regex nad usernamem: `kurv|pic[ae]|kokot|curak|zmrd|mrd|debil|hitler|nazi|negr|cigan|buzn|porn|fuck|shit|hovn|prdel|sex|onlyfans`. Je to startovní seznam, rozšiř ho podle potřeby. Stejný filtr použij i na texty cedulí speciálních budov.
 
+## Povolání
+
+Stav k 5. 11. 2026 odpoledne. Hráč může k obci připsat povolání v libovolném pořadí: „Mukařov hasič“, „hasič Mukařov“, „Mnichovice, kuchařka 🔥“, „jsem hasička z Mukařova“. Komentář bez povolání funguje jako dřív.
+
+- **Modul 2 (scénář 8385083):** po normalizaci se z textu vymaže každé celé slovo povolání. Zbytek projde odstraněním úvodních slov a porovná se s aliasy obcí jako dosud. Nová proměnná `povolani` najde slovo povolání (bere poslední výskyt) a přes `switch` z něj udělá kanonický klíč. Bez povolání je prázdná. Operace se nemění, pořád jde o jeden modul.
+- **Kanonické klíče (alias → klíč):** hasic (hasicka), kuchar (kucharka), hospodsky (hospodska, barman, barmanka), prodavac (prodavacka), barista (kavarnik), fotbalista (fotbalistka), sportovec (sportovkyne, trener), skejtak (skater), ridic (ridicka), strojvedouci (vypravci), rybar (rybarka), plavcik (plavcice), ucitel (ucitelka), muzikant (muzikantka, dj), hokejista, programator (programatorka, ajtak), filmar (filmarka), turista (turistka), rytir, pilot (pilotka). Žádný alias obce tato slova neobsahuje (ověřeno nad `obce.json`).
+- **Kam se ukládá:** `postav_hraci.povolani` (struktura 681250) a `postav_obce.hraci[].povolani` (struktura 681251), modul 5 → `5.hrac.povolani`, modul 6 → `povolani`. Publikace 8387398 posílá `hraci` beze změny, takže pole jde do `world.json`. `podpis` má navíc 6. část: md5 seznamu povolání. Ruční změna povolání v data storu tak vyvolá novou publikaci. První běh po této změně publikuje vždy, protože se změnil formát podpisu.
+- **Prázdná hodnota:** Make neumí pole podmíněně vynechat bez rizikového skládání JSON, a tak hráč bez povolání má v datech `"povolani": ""` (Make ho může propsat i jako `null`). `world.schema.json` povoluje řetězec z výčtu klíčů, `""` nebo `null`. Hra má každou prázdnou hodnotu brát jako „bez povolání“.
+- **Neověřeno v Make:** regex s lookahead `(?= |$)` a náhrada `$1` v `replace()`. Logika je otestovaná v Node.js, kde Make regexy běží. Při testu „Run once“ zkus komentáře „Mukařov hasič“ a „hasič Mukařov“.
+- **Omezení:** povolání se pozná jen jako samostatné slovo („hasičárna“ neprojde). Text navíc („Mukařov hasič jdeme do toho“) pořád neprojde. Změnu povolání po registraci dělá Radar ručně v obou data storech.
+
 ## Úsporná varianta (aktivní návrh)
 
 Stav k 5. 11. 2026 ráno. Oba scénáře jsou **neaktivní** a nic se nespustilo. Původní jednoscénářová verze je jen v `blueprint.json` (záloha).

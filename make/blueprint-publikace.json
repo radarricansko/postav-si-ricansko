@@ -52,7 +52,7 @@
     "designer": {
      "x": 300,
      "y": 0,
-     "name": "Agregace obcí"
+     "name": "Agregace obcí (hraci vč. povolani)"
     }
    }
   },
@@ -126,7 +126,7 @@
      "revize": "{{ifempty(4.revize; 0) + 1}}",
      "den_hry": "{{ifempty(4.den_hry; 1)}}",
      "aktualizovano": "{{formatDate(now; \"YYYY-MM-DDTHH:mm:ss[Z]\"; \"UTC\")}}",
-     "podpis": "{{sum(map(2.array; \"pocet_hracu\"))}}-{{length(flatten(map(2.array; \"specialni_budovy\")))}}-{{length(flatten(map(flatten(map(2.array; \"hraci\")); \"odznaky\")))}}-{{md5(join(map(flatten(map(2.array; \"hraci\")); \"ig\"); \",\"))}}-{{md5(join(map(flatten(map(2.array; \"specialni_budovy\")); \"nazev_cedule\"); \",\"))}}",
+     "podpis": "{{sum(map(2.array; \"pocet_hracu\"))}}-{{length(flatten(map(2.array; \"specialni_budovy\")))}}-{{length(flatten(map(flatten(map(2.array; \"hraci\")); \"odznaky\")))}}-{{md5(join(map(flatten(map(2.array; \"hraci\")); \"ig\"); \",\"))}}-{{md5(join(map(flatten(map(2.array; \"specialni_budovy\")); \"nazev_cedule\"); \",\"))}}-{{md5(join(map(flatten(map(2.array; \"hraci\")); \"povolani\"); \",\"))}}",
      "obce": "{{2.array}}",
      "navrhy_dne": "{{ifempty(4.navrhy_dne; emptyarray)}}",
      "log_udalosti": "{{ifempty(4.log_udalosti; emptyarray)}}"
@@ -144,7 +144,7 @@
     "conditions": [
      [
       {
-       "a": "{{sum(map(2.array; \"pocet_hracu\"))}}-{{length(flatten(map(2.array; \"specialni_budovy\")))}}-{{length(flatten(map(flatten(map(2.array; \"hraci\")); \"odznaky\")))}}-{{md5(join(map(flatten(map(2.array; \"hraci\")); \"ig\"); \",\"))}}-{{md5(join(map(flatten(map(2.array; \"specialni_budovy\")); \"nazev_cedule\"); \",\"))}}",
+       "a": "{{sum(map(2.array; \"pocet_hracu\"))}}-{{length(flatten(map(2.array; \"specialni_budovy\")))}}-{{length(flatten(map(flatten(map(2.array; \"hraci\")); \"odznaky\")))}}-{{md5(join(map(flatten(map(2.array; \"hraci\")); \"ig\"); \",\"))}}-{{md5(join(map(flatten(map(2.array; \"specialni_budovy\")); \"nazev_cedule\"); \",\"))}}-{{md5(join(map(flatten(map(2.array; \"hraci\")); \"povolani\"); \",\"))}}",
        "o": "text:notequal",
        "b": "{{4.podpis}}"
       }

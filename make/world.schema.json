@@ -35,7 +35,7 @@
     },
     "podpis": {
       "type": "string",
-      "description": "Otisk obsahu obcí (počet hráčů, budov, odznaků + md5 seznamu hráčů a cedulí). Scénář publikace podle něj pozná, že se nic nezměnilo, a nic necommituje. Smazání pole vynutí novou publikaci."
+      "description": "Otisk obsahu obcí (počet hráčů, budov, odznaků + md5 seznamu hráčů, cedulí a povolání). Scénář publikace podle něj pozná, že se nic nezměnilo, a nic necommituje. Smazání pole vynutí novou publikaci."
     },
     "obce": {
       "type": "array",
@@ -100,6 +100,37 @@
                     ]
                   },
                   "uniqueItems": true
+                },
+                "povolani": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "hasic",
+                    "kuchar",
+                    "hospodsky",
+                    "prodavac",
+                    "barista",
+                    "fotbalista",
+                    "sportovec",
+                    "skejtak",
+                    "ridic",
+                    "strojvedouci",
+                    "rybar",
+                    "plavcik",
+                    "ucitel",
+                    "muzikant",
+                    "hokejista",
+                    "programator",
+                    "filmar",
+                    "turista",
+                    "rytir",
+                    "pilot",
+                    "",
+                    null
+                  ],
+                  "description": "Kanonický klíč povolání z komentáře (např. „Mukařov hasič“ → hasic). Nepovinné; chybí, \"\" nebo null = bez povolání (Make může prázdnou hodnotu propsat jako \"\" či null)."
                 }
               },
               "additionalProperties": false

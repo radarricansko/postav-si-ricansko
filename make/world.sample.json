@@ -8,7 +8,7 @@
       "id": "ricany", "nazev": "Říčany", "pocet_hracu": 3,
       "hraci": [
         { "ig": "hrac_01", "cislo_obyvatele": 1, "datum": "2026-11-05T09:12:00Z", "odznaky": ["prvni_v_obci", "follow_overen"] },
-        { "ig": "hrac_02", "cislo_obyvatele": 2, "datum": "2026-11-05T09:40:00Z", "odznaky": ["novacek"] },
+        { "ig": "hrac_02", "cislo_obyvatele": 2, "datum": "2026-11-05T09:40:00Z", "odznaky": ["novacek"], "povolani": "hasic" },
         { "ig": "hrac_03", "cislo_obyvatele": 3, "datum": "2026-11-06T16:05:00Z", "odznaky": ["novacek"] }
       ],
       "specialni_budovy": [
@@ -19,14 +19,14 @@
       "id": "mukarov", "nazev": "Mukařov", "pocet_hracu": 2,
       "hraci": [
         { "ig": "hrac_04", "cislo_obyvatele": 1, "datum": "2026-11-05T10:01:00Z", "odznaky": ["prvni_v_obci"] },
-        { "ig": "hrac_05", "cislo_obyvatele": 2, "datum": "2026-11-06T12:30:00Z", "odznaky": ["novacek"] }
+        { "ig": "hrac_05", "cislo_obyvatele": 2, "datum": "2026-11-06T12:30:00Z", "odznaky": ["novacek"], "povolani": "kuchar" }
       ],
       "specialni_budovy": []
     },
     {
       "id": "mnichovice", "nazev": "Mnichovice", "pocet_hracu": 1,
       "hraci": [
-        { "ig": "hrac_06", "cislo_obyvatele": 1, "datum": "2026-11-06T07:55:00Z", "odznaky": ["prvni_v_obci"] }
+        { "ig": "hrac_06", "cislo_obyvatele": 1, "datum": "2026-11-06T07:55:00Z", "odznaky": ["prvni_v_obci"], "povolani": "muzikant" }
       ],
       "specialni_budovy": [
         { "typ": "hriste", "nazev_cedule": "Hřiště U Rybníka", "autor": "hrac_06", "datum": "2026-11-07T15:00:00Z" }
@@ -43,7 +43,7 @@
       "id": "strancice", "nazev": "Strančice", "pocet_hracu": 2,
       "hraci": [
         { "ig": "hrac_08", "cislo_obyvatele": 1, "datum": "2026-11-07T11:11:00Z", "odznaky": ["prvni_v_obci"] },
-        { "ig": "hrac_09", "cislo_obyvatele": 2, "datum": "2026-11-07T18:42:00Z", "odznaky": ["novacek"] }
+        { "ig": "hrac_09", "cislo_obyvatele": 2, "datum": "2026-11-07T18:42:00Z", "odznaky": ["novacek"], "povolani": "skejtak" }
       ],
       "specialni_budovy": []
     }
