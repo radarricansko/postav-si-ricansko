@@ -1,7 +1,7 @@
 /* Postav si Říčansko – rozhraní pro hráče (bez admin nástrojů). Admin: ?admin=1 */
 (function(){
 "use strict";
-const QS=new URLSearchParams(location.search);const ADMIN=QS.get("admin")==="1";
+const QS=new URLSearchParams(location.search);const ADMIN=QS.get("admin")==="fofrburg96";
 const $=id=>document.getElementById(id);
 document.body.classList.add(ADMIN?"admin":"player");
 if(ADMIN)return;

@@ -58,6 +58,6 @@ Hotové texty pro teaser a start, pravidla, šablony DM a denní rutina. Fáze a
 
 ## Adresy a automatika (5. 11.)
 
-- **Web hry:** https://radarricansko.github.io/postav-si-ricansko/ (admin: `?admin=1`). Nasazuje se samo z repa (GitHub Actions → „Web (GitHub Pages)“) při každé změně ve `web/` nebo `world.json`.
+- **Web hry:** https://radarricansko.github.io/postav-si-ricansko/ (admin: `?admin=fofrburg96`). Nasazuje se samo z repa (GitHub Actions → „Web (GitHub Pages)“) při každé změně ve `web/` nebo `world.json`.
 - **Denní reel:** GitHub Actions → „Denní reel“ běží každý den 5:30, výsledek je v artefaktu běhu (`reel-den-N.mp4` + `.txt` voiceover + `.srt`). Ručně: Run workflow. Nastavení hlasu a Telegramu: `tools/video/README.md`.
 - **Make → Instagram:** modul „Instagram for Business“ potřebuje připojení vytvořené přes tento modul (žádá oprávnění `instagram_manage_comments`). Připojení „Radar's Facebook connection“ tato oprávnění nemá, takže ho při nastavení scénáře 8385083 nahraď novým (Add → Instagram for Business → přihlásit Facebook stránkou propojenou s IG @radar_ricansko).

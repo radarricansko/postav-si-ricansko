@@ -25,9 +25,8 @@ async function tts(text){const key=process.env.ELEVENLABS_API_KEY,voice=process.
  const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--autoplay-policy=no-user-gesture-required']});
  const p=await b.newPage({viewport:{width:1100,height:720}});p.on('pageerror',e=>console.error('page:',e.message));p.on('console',m=>{if(/^frame/.test(m.text()))console.log(m.text())});
  const three=arg('three');if(three)await p.route(/three(\.min)?\.js|OrbitControls\.js|GLTFLoader\.js/,r=>{const f=r.request().url().split('/').pop();const m={'three.min.js':'build/three.min.js','OrbitControls.js':'examples/js/controls/OrbitControls.js','GLTFLoader.js':'examples/js/loaders/GLTFLoader.js'}[f];m?r.fulfill({path:path.join(three,m)}):r.continue()});
- await p.route(/fonts\.(googleapis|gstatic)\.com/,r=>r.fulfill({body:''}).catch(()=>{}));
  const data=arg('data','world.json');const dayQ=arg('day')?`&den=${arg('day')}`:'';
- await p.goto(`${base}/index.html?admin=1&perf=0&render=${arg('scale','0.5')}&data=${encodeURIComponent('/'+data)}${dayQ}`);
+ await p.goto(`${base}/index.html?admin=fofrburg96&perf=0&render=${arg('scale','0.5')}&data=${encodeURIComponent('/'+data)}${dayQ}`);
  await p.waitForFunction(()=>window.done===1,null,{timeout:180000});await p.waitForTimeout(2000);
  const info=await p.evaluate(()=>({day:GAME.info().day,pop:GAME.info().pop,hasReel:!!window.REEL}));console.log('hra:',info);if(!info.hasReel)throw new Error('REEL chybí');
  /* scénář */
