@@ -1,0 +1,60 @@
+{
+  "verze": 1,
+  "revize": 9,
+  "den_hry": 3,
+  "aktualizovano": "2026-11-07T18:42:00Z",
+  "obce": [
+    {
+      "id": "ricany", "nazev": "Říčany", "pocet_hracu": 3,
+      "hraci": [
+        { "ig": "hrac_01", "cislo_obyvatele": 1, "datum": "2026-11-05T09:12:00Z", "odznaky": ["prvni_v_obci", "follow_overen"] },
+        { "ig": "hrac_02", "cislo_obyvatele": 2, "datum": "2026-11-05T09:40:00Z", "odznaky": ["novacek"] },
+        { "ig": "hrac_03", "cislo_obyvatele": 3, "datum": "2026-11-06T16:05:00Z", "odznaky": ["novacek"] }
+      ],
+      "specialni_budovy": [
+        { "typ": "radnice", "nazev_cedule": "Radnice Říčany", "autor": "radar", "datum": "2026-11-05T08:00:00Z" }
+      ]
+    },
+    {
+      "id": "mukarov", "nazev": "Mukařov", "pocet_hracu": 2,
+      "hraci": [
+        { "ig": "hrac_04", "cislo_obyvatele": 1, "datum": "2026-11-05T10:01:00Z", "odznaky": ["prvni_v_obci"] },
+        { "ig": "hrac_05", "cislo_obyvatele": 2, "datum": "2026-11-06T12:30:00Z", "odznaky": ["novacek"] }
+      ],
+      "specialni_budovy": []
+    },
+    {
+      "id": "mnichovice", "nazev": "Mnichovice", "pocet_hracu": 1,
+      "hraci": [
+        { "ig": "hrac_06", "cislo_obyvatele": 1, "datum": "2026-11-06T07:55:00Z", "odznaky": ["prvni_v_obci"] }
+      ],
+      "specialni_budovy": [
+        { "typ": "hriste", "nazev_cedule": "Hřiště U Rybníka", "autor": "hrac_06", "datum": "2026-11-07T15:00:00Z" }
+      ]
+    },
+    {
+      "id": "kostelec-nad-cernymi-lesy", "nazev": "Kostelec nad Černými lesy", "pocet_hracu": 1,
+      "hraci": [
+        { "ig": "hrac_07", "cislo_obyvatele": 1, "datum": "2026-11-06T19:20:00Z", "odznaky": ["prvni_v_obci"] }
+      ],
+      "specialni_budovy": []
+    },
+    {
+      "id": "strancice", "nazev": "Strančice", "pocet_hracu": 2,
+      "hraci": [
+        { "ig": "hrac_08", "cislo_obyvatele": 1, "datum": "2026-11-07T11:11:00Z", "odznaky": ["prvni_v_obci"] },
+        { "ig": "hrac_09", "cislo_obyvatele": 2, "datum": "2026-11-07T18:42:00Z", "odznaky": ["novacek"] }
+      ],
+      "specialni_budovy": []
+    }
+  ],
+  "navrhy_dne": [
+    { "id": "d3-1", "obec_id": "mukarov", "text": "Postavit v Mukařově hospodu", "autor": "hrac_05", "hlasy": 4, "datum": "2026-11-07T09:00:00Z" },
+    { "id": "d3-2", "obec_id": "ricany", "text": "Skatepark u nádraží", "autor": "hrac_02", "hlasy": 7, "datum": "2026-11-07T09:30:00Z" }
+  ],
+  "log_udalosti": [
+    { "typ": "novy_den", "text": "Začíná den 3", "datum": "2026-11-07T06:00:00Z" },
+    { "typ": "nova_budova", "obec_id": "mnichovice", "ig": "hrac_06", "text": "Hřiště U Rybníka", "datum": "2026-11-07T15:00:00Z" },
+    { "typ": "novy_hrac", "ig": "hrac_09", "obec_id": "strancice", "cislo_obyvatele": 2, "datum": "2026-11-07T18:42:00Z" }
+  ]
+}

@@ -1,0 +1,534 @@
+{
+  "verze": 1,
+  "popis": "52 obcí ORP Říčany + aliasy pro normalizaci. Aliasy jsou už normalizované: malá písmena, bez diakritiky, jen a-z0-9 a mezery. 'kostelec' samotný je nejednoznačný (nad Černými lesy / u Křížků) a záměrně není alias.",
+  "normalizace": [
+    "lower",
+    "odstranit diakritiku",
+    "odstranit @zmínky a URL",
+    "nahradit vše mimo a-z0-9 mezerou",
+    "odstranit úvodní slova: jsem, hraju za, obec, mesto, z, ze, za, v, ve",
+    "sloučit mezery, trim"
+  ],
+  "obce": [
+    {
+      "id": "ricany",
+      "nazev": "Říčany",
+      "aliasy": [
+        "ricany",
+        "ricany u prahy",
+        "rican",
+        "ricanech",
+        "ricanama",
+        "ricany city",
+        "rycany",
+        "ricani",
+        "ricny",
+        "rcany"
+      ]
+    },
+    {
+      "id": "svetice",
+      "nazev": "Světice",
+      "aliasy": [
+        "svetice",
+        "svetic",
+        "sveticich",
+        "svetice u rican",
+        "svetyce"
+      ]
+    },
+    {
+      "id": "strancice",
+      "nazev": "Strančice",
+      "aliasy": [
+        "strancice",
+        "strancic",
+        "strancicich",
+        "strancice u prahy",
+        "strancyce",
+        "stranice"
+      ]
+    },
+    {
+      "id": "mukarov",
+      "nazev": "Mukařov",
+      "aliasy": [
+        "mukarov",
+        "mukarova",
+        "mukarove",
+        "mukarow",
+        "mukaruv",
+        "mukarov u rican"
+      ]
+    },
+    {
+      "id": "mnichovice",
+      "nazev": "Mnichovice",
+      "aliasy": [
+        "mnichovice",
+        "mnichovic",
+        "mnichovicich",
+        "mnichovyce",
+        "mnichovice u prahy",
+        "mnichovce"
+      ]
+    },
+    {
+      "id": "velke-popovice",
+      "nazev": "Velké Popovice",
+      "aliasy": [
+        "velke popovice",
+        "velkych popovic",
+        "velkych popovicich",
+        "v popovice",
+        "vel popovice",
+        "velke popovic",
+        "popovice",
+        "velkopopovice",
+        "velky popovice"
+      ]
+    },
+    {
+      "id": "kamenice",
+      "nazev": "Kamenice",
+      "aliasy": [
+        "kamenice",
+        "kamenici",
+        "kamenice u prahy",
+        "kamenyce"
+      ]
+    },
+    {
+      "id": "kostelec-nad-cernymi-lesy",
+      "nazev": "Kostelec nad Černými lesy",
+      "aliasy": [
+        "kostelec nad cernymi lesy",
+        "kostelce nad cernymi lesy",
+        "kostelci nad cernymi lesy",
+        "kostelec n c l",
+        "kostelec ncl",
+        "kncl",
+        "kostelec nad cernyma lesama",
+        "kostelec nad cernymi lesi",
+        "cerne lesy"
+      ]
+    },
+    {
+      "id": "ondrejov",
+      "nazev": "Ondřejov",
+      "aliasy": [
+        "ondrejov",
+        "ondrejova",
+        "ondrejove",
+        "ondrejow",
+        "ondrejov u prahy"
+      ]
+    },
+    {
+      "id": "kunice",
+      "nazev": "Kunice",
+      "aliasy": [
+        "kunice",
+        "kunic",
+        "kunicich",
+        "kunyce"
+      ]
+    },
+    {
+      "id": "babice",
+      "nazev": "Babice",
+      "aliasy": [
+        "babice",
+        "babic",
+        "babicich",
+        "babice u rican",
+        "babyce"
+      ]
+    },
+    {
+      "id": "brezi",
+      "nazev": "Březí",
+      "aliasy": [
+        "brezi",
+        "brezi u rican"
+      ]
+    },
+    {
+      "id": "cerne-voderady",
+      "nazev": "Černé Voděrady",
+      "aliasy": [
+        "cerne voderady",
+        "cernych voderad",
+        "cernych voderadech",
+        "voderady",
+        "cerne voderady u prahy",
+        "c voderady"
+      ]
+    },
+    {
+      "id": "cestlice",
+      "nazev": "Čestlice",
+      "aliasy": [
+        "cestlice",
+        "cestlic",
+        "cestlicich",
+        "cestlyce"
+      ]
+    },
+    {
+      "id": "dobrejovice",
+      "nazev": "Dobřejovice",
+      "aliasy": [
+        "dobrejovice",
+        "dobrejovic",
+        "dobrejovicich",
+        "dobrejovyce"
+      ]
+    },
+    {
+      "id": "doubek",
+      "nazev": "Doubek",
+      "aliasy": [
+        "doubek",
+        "doubku"
+      ]
+    },
+    {
+      "id": "herink",
+      "nazev": "Herink",
+      "aliasy": [
+        "herink",
+        "herinku",
+        "hering"
+      ]
+    },
+    {
+      "id": "hrusice",
+      "nazev": "Hrusice",
+      "aliasy": [
+        "hrusice",
+        "hrusic",
+        "hrusicich",
+        "hrusyce"
+      ]
+    },
+    {
+      "id": "jevany",
+      "nazev": "Jevany",
+      "aliasy": [
+        "jevany",
+        "jevan",
+        "jevanech"
+      ]
+    },
+    {
+      "id": "kaliste",
+      "nazev": "Kaliště",
+      "aliasy": [
+        "kaliste",
+        "kaliste u ondrejova",
+        "kalisti"
+      ]
+    },
+    {
+      "id": "klokocna",
+      "nazev": "Klokočná",
+      "aliasy": [
+        "klokocna",
+        "klokocne",
+        "klokocny"
+      ]
+    },
+    {
+      "id": "konojedy",
+      "nazev": "Konojedy",
+      "aliasy": [
+        "konojedy",
+        "konojed",
+        "konojedech"
+      ]
+    },
+    {
+      "id": "kostelec-u-krizku",
+      "nazev": "Kostelec u Křížků",
+      "aliasy": [
+        "kostelec u krizku",
+        "kostelce u krizku",
+        "kostelci u krizku",
+        "kostelec u krizek",
+        "kostelec u krizu"
+      ]
+    },
+    {
+      "id": "kozojedy",
+      "nazev": "Kozojedy",
+      "aliasy": [
+        "kozojedy",
+        "kozojed",
+        "kozojedech"
+      ]
+    },
+    {
+      "id": "krenice",
+      "nazev": "Křenice",
+      "aliasy": [
+        "krenice",
+        "krenic",
+        "krenicich",
+        "krenyce"
+      ]
+    },
+    {
+      "id": "krizkovy-ujezdec",
+      "nazev": "Křížkový Újezdec",
+      "aliasy": [
+        "krizkovy ujezdec",
+        "krizkoveho ujezdce",
+        "krizkovem ujezdci",
+        "ujezdec",
+        "krizkovy ujezd"
+      ]
+    },
+    {
+      "id": "lounovice",
+      "nazev": "Louňovice",
+      "aliasy": [
+        "lounovice",
+        "lounovic",
+        "lounovicich",
+        "lounovice pod blanikem"
+      ]
+    },
+    {
+      "id": "mirosovice",
+      "nazev": "Mirošovice",
+      "aliasy": [
+        "mirosovice",
+        "mirosovic",
+        "mirosovicich",
+        "mirosovyce"
+      ]
+    },
+    {
+      "id": "modletice",
+      "nazev": "Modletice",
+      "aliasy": [
+        "modletice",
+        "modletic",
+        "modleticich",
+        "modletyce"
+      ]
+    },
+    {
+      "id": "nucice",
+      "nazev": "Nučice",
+      "aliasy": [
+        "nucice",
+        "nucic",
+        "nucicich"
+      ]
+    },
+    {
+      "id": "nupaky",
+      "nazev": "Nupaky",
+      "aliasy": [
+        "nupaky",
+        "nupak",
+        "nupakach"
+      ]
+    },
+    {
+      "id": "oleska",
+      "nazev": "Oleška",
+      "aliasy": [
+        "oleska",
+        "olesky",
+        "olesce"
+      ]
+    },
+    {
+      "id": "oplany",
+      "nazev": "Oplany",
+      "aliasy": [
+        "oplany",
+        "oplan",
+        "oplanech"
+      ]
+    },
+    {
+      "id": "petihosty",
+      "nazev": "Pětihosty",
+      "aliasy": [
+        "petihosty",
+        "petihost",
+        "petihostech"
+      ]
+    },
+    {
+      "id": "petrikov",
+      "nazev": "Petříkov",
+      "aliasy": [
+        "petrikov",
+        "petrikova",
+        "petrikove"
+      ]
+    },
+    {
+      "id": "popovicky",
+      "nazev": "Popovičky",
+      "aliasy": [
+        "popovicky",
+        "popovicek",
+        "popovickach"
+      ]
+    },
+    {
+      "id": "prusice",
+      "nazev": "Prusice",
+      "aliasy": [
+        "prusice",
+        "prusic",
+        "prusicich"
+      ]
+    },
+    {
+      "id": "radejovice",
+      "nazev": "Radějovice",
+      "aliasy": [
+        "radejovice",
+        "radejovic",
+        "radejovicich"
+      ]
+    },
+    {
+      "id": "senohraby",
+      "nazev": "Senohraby",
+      "aliasy": [
+        "senohraby",
+        "senohrab",
+        "senohrabech"
+      ]
+    },
+    {
+      "id": "slustice",
+      "nazev": "Sluštice",
+      "aliasy": [
+        "slustice",
+        "slustic",
+        "sluticich",
+        "slustice u prahy"
+      ]
+    },
+    {
+      "id": "struharov",
+      "nazev": "Struhařov",
+      "aliasy": [
+        "struharov",
+        "struharova",
+        "struharove"
+      ]
+    },
+    {
+      "id": "stribrna-skalice",
+      "nazev": "Stříbrná Skalice",
+      "aliasy": [
+        "stribrna skalice",
+        "stribrne skalice",
+        "stribrny skalice",
+        "skalice",
+        "st skalice"
+      ]
+    },
+    {
+      "id": "sulice",
+      "nazev": "Sulice",
+      "aliasy": [
+        "sulice",
+        "sulic",
+        "sulicich",
+        "zelivec"
+      ]
+    },
+    {
+      "id": "svojetice",
+      "nazev": "Svojetice",
+      "aliasy": [
+        "svojetice",
+        "svojetic",
+        "svojeticich"
+      ]
+    },
+    {
+      "id": "stihlice",
+      "nazev": "Štíhlice",
+      "aliasy": [
+        "stihlice",
+        "stihlic",
+        "stihlicich"
+      ]
+    },
+    {
+      "id": "tehov",
+      "nazev": "Tehov",
+      "aliasy": [
+        "tehov",
+        "tehova",
+        "tehove"
+      ]
+    },
+    {
+      "id": "tehovec",
+      "nazev": "Tehovec",
+      "aliasy": [
+        "tehovec",
+        "tehovce",
+        "tehovci"
+      ]
+    },
+    {
+      "id": "vlkancice",
+      "nazev": "Vlkančice",
+      "aliasy": [
+        "vlkancice",
+        "vlkancic",
+        "vlkancicich"
+      ]
+    },
+    {
+      "id": "vsestary",
+      "nazev": "Všestary",
+      "aliasy": [
+        "vsestary",
+        "vsestar",
+        "vsestarech"
+      ]
+    },
+    {
+      "id": "vyzerky",
+      "nazev": "Výžerky",
+      "aliasy": [
+        "vyzerky",
+        "vyzerek",
+        "vyzerkach"
+      ]
+    },
+    {
+      "id": "vyzlovka",
+      "nazev": "Vyžlovka",
+      "aliasy": [
+        "vyzlovka",
+        "vyzlovky",
+        "vyzlovce"
+      ]
+    },
+    {
+      "id": "zvanovice",
+      "nazev": "Zvánovice",
+      "aliasy": [
+        "zvanovice",
+        "zvanovic",
+        "zvanovicich"
+      ]
+    }
+  ]
+}

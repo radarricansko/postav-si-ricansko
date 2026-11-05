@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Postav si Říčansko</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0d1838;--mut:#5a6688;--panel:rgba(255,255,255,.94);--navy:#0b1430;--blue:#2f72d6;--sky:#5fa8e8;--acc:#ffd23f;--bg:#cfe3ef}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#cfe3ef}}
+:root[data-theme="dark"]{--bg:#cfe3ef}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font:14px/1.4 Inter,system-ui,sans-serif;color:var(--ink);
+ background:linear-gradient(180deg,#8fc2e6 0%,#bcd9ea 45%,#e9dcc8 100%)}
+canvas#gl{display:block;position:fixed;inset:0}
+#grade{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(255,235,200,0) 55%,rgba(20,30,60,.28) 100%);mix-blend-mode:multiply}
+#warm{position:fixed;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,200,140,.06),rgba(255,170,90,.08));mix-blend-mode:soft-light}
+.card{background:var(--panel);border-radius:18px;box-shadow:0 10px 30px #0b1d4a26;backdrop-filter:blur(8px)}
+#hud{position:fixed;left:16px;top:14px;width:300px;max-width:calc(100vw - 32px);padding:14px 16px}
+#brand{display:flex;align-items:center;gap:10px}
+#brand .logo{font:700 13px "Space Grotesk";letter-spacing:.14em;color:#fff;background:linear-gradient(135deg,#5fa8e8,#1f3c8f);padding:5px 9px;border-radius:8px}
+#brand h1{font:700 18px/1.05 "Space Grotesk";margin:0}
+#stats{display:flex;gap:8px;margin:12px 0 10px}
+.stat{flex:1;background:#eef2fb;border-radius:12px;padding:7px 9px}
+.stat b{display:block;font:700 20px "Space Grotesk"}
+.stat span{font-size:11px;color:var(--mut)}
+select,button{font:600 13px Inter;border:0;border-radius:999px;padding:8px 12px;cursor:pointer}
+select{background:#eef2fb;color:var(--ink);width:100%;margin-bottom:8px;border-radius:12px}
+button{background:var(--ink);color:#fff}
+button.alt{background:#e7ecf8;color:var(--ink)}
+button.y{background:var(--acc);color:#111}
+button:active{transform:scale(.97)}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+#toggleHud{display:none}
+.lbl{position:fixed;transform:translate(-50%,-100%);cursor:pointer;text-align:center;white-space:nowrap;font:700 13px "Space Grotesk";color:#fff;
+ text-shadow:0 1px 3px #000a,0 0 10px #0007;pointer-events:auto;user-select:none}
+.lbl small{display:block;font:600 11px Inter;opacity:.95}
+.lbl.lock{opacity:.85}
+#compass{position:fixed;left:16px;bottom:16px;width:72px;height:72px;border-radius:50%;pointer-events:none}
+#compass .n{position:absolute;inset:0}
+#compass .n:before{content:"";position:absolute;left:50%;top:9px;border:7px solid transparent;border-bottom:24px solid #d63c3c;transform:translateX(-50%)}
+#compass .n:after{content:"";position:absolute;left:50%;bottom:9px;border:7px solid transparent;border-top:24px solid #0d1838;transform:translateX(-50%)}
+#compass i{position:absolute;left:50%;top:-2px;transform:translateX(-50%);font:700 11px "Space Grotesk";font-style:normal;color:#d63c3c}
+#info{position:fixed;right:16px;top:14px;width:300px;max-width:calc(100vw - 32px);padding:16px;display:none}
+#info.on{display:block;animation:pop .25s ease-out}
+@keyframes pop{from{transform:translateY(-8px);opacity:0}}
+#info .top{display:flex;gap:12px;align-items:center}
+#info .av{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#5fa8e8,#1f3c8f);display:flex;align-items:center;justify-content:center;color:#fff;font:700 18px "Space Grotesk";flex:none}
+#info h3{margin:0;font:700 18px "Space Grotesk"}
+#info .sub{color:var(--mut);font-size:12px}
+#info .badges{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 6px}
+#info .b{font:600 11px Inter;padding:4px 8px;border-radius:999px;background:#eef2fb}
+#info .b.gold{background:#fff1bf}
+#info .b.green{background:#dcf5e3}
+#info .b.blue{background:#dfeafe}
+#info .x{position:absolute;right:10px;top:8px;background:none;color:var(--mut);font-size:18px;padding:4px 8px}
+#info dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:8px 0 0;font-size:12.5px}
+#info dt{color:var(--mut)}#info dd{margin:0;font-weight:600}
+#toast{position:fixed;left:50%;top:16px;transform:translate(-50%,-30px);background:#0d1838;color:#fff;font:700 16px "Space Grotesk";padding:12px 18px;border-radius:14px;opacity:0;transition:.35s;pointer-events:none;text-align:center;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast small{display:block;font:500 12px Inter;opacity:.85}
+#load{position:fixed;inset:0;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;background:#0b1430;color:#fff;font:700 18px "Space Grotesk";z-index:9}
+#load small{font:500 12px Inter;opacity:.7}
+#cat{position:fixed;inset:0;background:rgba(8,14,36,.72);display:none;z-index:8;overflow:auto;padding:24px 16px}
+#cat.on{display:block}
+#cat .wrap{max-width:1100px;margin:0 auto;background:#fff;border-radius:22px;padding:20px}
+#cat h2{font:700 24px "Space Grotesk";margin:0 0 4px}
+#cat p{color:var(--mut);margin:0 0 14px}
+#cat .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+#cat .it{border:1px solid #e3e8f4;border-radius:14px;overflow:hidden;background:#f7f9fe}
+#cat .it img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:linear-gradient(#bcd9ea,#e6e0d0)}
+#cat .it div{padding:8px 10px}
+#cat .it b{font:700 14px "Space Grotesk";display:block}
+#cat .it span{font-size:12px;color:var(--mut)}
+#cat .it .th{float:right;font:700 11px Inter;background:#0d1838;color:#fff;border-radius:999px;padding:2px 7px}
+#cat .close{position:sticky;top:0;float:right}
+#help{position:fixed;right:16px;bottom:16px;font-size:12px;padding:8px 12px;max-width:270px;color:var(--mut)}
+#attr{position:fixed;left:100px;bottom:10px;font-size:10px;color:#fff;text-shadow:0 1px 2px #000a;opacity:.8}
+@media (max-width:700px){
+ #hud{width:auto;right:16px;padding:10px 12px}#stats{margin:8px 0}.stat b{font-size:16px}
+ #hud .more{display:none}#hud.open .more{display:block}#toggleHud{display:inline-block}
+ #help{display:none}#info{top:auto;bottom:16px;left:16px;right:16px;width:auto}
+}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="warm"></div><div id="grade"></div>
+<div id="load">Načítám Říčansko…<small id="loadMsg">mapa, modely, obce</small></div>
+<div id="hud" class="card">
+ <div id="brand"><span class="logo">RADAR</span><h1>Postav si Říčansko</h1></div>
+ <div id="stats">
+  <div class="stat"><b id="sDay">1</b><span>den hry</span></div>
+  <div class="stat"><b id="sPop">0</b><span>obyvatel</span></div>
+  <div class="stat"><b id="sTowns">0</b><span>obcí z mlhy</span></div>
+ </div>
+ <button class="alt" id="toggleHud">Ovládání ▾</button>
+ <div class="more">
+  <select id="sel"></select>
+  <div class="row">
+   <button id="add1">+1 obyvatel</button><button class="alt" id="add10">+10</button><button class="alt" id="build">Postavit budovu</button>
+  </div>
+  <div class="row" style="margin-top:6px">
+   <button class="y" id="wave">+40 náhodně</button><button class="alt" id="over">Přehled</button><button class="alt" id="catBtn">Katalog budov</button><button class="alt" id="reelBtn">🎬 Reel dne</button>
+  </div>
+ </div>
+</div>
+<div id="info" class="card"><button class="x" id="infoX">×</button><div id="infoBody"></div></div>
+<div id="compass" class="card"><div class="n"><i>S</i></div></div>
+<div id="help" class="card">Táhni = otáčení · pravé tlačítko / 2 prsty = posun · kolečko = zoom · klik na domek = kdo v něm bydlí</div>
+<div id="attr">Mapová data © OpenStreetMap · modely Kenney (CC0)</div>
+<div id="toast"></div>
+<div id="cat"><div class="wrap"><button class="close alt" id="catX">Zavřít</button><h2>Katalog speciálních budov</h2>
+<p>Obec si budovu odemkne počtem obyvatel. Co se postaví, vybírá nejlajkovanější komentář, a každá budova má vlastní ceduli s názvem.</p><div class="grid" id="catGrid"></div></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="kit.js"></script>
+<script src="erb-lib.js"></script>
+<script src="map.js"></script>
+<script src="land.js"></script>
+<script src="specials.js"></script>
+<script src="game.js"></script>
+<script src="reel.js"></script>
+<div id="reel" style="position:fixed;inset:0;background:rgba(8,14,36,.85);display:none;z-index:8;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:16px">
+ <div id="reelMount" style="height:min(80vh,720px);aspect-ratio:9/16;border-radius:18px;overflow:hidden;background:#000"></div>
+ <div class="card" style="padding:14px;max-width:280px"><b style="font:700 18px 'Space Grotesk'">Reel dne</b><p style="color:#5a6688;font-size:12.5px">Automatický reel z dnešního dne: hook, přelet, obce s největším přírůstkem, TOP komentář a CTA. Voiceover čte prohlížeč; do videa ho přidáš přes text níže (CapCut TTS nebo vlastní hlas).</p>
+ <div class="row"><button id="rPlay">▶ Přehrát</button><button class="alt" id="rRec">⏺ Nahrát video</button><button class="alt" id="rVo">Text voiceoveru</button><button class="alt" id="rX">Zavřít</button></div><pre id="rOut" style="white-space:pre-wrap;font-size:11px;max-height:200px;overflow:auto"></pre></div></div>
+<script>
+(function(){const $=id=>document.getElementById(id);let sc=null;
+$("reelBtn").onclick=()=>{$("reel").style.display="flex";const m=$("reelMount");if(!m.firstChild){REEL.canvas.style.width="100%";REEL.canvas.style.height="100%";m.appendChild(REEL.canvas)}sc=REEL.scriptFromDay(GAME.dayData(),{handle:"@radar_ricansko"})};
+$("rX").onclick=()=>{REEL.stop&&REEL.stop();$("reel").style.display="none"};
+$("rPlay").onclick=()=>{sc=REEL.scriptFromDay(GAME.dayData(),{handle:"@radar_ricansko"});REEL.play(sc,{mount:$("reelMount")})};
+$("rVo").onclick=()=>{$("rOut").textContent=REEL.voiceScript(sc||REEL.scriptFromDay(GAME.dayData())).text};
+$("rRec").onclick=async()=>{$("rOut").textContent="Nahrávám… (cca 30 s)";try{const b=await REEL.record(REEL.scriptFromDay(GAME.dayData(),{handle:"@radar_ricansko"}),{mount:$("reelMount")});const dl=await claude.use("downloads");if(!dl){$("rOut").textContent="Video je nahrané, ale stažení tady není dostupné.";return}$("rOut").textContent="Hotovo, ukládám…";try{await dl.save({filename:"reel-den."+(b.extension||"webm"),data:b});$("rOut").textContent="Video uloženo."}catch(err){$("rOut").textContent="Uložení zrušeno."}}catch(e){$("rOut").textContent="Nahrávání selhalo: "+e.message}};
+})();
+</script>
+</body>
+</html>

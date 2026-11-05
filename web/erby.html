@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Erby Říčanska</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1430;--panel:#121d40;--line:#24315e;--ink:#eef2ff;--mut:#97a3c9;--acc:#ffd23f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1430}}
+:root[data-theme="dark"]{--bg:#0b1430}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 60px}
+h1{font:700 clamp(28px,5vw,44px)/1.05 "Space Grotesk",sans-serif;margin:0 0 8px;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--acc)}
+h2{font:700 20px "Space Grotesk",sans-serif;margin:40px 0 4px}
+p.lead{color:var(--mut);max-width:720px;margin:0}
+.note{color:var(--mut);font-size:13px;margin:4px 0 16px}
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.tier{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 10px 12px;text-align:center}
+.tier b{display:block;font:700 15px "Space Grotesk"}
+.tier small{color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 8px 10px;text-align:center;cursor:pointer;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-3px);border-color:#3b4c8a}
+.card .n{font:600 13px/1.2 Inter;margin-top:6px}
+.card .d{font-size:11px;color:var(--mut);margin-top:3px;line-height:1.3}
+svg.erb{width:100%;max-width:120px;height:auto;overflow:visible;display:block;margin:0 auto}
+.tier svg.erb{max-width:150px}
+.float{animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.sheen{animation:sheen 4.5s ease-in-out infinite}
+@keyframes sheen{0%{transform:translateX(-140px)}55%,100%{transform:translateX(160px)}}
+.a-spin{animation:spin 9s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.a-swing{animation:swing 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 0}
+@keyframes swing{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+.a-sway{animation:sway 3.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.a-bob{animation:bob 2.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-3px) rotate(3deg)}}
+.a-pulse{animation:pulse 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.a-flick{animation:flick .9s steps(3) infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes flick{0%{transform:scaleY(1)}33%{transform:scaleY(1.12) skewX(3deg)}66%{transform:scaleY(.93) skewX(-3deg)}}
+.a-wave{animation:wave 3s linear infinite}
+@keyframes wave{to{transform:translateX(-20px)}}
+.a-twinkle{animation:twinkle 2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes twinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+.plat{animation:plat 3s linear infinite}
+@keyframes plat{to{stroke-dashoffset:-60}}
+#modal{position:fixed;inset:0;background:rgba(5,10,28,.86);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+#modal.on{display:flex}
+#modal .box{text-align:center;max-width:420px}
+#modal svg.erb{max-width:240px}
+#modal h3{font:700 26px "Space Grotesk";margin:16px 0 4px}
+#modal p{color:var(--mut);margin:0 0 12px}
+.seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap;justify-content:center}
+.seg button{background:none;border:0;color:var(--mut);font:600 13px Inter;padding:7px 12px;border-radius:999px;cursor:pointer}
+.seg button.on{background:var(--acc);color:#111}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px}
+.rule{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.rule b{font-family:"Space Grotesk"}
+.rule p{margin:4px 0 0;color:var(--mut);font-size:13px}
+@media (max-width:640px){.tiers{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Erby <em>Říčanska</em> ve hře</h1>
+  <p class="lead">Stejné barvy a stejné dělení štítu jako skutečný znak obce, ale vlastní zjednodušený symbol. Žádná kopie oficiálního erbu, princip ale sedí a místní ho poznají. Každý erb se ve hře vznáší a symbol se jemně hýbe.</p>
+
+  <h2>Rámečky podle velikosti obce</h2>
+  <p class="note">Příklad na Říčanech. Rámeček se mění podle počtu hráčů z obce.</p>
+  <div class="tiers" id="tiers"></div>
+
+  <h2>Pravidla stylu</h2>
+  <div class="rules">
+    <div class="rule"><b>1 štít, 1 symbol</b><p>Max. dvě dělení a jeden hlavní symbol. Zvířata jen jako hlava nebo silueta, žádné detaily.</p></div>
+    <div class="rule"><b>Barvy podle originálu</b><p>Tinktury zůstávají (modrá, červená, zelená, zlatá, stříbrná), jen v jedné jednotné paletě pro celou hru.</p></div>
+    <div class="rule"><b>Pohyb symbolu</b><p>Kola a slunce se točí, zvony se houpou, stromy se kývou, vlny tečou, pochodně plápolají.</p></div>
+  </div>
+
+  <h2>Všech 52 obcí</h2>
+  <p class="note">Klikni na erb pro detail a přepínání rámečků. Tři obce bez dohledaného znaku mají zatím neutrální placeholder.</p>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="modal"><div class="box" id="mbox"></div></div>
+
+<script>
+const C={navy:"#1f3c8f",blue:"#2f72d6",sky:"#5fa8e8",red:"#d63c3c",green:"#2f9a52",dgreen:"#1f6e3a",gold:"#f4c430",white:"#f5f5ef",black:"#26262b",brown:"#8a5a2b",grey:"#8e95a8"};
+const SH="M8 8H92V60C92 88 72 104 50 113C28 104 8 88 8 60Z";
+
+// ---- dělení štítu ----
+const DIV={
+ pale:c=>`<rect x="50" y="0" width="50" height="120" fill="${c}"/>`,
+ paleL:c=>`<rect x="0" y="0" width="50" height="120" fill="${c}"/>`,
+ fess:c=>`<rect x="0" y="60" width="100" height="60" fill="${c}"/>`,
+ chief:c=>`<rect x="0" y="0" width="100" height="36" fill="${c}"/>`,
+ crenchief:c=>`<path d="M0 0H100V36H90V30H80V36H70V30H60V36H50V30H40V36H30V30H20V36H10V30H0Z" fill="${c}"/>`,
+ base:c=>`<rect x="0" y="88" width="100" height="40" fill="${c}"/>`,
+ bend:c=>`<path d="M0 0L100 120H0Z" fill="${c}"/>`,
+ bendS:c=>`<path d="M100 0L0 120H100Z" fill="${c}"/>`,
+ bendband:c=>`<path d="M-5 10L15 -5L110 105L90 120Z" fill="${c}"/>`,
+ bar:c=>`<rect x="0" y="52" width="100" height="14" fill="${c}"/>`,
+ bars3:c=>`<g fill="${c}"><rect y="34" width="100" height="9"/><rect y="56" width="100" height="9"/><rect y="78" width="100" height="9"/></g>`,
+ quarters:c=>`<path d="M50 0H100V60H50ZM0 60H50V120H0Z" fill="${c}"/>`,
+ point:c=>`<path d="M0 120L50 50L100 120Z" fill="${c}"/>`,
+ mounds:c=>`<path d="M0 120V94Q17 76 34 92Q50 74 66 92Q83 76 100 94V120Z" fill="${c}"/>`,
+ arch:c=>`<path d="M0 120V86Q50 52 100 86V120Z" fill="${c}"/>`,
+ zigpale:c=>`<path d="M50 0L56 8L44 16L56 24L44 32L56 40L44 48L56 56L44 64L56 72L44 80L56 88L44 96L56 104L44 112L50 120H100V0Z" fill="${c}"/>`,
+ zigbase:c=>`<path d="M0 120V96L10 88L20 96L30 88L40 96L50 88L60 96L70 88L80 96L90 88L100 96V120Z" fill="${c}"/>`,
+ waves:c=>`<g class="a-wave"><path d="M-20 92q5-6 10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0V130H-20Z" fill="${c}"/><path d="M-20 104q5-6 10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2.5"/></g>`,
+ wavebar:c=>`<g class="a-wave"><path d="M-20 62q5-6 10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0t10 0v10q-5 6-10 0t-10 0t-10 0t-10 0t-10 0t-10 0t-10 0t-10 0t-10 0t-10 0t-10 0t-10 0t-10 0Z" fill="${c}"/></g>`,
+ rays:c=>`<g fill="${c}" opacity=".9"><path d="M50 120L20 80L30 120ZM50 120L45 76L55 76ZM50 120L80 80L70 120Z"/></g>`,
+ fence:c=>`<g fill="${c}"><rect y="98" width="100" height="4"/>${[14,26,38,50,62,74,86].map(x=>`<path d="M${x-2} 120V92l2-4l2 4V120Z"/>`).join("")}</g>`,
+ disc:c=>`<circle cx="50" cy="38" r="16" fill="${c}"/>`,
+ saltire:c=>`<path d="M14 6L50 46L86 6L94 14L54 56L94 98L86 106L50 66L14 106L6 98L46 56L6 14Z" fill="${c}"/>`,
+ crosspanel:c=>`<g fill="${c}"><rect x="56" y="44" width="30" height="44" rx="2"/></g>`,
+};
+
+// ---- symboly (střed 50,60, velikost ~44) ----
+const IC={
+ castle:c=>`<g fill="${c}"><path d="M26 90V44h4v-5h4v5h3v-5h4v5h4v46Z"/><path d="M55 90V44h4v-5h4v5h3v-5h4v5h4v46Z"/><rect x="40" y="56" width="20" height="34"/><path d="M40 56h3v-4h4v4h6v-4h4v4h3" /><path d="M46 90V78a4 4 0 0 1 8 0V90Z" fill="#0004"/><rect x="31" y="54" width="4" height="7" rx="2" fill="#0004"/><rect x="65" y="54" width="4" height="7" rx="2" fill="#0004"/></g>`,
+ tower:c=>`<g fill="${c}"><path d="M38 92V40h4v-6h5v6h6v-6h5v6h4v52Z"/><path d="M46 92V80a4 4 0 0 1 8 0V92Z" fill="#0004"/><rect x="47" y="52" width="6" height="10" rx="3" fill="#0004"/></g>`,
+ pine:c=>`<g class="a-sway"><path d="M50 28L64 50H57L68 66H58L72 84H28L42 66H32L43 50H36Z" fill="${c}"/><rect x="47" y="84" width="6" height="9" fill="${C.brown}"/></g>`,
+ tree:c=>`<g class="a-sway"><rect x="47" y="66" width="6" height="26" fill="${C.brown}"/><circle cx="50" cy="52" r="20" fill="${c}"/><circle cx="38" cy="60" r="11" fill="${c}"/><circle cx="62" cy="60" r="11" fill="${c}"/></g>`,
+ apple:c=>`<g class="a-sway"><rect x="47" y="66" width="6" height="26" fill="${C.brown}"/><circle cx="50" cy="52" r="20" fill="${c}"/><circle cx="38" cy="60" r="11" fill="${c}"/><circle cx="62" cy="60" r="11" fill="${c}"/><g fill="${C.red}"><circle cx="42" cy="48" r="3.2"/><circle cx="58" cy="44" r="3.2"/><circle cx="52" cy="60" r="3.2"/><circle cx="36" cy="62" r="3.2"/><circle cx="64" cy="61" r="3.2"/></g></g>`,
+ birch:c=>`<g class="a-sway"><rect x="47" y="56" width="6" height="36" fill="#fff"/><g fill="#222"><rect x="47" y="64" width="3" height="2"/><rect x="50" y="74" width="3" height="2"/><rect x="47" y="84" width="3" height="2"/></g><ellipse cx="50" cy="46" rx="16" ry="20" fill="${c}"/></g>`,
+ fleur:c=>`<path class="a-pulse" fill="${c}" d="M50 26C44 36 44 48 50 58C56 48 56 36 50 26ZM47 60C38 50 26 48 26 60C26 68 34 70 38 64C36 70 42 74 47 70ZM53 60C62 50 74 48 74 60C74 68 66 70 62 64C64 70 58 74 53 70ZM38 62H62V68H38ZM48 68H52V86C50 90 50 90 48 86Z"/>`,
+ feather:c=>`<g class="a-sway"><path d="M50 92C46 70 36 56 40 36C44 28 56 26 60 34C64 48 54 64 50 92Z" fill="${c}"/><path d="M50 92C49 70 50 50 52 32" stroke="#0005" stroke-width="2" fill="none"/></g>`,
+ helmet:c=>`<g fill="${c}" class="a-pulse"><path d="M32 82V58C32 44 40 36 50 36C60 36 68 44 68 58V82Z"/><rect x="36" y="58" width="28" height="4" fill="#0005"/><g fill="#0005"><rect x="40" y="66" width="3" height="12"/><rect x="46" y="66" width="3" height="12"/><rect x="52" y="66" width="3" height="12"/><rect x="58" y="66" width="3" height="12"/></g><path d="M50 36C54 26 64 22 72 26C64 28 58 32 56 38Z"/></g>`,
+ bell:c=>`<g class="a-swing"><rect x="47" y="30" width="6" height="6" fill="${c}"/><path d="M50 34C40 34 36 44 36 58C36 70 32 76 28 80H72C68 76 64 70 64 58C64 44 60 34 50 34Z" fill="${c}"/><circle cx="50" cy="84" r="5" fill="${c}"/><rect x="30" y="76" width="40" height="3" fill="#0003"/></g>`,
+ leaf:c=>`<path class="a-sway" fill="${c}" d="M50 90V80C34 78 26 64 30 48C34 36 46 34 50 42C54 34 66 36 70 48C74 64 66 78 50 80Z"/>`,
+ leaves3:c=>`<g fill="${c}" class="a-sway"><path d="M50 60C40 52 38 38 50 28C62 38 60 52 50 60Z"/><path d="M48 62C36 66 24 60 22 48C36 46 46 52 48 62Z"/><path d="M52 62C64 66 76 60 78 48C64 46 54 52 52 62Z"/><rect x="48" y="60" width="4" height="26"/></g>`,
+ oak:c=>`<path class="a-sway" fill="${c}" d="M50 92V82C42 82 38 76 40 70C34 70 32 62 38 58C32 54 34 46 40 46C38 38 46 32 50 38C54 32 62 38 60 46C66 46 68 54 62 58C68 62 66 70 60 70C62 76 58 82 50 82Z"/>`,
+ rings3:c=>`<g fill="none" stroke="${c}" stroke-width="5" class="a-pulse"><circle cx="34" cy="44" r="8"/><circle cx="50" cy="60" r="8"/><circle cx="66" cy="76" r="8"/></g>`,
+ star:c=>`<path class="a-twinkle" fill="${c}" d="M50 30L57 50H78L61 62L67 82L50 70L33 82L39 62L22 50H43Z"/>`,
+ star6:c=>`<path class="a-twinkle" fill="${c}" d="M50 34L56 50L72 48L62 60L72 72L56 70L50 86L44 70L28 72L38 60L28 48L44 50Z"/>`,
+ cross:c=>`<path fill="${c}" d="M44 30H56V54H78V66H56V92H44V66H22V54H44Z"/>`,
+ maltese:c=>`<path class="a-spin" fill="${c}" d="M50 60L40 30L50 38L60 30ZM50 60L80 50L72 60L80 70ZM50 60L60 90L50 82L40 90ZM50 60L20 70L28 60L20 50Z"/>`,
+ wing:c=>`<path class="a-bob" fill="${c}" d="M24 76C30 52 48 34 76 30C70 38 70 42 74 44C64 46 62 50 66 54C56 56 54 60 58 64C48 66 46 70 48 74C38 76 32 76 24 76Z"/>`,
+ horse:c=>`<path class="a-bob" fill="${c}" d="M36 90C36 74 40 66 46 60C40 60 32 62 28 58C30 50 40 40 48 34L50 26L56 32C68 36 74 52 72 70C71 78 72 84 74 90Z"/>`,
+ anchor:c=>`<g fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" class="a-bob"><circle cx="50" cy="34" r="5"/><path d="M50 40V88M36 50H64M28 70C30 84 40 88 50 88C60 88 70 84 72 70"/></g>`,
+ wheel:c=>`<g class="a-spin"><circle cx="50" cy="60" r="22" fill="none" stroke="${c}" stroke-width="6"/><circle cx="50" cy="60" r="5" fill="${c}"/><g stroke="${c}" stroke-width="3.5">${[0,45,90,135].map(a=>{const r=a*Math.PI/180,x=Math.cos(r)*20,y=Math.sin(r)*20;return `<line x1="${50-x}" y1="${60-y}" x2="${50+x}" y2="${60+y}"/>`}).join("")}</g></g>`,
+ fish:c=>`<path class="a-bob" fill="${c}" d="M22 60C32 46 54 44 66 56L78 46V74L66 64C54 76 32 74 22 60Z"/>`,
+ fish3:c=>`<g fill="${c}" class="a-bob"><path d="M30 38C36 31 48 30 55 37L62 32V46L55 41C48 48 36 46 30 38Z"/><path d="M30 60C36 53 48 52 55 59L62 54V68L55 63C48 70 36 68 30 60Z"/><path d="M30 82C36 75 48 74 55 81L62 76V90L55 85C48 92 36 90 30 82Z"/></g>`,
+ key:c=>`<g fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" class="a-swing"><circle cx="50" cy="38" r="9"/><path d="M50 47V88M50 78H60M50 86H58"/></g>`,
+ keys:c=>`<g fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" class="a-pulse"><g transform="rotate(35 50 60)"><circle cx="50" cy="34" r="7"/><path d="M50 41V86M50 78H58"/></g><g transform="rotate(-35 50 60)"><circle cx="50" cy="34" r="7"/><path d="M50 41V86M50 78H42"/></g></g>`,
+ goat:c=>`<g fill="${c}" class="a-bob"><path d="M42 50C34 40 30 30 34 24C36 34 42 40 46 46ZM58 50C66 40 70 30 66 24C64 34 58 40 54 46Z"/><path d="M40 50H60L58 76L50 88L42 76Z"/><path d="M46 86L50 98L54 86Z"/><circle cx="45" cy="60" r="2" fill="#0006"/><circle cx="55" cy="60" r="2" fill="#0006"/></g>`,
+ ram:c=>`<g fill="${c}" class="a-bob"><path d="M42 50H58L56 76L50 86L44 76Z"/><g fill="none" stroke="${c}" stroke-width="6"><path d="M43 52C30 54 26 42 34 38C40 36 42 44 37 46"/><path d="M57 52C70 54 74 42 66 38C60 36 58 44 63 46"/></g></g>`,
+ lion:c=>`<g class="a-pulse"><path fill="${c}" d="${(()=>{let d="";for(let i=0;i<16;i++){const a=i/16*Math.PI*2,r=i%2?18:24;d+=(i?"L":"M")+(50+Math.cos(a)*r).toFixed(1)+" "+(60+Math.sin(a)*r).toFixed(1)}return d+"Z"})()}"/><circle cx="50" cy="60" r="12" fill="${c}" stroke="#0004" stroke-width="2"/><circle cx="46" cy="58" r="1.8" fill="#0007"/><circle cx="54" cy="58" r="1.8" fill="#0007"/></g>`,
+ lioncrown:c=>`<g class="a-pulse"><path d="M38 40L42 30L46 38L50 28L54 38L58 30L62 40Z" fill="${C.gold}"/><path fill="${c}" d="${(()=>{let d="";for(let i=0;i<16;i++){const a=i/16*Math.PI*2,r=i%2?16:21;d+=(i?"L":"M")+(50+Math.cos(a)*r).toFixed(1)+" "+(64+Math.sin(a)*r).toFixed(1)}return d+"Z"})()}"/><circle cx="50" cy="64" r="10" fill="${c}" stroke="#0003" stroke-width="2"/></g>`,
+ sun:c=>`<g class="a-spin"><circle cx="50" cy="56" r="13" fill="${c}"/><g fill="${c}">${[...Array(12)].map((_,i)=>`<path transform="rotate(${i*30} 50 56)" d="M47 37L50 28L53 37Z"/>`).join("")}</g></g>`,
+ wheat:c=>`<g fill="${c}" class="a-sway"><rect x="49" y="40" width="2" height="50"/>${[0,1,2,3,4].map(i=>`<ellipse cx="45" cy="${36+i*8}" rx="3" ry="6" transform="rotate(-25 45 ${36+i*8})"/><ellipse cx="55" cy="${36+i*8}" rx="3" ry="6" transform="rotate(25 55 ${36+i*8})"/>`).join("")}<ellipse cx="50" cy="30" rx="3" ry="6"/></g>`,
+ column:c=>`<g fill="${c}"><rect x="38" y="32" width="24" height="6"/><rect x="42" y="38" width="16" height="44"/><rect x="36" y="82" width="28" height="8"/><g fill="#0003"><rect x="46" y="40" width="2" height="40"/><rect x="52" y="40" width="2" height="40"/></g></g>`,
+ crown:c=>`<path class="a-pulse" fill="${c}" d="M28 76L24 42L38 58L50 36L62 58L76 42L72 76Z"/>`,
+ rake:c=>`<g fill="${c}"><rect x="28" y="34" width="44" height="6"/>${[30,38,46,54,62,68].map(x=>`<rect x="${x}" y="40" width="3" height="10"/>`).join("")}<rect x="48" y="40" width="4" height="50"/></g>`,
+ hammers:c=>`<g fill="${c}" class="a-pulse"><g transform="rotate(40 50 60)"><rect x="47" y="40" width="6" height="48"/><rect x="38" y="32" width="24" height="10" rx="2"/></g><g transform="rotate(-40 50 60)"><rect x="47" y="40" width="6" height="48"/><rect x="38" y="32" width="24" height="10" rx="2"/></g></g>`,
+ boat:c=>`<g fill="${c}" class="a-bob"><path d="M22 70H78L68 84H32Z"/><rect x="49" y="34" width="3" height="36"/><path d="M52 36L70 64H52Z"/></g>`,
+ sword:c=>`<g fill="${c}"><path d="M48 26H52V76H48Z"/><path d="M48 26L50 20L52 26Z"/><rect x="38" y="76" width="24" height="5" rx="2"/><rect x="48" y="81" width="4" height="10"/><circle cx="50" cy="93" r="3"/></g>`,
+ horseshoe:c=>`<path class="a-swing" fill="none" stroke="${c}" stroke-width="8" stroke-linecap="round" d="M36 86V60C36 44 42 38 50 38C58 38 64 44 64 60V86"/>`,
+ dog:c=>`<g fill="${c}" class="a-bob"><path d="M36 42L44 52H58L66 42L64 60C66 72 58 84 50 84C42 84 34 72 36 60Z"/><rect x="38" y="72" width="26" height="5" fill="${C.red}"/><circle cx="45" cy="60" r="2" fill="#0007"/><circle cx="57" cy="60" r="2" fill="#0007"/></g>`,
+ bear:c=>`<g fill="${c}" class="a-bob"><circle cx="36" cy="44" r="8"/><circle cx="64" cy="44" r="8"/><circle cx="50" cy="62" r="20"/><ellipse cx="50" cy="70" rx="8" ry="6" fill="#ffffff22"/><circle cx="43" cy="58" r="2.4" fill="#fff8"/><circle cx="57" cy="58" r="2.4" fill="#fff8"/></g>`,
+ church:c=>`<g fill="${c}"><path d="M44 50V34L50 24L56 34V50Z"/><rect x="49" y="16" width="2" height="8"/><rect x="47" y="18" width="6" height="2"/><path d="M30 90V62L44 50H56L70 62V90Z"/><path d="M46 90V76a4 4 0 0 1 8 0V90Z" fill="#0004"/></g>`,
+ torch:c=>`<g><path class="a-flick" d="M50 22C42 34 42 42 50 48C58 42 58 34 50 22Z" fill="${C.red}"/><path class="a-flick" d="M50 30C46 37 46 42 50 46C54 42 54 37 50 30Z" fill="${C.gold}"/><path d="M42 48H58L54 56H46Z" fill="${c}"/><rect x="47" y="56" width="6" height="36" fill="${c}"/></g>`,
+ scallop:c=>`<g fill="${c}" class="a-pulse"><path d="M50 84L28 54C28 40 40 32 50 32C60 32 72 40 72 54Z"/><g stroke="#0004" stroke-width="2">${[-16,-8,0,8,16].map(x=>`<line x1="50" y1="82" x2="${50+x}" y2="36"/>`).join("")}</g></g>`,
+ scales:c=>`<g fill="${c}" class="a-swing"><rect x="49" y="32" width="2" height="54"/><rect x="28" y="38" width="44" height="3"/><path d="M24 58H40L32 42Z" fill="none" stroke="${c}" stroke-width="2"/><path d="M60 58H76L68 42Z" fill="none" stroke="${c}" stroke-width="2"/><path d="M24 58H40C40 64 24 64 24 58ZM60 58H76C76 64 60 64 60 58Z"/><rect x="40" y="86" width="20" height="4"/></g>`,
+ kite:c=>`<path class="a-bob" fill="${c}" d="M50 48L30 38L18 44L36 50L46 58L44 70L50 66L56 70L54 58L64 50L82 44L70 38Z"/>`,
+ brick:c=>`<g fill="${c}"><rect x="40" y="32" width="20" height="58"/><g fill="#0003">${[40,52,64,76].map(y=>`<rect x="40" y="${y}" width="20" height="1.6"/>`).join("")}</g></g>`,
+ arch:c=>`<path fill="${c}" d="M24 90V66C24 50 36 40 50 40C64 40 76 50 76 66V90H66V68C66 58 58 50 50 50C42 50 34 58 34 68V90Z"/>`,
+ dot:c=>`<circle cx="50" cy="58" r="7" fill="${c}"/>`,
+ q:c=>`<text x="50" y="74" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="44" fill="${c}">?</text>`,
+ branches:c=>`<g fill="${c}" class="a-sway"><g transform="rotate(-28 50 70)"><rect x="49" y="30" width="2.5" height="56"/>${[0,1,2,3].map(i=>`<ellipse cx="44" cy="${36+i*11}" rx="4" ry="7" transform="rotate(-35 44 ${36+i*11})"/><ellipse cx="57" cy="${40+i*11}" rx="4" ry="7" transform="rotate(35 57 ${40+i*11})"/>`).join("")}</g><g transform="rotate(28 50 70)"><rect x="49" y="30" width="2.5" height="56"/>${[0,1,2,3].map(i=>`<ellipse cx="44" cy="${36+i*11}" rx="4" ry="7" transform="rotate(-35 44 ${36+i*11})"/><ellipse cx="57" cy="${40+i*11}" rx="4" ry="7" transform="rotate(35 57 ${40+i*11})"/>`).join("")}</g></g>`,
+};
+
+// [název, pozadí, dělení[[typ,barva]], symboly[[ikona,barva,x,y,s]], popis]
+const E=[
+ ["Říčany","navy",[],[["castle","white"]],"modrá + bílý hrad"],
+ ["Světice","green",[],[["feather","gold"]],"zelená + zlaté pštrosí pero"],
+ ["Strančice","green",[],[["fleur","gold"]],"zelená + zlatá lilie"],
+ ["Mukařov","red",[["chief","white"]],[["pine","dgreen",30,18,.42],["pine","dgreen",50,18,.42],["pine","dgreen",70,18,.42],["wheel","white",50,72,.75]],"bílá hlava se třemi jehličnany, červená + kolo"],
+ ["Mnichovice","red",[],[["helmet","white"]],"červená + stříbrná přilba rytíře"],
+ ["Velké Popovice","green",[["paleL","white"],["zigpale","green"]],[["fleur","red",28,60,.5],["star","white",72,60,.5]],"bílo-zelená, cik-cak dělení"],
+ ["Kamenice","gold",[["bendband","green"]],[["rings3","gold"],["leaf","dgreen",76,32,.4],["leaf","dgreen",26,88,.4]],"zlatá, zelené břevno se třemi kruhy"],
+ ["Kostelec nad Černými lesy","blue",[],[["star","gold",50,26,.4],["tree","dgreen",50,66,.85]],"modrá, hvězda + strom (divý muž → les)"],
+ ["Ondřejov","blue",[["saltire","brown"]],[["tower","white",50,58,.7]],"modrá, ondřejský kříž + věž"],
+ ["Kunice","blue",[],[["sun","gold",50,58,1.05],["bell","blue",50,60,.48]],"modrá, zlaté slunce se zvonem"],
+ ["Babice","blue",[["bend","green"]],[["wing","gold",62,48,.6],["maltese","white",32,82,.4]],"modro-zelená, zlaté křídlo + kříž"],
+ ["Březí","red",[["chief","green"]],[["crown","gold",50,20,.42],["birch","green",32,72,.7],["cross","white",70,74,.45]],"zelená hlava s korunou, bříza + kříž"],
+ ["Černé Voděrady","red",[["chief","white"]],[["tree","dgreen",30,18,.36],["tree","dgreen",50,18,.36],["tree","dgreen",70,18,.36],["scales","white",50,72,.8]],"bílá hlava se stromy, červená + váhy"],
+ ["Čestlice","gold",[["bars3","blue"]],[["torch","red",50,60,.95]],"zlatá, tři modrá břevna + pochodeň"],
+ ["Dobřejovice","white",[["bendband","red"]],[["leaf","gold",36,44,.36],["leaf","gold",64,76,.36]],"bílá, červené břevno se zlatými listy"],
+ ["Doubek","white",[["chief","red"]],[["oak","gold",50,20,.42],["crown","red",50,70,.7]],"dubové listy + červená koruna"],
+ ["Herink","blue",[["pale","red"]],[["fish3","white",28,60,.8],["fleur","white",74,60,.55]],"modrá s rybami / červená s lilií"],
+ ["Hrusice","red",[],[["anchor","white",50,56,.85],["leaf","gold",24,84,.3],["leaf","gold",76,84,.3]],"červená, bílá kotva + zlaté listy"],
+ ["Jevany","green",[["waves","blue"]],[["branches","gold",50,52,.85]],"zelená, zkřížené zlaté větve, vlny"],
+ ["Kaliště","red",[["fess","blue"],["waves","blue"]],[["anchor","white",50,38,.6]],"červená s kotvou / modrá s vlnami"],
+ ["Klokočná","blue",[["arch","black"]],[["leaves3","green",50,46,.75]],"modrá, větvička nad černým obloukem"],
+ ["Konojedy","green",[["fess","gold"]],[["horse","white",50,32,.5],["pine","green",50,86,.5]],"zelená s koněm / zlatá s jehličnanem"],
+ ["Kostelec u Křížků","blue",[["base","green"]],[["church","gold",50,50,.8],["cross","white",50,102,.22]],"modrá, zlatý kostel, zelená pata"],
+ ["Kozojedy","red",[["pale","blue"]],[["goat","gold",50,62,.95],["crown","gold",50,22,.32]],"červeno-modrá, zlatá kozí hlava"],
+ ["Křenice","blue",[],[["column","white"],["wheat","gold",24,60,.55],["wheat","gold",76,60,.55]],"modrá, sloup mezi klasy"],
+ ["Křížkový Újezdec","grey",[],[["q","white"]],"znak nedohledán – placeholder"],
+ ["Louňovice","blue",[["bar","white"],["waves","blue"]],[["sun","gold",50,32,.55],["kite","black",50,32,.32],["fish","gold",50,90,.4]],"modrá, slunce s luňákem, bílé břevno"],
+ ["Mirošovice","gold",[["rays","blue"]],[["tree","green",50,52,.85],["bell","white",50,56,.32]],"zlatá, lípa se zvonkem, modré paprsky"],
+ ["Modletice","blue",[["bendS","gold"]],[["lion","gold",34,42,.55],["lion","blue",66,82,.4]],"modro-zlatá, lví hlava"],
+ ["Nučice","gold",[["pale","red"]],[["pine","green",28,60,.6],["brick","white",72,60,.75]],"zlato-červená, jehličnan + cihlový pilíř"],
+ ["Nupaky","red",[["fess","white"],["fence","blue"]],[["keys","gold",50,34,.55],["bell","blue",50,76,.4]],"červená s klíči / bílá se zvonem"],
+ ["Oleška","white",[["waves","blue"]],[["leaves3","green",50,54,.9]],"bílá, trojlist, modré vlny"],
+ ["Oplany","white",[["paleL","blue"]],[["key","white",28,56,.6],["pine","green",72,44,.45],["pine","green",72,78,.45]],"modrá s klíčem / bílá s jehličnany"],
+ ["Pětihosty","grey",[],[["q","white"]],"znak nedohledán – placeholder"],
+ ["Petříkov","white",[["paleL","blue"]],[["key","gold",28,58,.6],["bear","black",72,60,.6]],"modrá s klíčem / bílá s medvědem"],
+ ["Popovičky","blue",[],[["cross","white",50,58,.9],["star6","red",28,30,.3],["star6","red",72,30,.3]],"modrá, bílý kříž, červené hvězdy"],
+ ["Prusice","gold",[["bendS","red"]],[["bell","gold",66,80,.5],["leaf","green",32,40,.45]],"zlato-červená, list + zlatý zvon"],
+ ["Radějovice","white",[["pale","blue"]],[["cross","red",28,58,.6],["star","gold",72,40,.4],["fleur","gold",72,80,.4]],"bílá s křížem / modrá s hvězdou a lilií"],
+ ["Senohraby","red",[["quarters","green"],["waves","blue"]],[["anchor","white",28,32,.4],["tower","white",72,32,.42],["rake","gold",28,72,.38]],"čtvrcený: kotva, věž, hrábě, vlny"],
+ ["Sluštice","green",[["waves","blue"]],[["horse","white",50,54,.8],["scallop","gold",76,24,.28]],"zelená, bílý kůň, vlny, mušle"],
+ ["Struhařov","blue",[["bendS","green"],["bendband","gold"]],[["wheel","gold",32,74,.42]],"modro-zelená, zlaté břevno + kolo"],
+ ["Stříbrná Skalice","blue",[["mounds","grey"]],[["hammers","white",50,52,.8]],"modrá, skály + hornická kladívka"],
+ ["Sulice","blue",[["crenchief","red"],["waves","white"]],[["leaf","gold",50,16,.3],["boat","gold",50,62,.7]],"červená cimbuřová hlava, loďka na vlnách"],
+ ["Svojetice","red",[["base","green"]],[["pine","white",36,54,.6],["pine","gold",64,54,.6],["horseshoe","white",50,100,.25]],"červená, dva jehličnany, podkova"],
+ ["Štíhlice","blue",[["fess","green"]],[["rake","gold",50,24,.4],["tower","white",50,60,.6],["leaf","gold",50,94,.3]],"modro-zelená, hrábě, věž, list"],
+ ["Tehov","gold",[["mounds","blue"]],[["apple","green",50,54,.85]],"zlatá, jabloň, modré pahorky"],
+ ["Tehovec","red",[["pale","gold"]],[["leaf","white",28,46,.4],["wheat","white",28,80,.4],["pine","green",72,60,.6]],"červená s lipovým listem / zlatá s jehličnanem"],
+ ["Vlkančice","grey",[],[["q","white"]],"znak nedohledán – placeholder"],
+ ["Všestary","blue",[],[["horse","white",50,54,.8],["wheel","gold",24,92,.24],["wheel","gold",76,92,.24],["wheel","gold",50,24,.24]],"modrá, bílý kůň, tři kola"],
+ ["Výžerky","blue",[["point","white"]],[["lioncrown","white",50,40,.6],["leaf","green",50,92,.3]],"modrá, bílý hrot, korunovaná lví hlava"],
+ ["Vyžlovka","blue",[["wavebar","white"],["base","green"]],[["dog","white",32,40,.48],["dog","white",68,40,.48]],"modrá, dva psi s obojky, vlna"],
+ ["Zvánovice","navy",[["fess","green"],["zigbase","gold"]],[["dot","white",50,36,2.2],["ram","gold",50,72,.5]],"modrá s kotoučem / zelená s beraní hlavou"],
+];
+
+const TIERS=[
+ {k:"wood",n:"Dřevo",r:"do 20 hráčů",g:["#c08a4f","#6b4120","#a8723e"]},
+ {k:"silver",n:"Stříbro",r:"20–50 hráčů",g:["#f3f5f8","#8c95a3","#d6dbe3"]},
+ {k:"gold",n:"Zlato",r:"50–100 hráčů",g:["#fff0a0","#c48a10","#f6cc3b"]},
+ {k:"plat",n:"Platina",r:"100+ hráčů",g:["#e8fbff","#7fd8ff","#c9b5ff"]},
+];
+let uid=0;
+function erb(d,tier){
+ const id="e"+(uid++),[name,bg,divs,icons]=d;
+ const col=x=>C[x]||x;
+ const T=TIERS.find(t=>t.k===tier)||TIERS[1];
+ const ic=icons.map(([k,c,x=50,y=60,s=1])=>`<g transform="translate(${x} ${y}) scale(${s}) translate(-50 -60)">${IC[k](col(c))}</g>`).join("");
+ const frame=`<defs><linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${T.g[0]}"/><stop offset=".5" stop-color="${T.g[1]}"/><stop offset="1" stop-color="${T.g[2]}"/></linearGradient>
+  <clipPath id="${id}c"><path d="${SH}"/></clipPath>
+  <linearGradient id="${id}s" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <radialGradient id="${id}v" cx=".5" cy=".35" r=".8"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></radialGradient></defs>`;
+ const gems=tier==="gold"||tier==="plat"?`<circle cx="50" cy="5" r="4" fill="${tier==="plat"?"#bff3ff":"#ff4f6a"}" stroke="url(#${id}g)" stroke-width="2"/>`:"";
+ const grain=tier==="wood"?`<path d="${SH}" fill="none" stroke="#3d240f" stroke-width="1" stroke-dasharray="6 4" opacity=".6"/>`:"";
+ const plat=tier==="plat"?`<path class="plat" d="${SH}" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="10 50" stroke-linecap="round"/>`:"";
+ return `<svg class="erb" viewBox="-4 -4 108 128" role="img" aria-label="Erb ${name}">${frame}
+ <ellipse cx="50" cy="122" rx="26" ry="3" fill="#000" opacity=".35"><animate attributeName="rx" values="26;21;26" dur="4s" repeatCount="indefinite"/></ellipse>
+ <g class="float"><g clip-path="url(#${id}c)"><rect x="-10" y="-10" width="120" height="140" fill="${col(bg)}"/>
+ ${divs.map(([t,c])=>DIV[t](col(c))).join("")}${ic}
+ <rect x="-10" y="-10" width="120" height="140" fill="url(#${id}v)"/>
+ <rect class="sheen" x="0" y="-10" width="36" height="140" fill="url(#${id}s)" transform="skewX(-18)"/></g>
+ <path d="${SH}" fill="none" stroke="url(#${id}g)" stroke-width="6" stroke-linejoin="round"/>${grain}${plat}
+ <path d="${SH}" fill="none" stroke="#0005" stroke-width="1" transform="translate(50 60) scale(.93) translate(-50 -60)"/>${gems}</g></svg>`;
+}
+const tierFor=i=>["wood","silver","gold","plat"][[0,1,2,3][i%4]];
+document.getElementById("tiers").innerHTML=TIERS.map(t=>`<div class="tier">${erb(E[0],t.k)}<b>${t.n}</b><small>${t.r}</small></div>`).join("");
+document.getElementById("grid").innerHTML=E.map((d,i)=>`<div class="card" data-i="${i}">${erb(d,"silver")}<div class="n">${d[0]}</div><div class="d">${d[4]}</div></div>`).join("");
+const M=document.getElementById("modal"),MB=document.getElementById("mbox");
+function open(i,t="gold"){const d=E[i];MB.innerHTML=`${erb(d,t)}<h3>${d[0]}</h3><p>${d[4]}</p><div class="seg">${TIERS.map(x=>`<button data-t="${x.k}" class="${x.k===t?"on":""}">${x.n}</button>`).join("")}</div>`;
+ MB.querySelectorAll("button").forEach(b=>b.onclick=e=>{e.stopPropagation();open(i,b.dataset.t)});M.classList.add("on")}
+document.getElementById("grid").addEventListener("click",e=>{const c=e.target.closest(".card");if(c)open(+c.dataset.i)});
+M.onclick=e=>{if(e.target===M)M.classList.remove("on")};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")M.classList.remove("on")});
+</script>
+</body>
+</html>
