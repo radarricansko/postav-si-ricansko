@@ -7,6 +7,8 @@ on:
       day:
         description: "Den hry (prázdné = podle world.json)"
         required: false
+permissions:
+  contents: write
 jobs:
   render:
     runs-on: ubuntu-latest
@@ -22,6 +24,15 @@ jobs:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID || 'kOWmvbNszhdJeaeyEzJB' }}
         run: node tools/video/render.js --out out ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
+      - name: Náhled (6 snímků) do větve previews
+        run: |
+          f=$(ls out/*.mp4 | head -1); n=$(basename "$f" .mp4)
+          ffmpeg -v error -y -i "$f" -vf "select='not(mod(n\,100))',scale=270:-1,tile=7x1" -frames:v 1 "out/$n-nahled.jpg"
+          git config user.name "RADAR bot"; git config user.email "radar.ricansko@gmail.com"
+          git fetch origin previews:previews 2>/dev/null || git checkout --orphan previews
+          git checkout previews 2>/dev/null || true
+          mkdir -p nahledy && cp "out/$n-nahled.jpg" "out/$n.txt" nahledy/ && git add nahledy && git commit -q -m "náhled $n" && git push -q origin previews || echo "náhled nepushnut"
+          git checkout -q main
       - uses: actions/upload-artifact@v4
         with:
           name: reel

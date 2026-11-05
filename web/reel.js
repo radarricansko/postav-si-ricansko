@@ -16,17 +16,13 @@
   // ------------------------------------------------------------------ konstanty
   var W = 1080, H = 1920, FPS = 30;
   var SAFE_TOP = 220, SAFE_BOTTOM = 380;           // IG safe zóny
-  var C = {
-    navy: '#0b1430', navy2: '#13224f', blue: '#2f72d6', sky: '#5fa8e8', ice: '#bfe0ff',
-    yellow: '#ffd23f', white: '#ffffff', ink: '#0b1430', red: '#ff4d5e'
-  };
-  var FONT = '"Space Grotesk", "Inter", "Segoe UI", Roboto, Arial, sans-serif';
-  var TIERS = {
-    wood:   { label: 'DŘEVĚNÁ LIGA',   c1: '#c98a4b', c2: '#7a4a22', fg: '#fff' },
-    silver: { label: 'STŘÍBRNÁ LIGA',  c1: '#eef3fa', c2: '#9fadc2', fg: C.ink },
-    gold:   { label: 'ZLATÁ LIGA',     c1: '#ffe27a', c2: '#e0a400', fg: C.ink },
-    plat:   { label: 'PLATINOVÁ LIGA', c1: '#d9fbff', c2: '#6fd3e6', fg: C.ink }
-  };
+  // grafický kit RADAR: Noc, tmavě modrá, akcent (limetka), světle modrá; text na akcentu #0B0C12
+  var C = { night: '#0A1233', blue: '#2F4AA8', acc: '#C6FF3D', sky: '#66B2FF', white: '#ffffff', ink: '#0B0C12' };
+  C.navy = C.night;   // aliasy pro starší helpery
+  var FONT_H = '"Archivo", "Inter", "Segoe UI", Roboto, Arial, sans-serif';   // nadpisy, čísla, titulky (expanded 125 %, 800)
+  var FONT_B = '"Inter", "Segoe UI", Roboto, Arial, sans-serif';              // text v bublinách, popisky
+  var FONT = FONT_H;
+  var TIERS = { wood: { label: 'dřevěná liga' }, silver: { label: 'stříbrná liga' }, gold: { label: 'zlatá liga' }, plat: { label: 'platinová liga' } };
 
   // ------------------------------------------------------------------ utility
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -45,7 +41,7 @@
   function hash(s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
   // české skloňování: plural(n, 'obyvatel', 'obyvatelé', 'obyvatel')
   function plural(n, one, few, many) { n = Math.abs(n); return n === 1 ? one : (n >= 2 && n <= 4) ? few : many; }
-  function font(size, weight) { return (weight || 800) + ' ' + Math.round(size) + 'px ' + FONT; }
+  function font(size, weight) { if (R.g) { try { R.g.fontStretch = 'expanded'; R.g.letterSpacing = '-0.02em'; } catch (e) {} } return (weight || 800) + ' ' + Math.round(size) + 'px ' + FONT_H; }
   function now() { return (root.performance && performance.now) ? performance.now() : Date.now(); }
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   // časovač scén: online setTimeout, offline (frames) virtuální čas, při renderAudio nic
@@ -198,7 +194,7 @@
   // ------------------------------------------------------------------ konfety (bezstavové – jdou vykreslit v libovolném čase)
   function confetti(g, lt, o) {
     var t = (lt - o.t0) / 1000; if (t < 0 || t > 3.4) return;
-    var cols = [C.yellow, C.sky, C.white, C.blue, '#ff7a59', C.ice], n = o.n || 70, k = 2.2, grav = 1500;
+    var cols = [C.acc, C.sky, C.white, C.blue, C.acc, C.sky], n = o.n || 70, k = 2.2, grav = 1500;
     g.save();
     for (var i = 0; i < n; i++) {
       var s = (o.seed || 'c') + i, ang = (o.angle == null ? -Math.PI / 2 : o.angle) + (rnd(s + 'a') - 0.5) * (o.spread || 2.6), sp = 900 + rnd(s + 'v') * 1700;
@@ -238,8 +234,8 @@
   function rgbText(g, text, x, y, size, color, amt) {
     g.save(); g.font = font(size, 900); g.textAlign = 'center'; g.textBaseline = 'middle';
     g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.85;
-    g.fillStyle = '#ff2a4a'; g.fillText(text, x - amt, y);
-    g.fillStyle = '#20d8ff'; g.fillText(text, x + amt, y + amt * 0.25);
+    g.fillStyle = C.sky; g.fillText(text, x - amt, y);
+    g.fillStyle = C.acc; g.fillText(text, x + amt, y + amt * 0.25);
     g.restore();
     g.save(); g.font = font(size, 900); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = color; g.fillText(text, x, y); g.restore();
   }
@@ -248,10 +244,10 @@
     g.save(); g.translate(x, y); g.scale(s / 100, s / 100);
     g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 18; g.shadowOffsetY = 8;
     g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(-18, -38, -50, -62, -50, -100); g.arc(0, -100, 50, Math.PI, 0); g.bezierCurveTo(50, -62, 18, -38, 0, 0); g.closePath();
-    g.fillStyle = color || C.yellow; g.fill(); g.shadowBlur = 0; g.shadowOffsetY = 0;
+    g.fillStyle = color || C.acc; g.fill(); g.shadowBlur = 0; g.shadowOffsetY = 0;
     g.fillStyle = '#fff'; g.beginPath(); g.arc(0, -100, 30, 0, 7); g.fill();
-    if (inner === 'house') { g.fillStyle = C.navy; g.beginPath(); g.moveTo(-17, -94); g.lineTo(0, -116); g.lineTo(17, -94); g.lineTo(13, -94); g.lineTo(13, -82); g.lineTo(-13, -82); g.lineTo(-13, -94); g.closePath(); g.fill(); }
-    else if (inner) { g.fillStyle = C.navy; g.font = font(inner.length > 2 ? 22 : 34, 900); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(inner, 0, -98); }
+    if (inner === 'house') { g.fillStyle = C.ink; g.beginPath(); g.moveTo(-17, -94); g.lineTo(0, -116); g.lineTo(17, -94); g.lineTo(13, -94); g.lineTo(13, -82); g.lineTo(-13, -82); g.lineTo(-13, -94); g.closePath(); g.fill(); }
+    else if (inner) { g.fillStyle = C.ink; g.font = font(inner.length > 2 ? 22 : 34, 800); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(inner, 0, -98); }
     g.restore();
   }
   function brackets(g, cx, cy, hw, hh, len, lw, color) {
@@ -663,7 +659,7 @@
       type: 'jobBuilt', role: 'content', town: jb.town, job: jb.job, emoji: jb.emoji || '', building: b, name: jb.name || '', need: need,
       buildingEmoji: jb.buildingEmoji || '',
       head: up(jobForm(jb.job, 'pl') + ' z ' + townGen(jb.town)), acc: up(buildingAcc(b)),
-      eq: need + ' ' + up(jobForm(jb.job, need)) + ' = 1 ' + up(b),
+      eq: need + ' ' + up(jobForm(jb.job, need)) + ' = 1 ' + up(b), eqText: need + ' ' + jobForm(jb.job, need) + ' = 1 ' + lowerCs(b),
       vo: cap(jobForm(jb.job, 'pl')) + ' z ' + townGen(jb.town) + ' si postavili ' + lowerCs(buildingAcc(b)) + '! ' + need + ' ' + plural(need, 'člověk', 'lidi', 'lidí') + ', jedna budova.'
     };
   }
@@ -708,7 +704,7 @@
     return {
       type: 'jobs', role: 'content', town: j.town, job: job, emoji: j.emoji || '', count: j.count, need: j.need, building: cleanBuilding(j.building || ''), missing: missing,
       line1: up(dat), line2: 'CHYBÍ ' + missing + ' ' + up(jobForm(job, missing)) + '!',
-      ask: 'JSI ' + up(job) + ' Z ' + up(gen) + '?',
+      ask: 'JSI ' + up(job) + ' Z ' + up(gen) + '?', askText: 'Jsi ' + job + ' z ' + gen + '?',
       subsUntil: /^Jsi$/i,
       vo: cap(dat) + ' chybí ' + (missing === 1 ? 'už jen jeden ' + job : 'ještě ' + missing + ' ' + jobForm(job, missing)) + '! Jsi ' + job + ' z ' + gen + '? Napiš to do komentářů!'
     };
@@ -946,133 +942,170 @@
     return c;
   }
 
-  // ---- kreslení podkladu (hra)
+  // ------------------------------------------------------------------ KIT: písmo
+  // Archivo (expanded 125 %, 800, -0.02em) pro nadpisy/čísla/titulky, Inter pro text v bublinách a popisky.
+  // Bez sítě: fallback Inter + lehké horizontální roztažení (HX), aby zůstal „expanded“ charakter.
+  var HX = 1;
+  function hf(g, size, weight) { g.font = (weight || 800) + ' ' + Math.round(size) + 'px ' + FONT_H; try { g.fontStretch = 'expanded'; g.letterSpacing = '-0.02em'; } catch (e) {} }
+  function bf(g, size, weight) { g.font = (weight || 600) + ' ' + Math.round(size) + 'px ' + FONT_B; try { g.fontStretch = 'normal'; g.letterSpacing = '0px'; } catch (e) {} }
+  function hw(g, text) { return g.measureText(text).width * HX; }
+  function htext(g, text, x, y) {
+    if (HX === 1) { g.fillText(text, x, y); return; }
+    g.save(); g.translate(x, y); g.scale(HX, 1); g.fillText(text, 0, 0); g.restore();
+  }
+  function hfit(g, text, maxW, size, weight, min) { hf(g, size, weight); var w = hw(g, text); return w <= maxW ? size : Math.max(min || 12, Math.floor(size * maxW / w)); }
+  // pop-in s přestřelem: .6 → 1.08 → 1 (vrací scale pro p 0..1)
+  function popS(p) { if (p <= 0) return 0.6; if (p >= 1) return 1; return p < 0.7 ? lerp(0.6, 1.08, E.outCubic(p / 0.7)) : lerp(1.08, 1, (p - 0.7) / 0.3); }
+  function popA(p) { return clamp(p * 4, 0, 1); }
+  var POP = 220;
+
+  // ------------------------------------------------------------------ KIT: podklad
   function drawGame(g) {
     var gc = G() && G().canvas;
-    g.fillStyle = C.navy; g.fillRect(0, 0, W, H);
+    g.fillStyle = C.night; g.fillRect(0, 0, W, H);
     if (!gc || !gc.width) return;
     var s = Math.max(W / gc.width, H / gc.height), dw = gc.width * s, dh = gc.height * s;
     try { g.drawImage(gc, (W - dw) / 2, (H - dh) / 2, dw, dh); } catch (e) {}
   }
-  function grade(g, top, bottom, dim) {
-    var gr = g.createLinearGradient(0, 0, 0, 1080);
-    gr.addColorStop(0, 'rgba(11,20,48,' + top + ')'); gr.addColorStop(0.55, 'rgba(11,20,48,' + (top * 0.62) + ')'); gr.addColorStop(1, 'rgba(11,20,48,0)');
-    g.fillStyle = gr; g.fillRect(0, 0, W, 1080);
-    var gb = g.createLinearGradient(0, 1150, 0, H);
-    gb.addColorStop(0, 'rgba(11,20,48,0)'); gb.addColorStop(1, 'rgba(11,20,48,' + bottom + ')');
-    g.fillStyle = gb; g.fillRect(0, 1150, W, H - 1150);
-    var v = g.createRadialGradient(W / 2, H * 0.5, H * 0.3, W / 2, H * 0.5, H * 0.75);
-    v.addColorStop(0, 'rgba(5,10,30,0)'); v.addColorStop(1, 'rgba(5,10,30,0.45)');
-    g.fillStyle = v; g.fillRect(0, 0, W, H);
-    if (dim > 0) { g.fillStyle = 'rgba(11,20,48,' + dim + ')'; g.fillRect(0, 0, W, H); }
-  }
-
-  // ---- radar (kruh, prstence, sweep, blipy)
-  function drawRadar(g, cx, cy, r, ang, alpha, o) {
+  // tint Noc + 2 rozmazané bloby (světle modrý .6, tmavě modrý .35), pomalu se hýbou
+  function backdrop(g, t, tint, o) {
     o = o || {};
-    g.save(); g.globalAlpha = alpha;
-    if (o.fill !== false) {
-      var bg = g.createRadialGradient(cx, cy, 0, cx, cy, r);
-      bg.addColorStop(0, 'rgba(47,114,214,0.55)'); bg.addColorStop(0.7, 'rgba(19,34,79,0.75)'); bg.addColorStop(1, 'rgba(11,20,48,0.9)');
-      g.fillStyle = bg; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
-    }
-    g.strokeStyle = 'rgba(95,168,232,0.55)'; g.lineWidth = o.lw || 3;
-    for (var i = 1; i <= 4; i++) { g.beginPath(); g.arc(cx, cy, r * i / 4, 0, Math.PI * 2); g.stroke(); }
-    g.lineWidth = (o.lw || 3) * 0.6; g.strokeStyle = 'rgba(95,168,232,0.35)';
-    g.beginPath(); g.moveTo(cx - r, cy); g.lineTo(cx + r, cy); g.moveTo(cx, cy - r); g.lineTo(cx, cy + r); g.stroke();
-    // tick marks
-    g.strokeStyle = 'rgba(191,224,255,0.5)'; g.lineWidth = 2;
-    for (var k = 0; k < 72; k++) {
-      var a = k / 72 * Math.PI * 2, l = k % 6 === 0 ? 0.06 : 0.025;
-      g.beginPath(); g.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); g.lineTo(cx + Math.cos(a) * r * (1 - l), cy + Math.sin(a) * r * (1 - l)); g.stroke();
-    }
-    // sweep
-    var trail = 1.15, steps = 28;
-    for (var s = 0; s < steps; s++) {
-      var a0 = ang - trail * (s + 1) / steps, a1 = ang - trail * s / steps;
-      g.fillStyle = 'rgba(95,168,232,' + (0.42 * Math.pow(1 - s / steps, 2)) + ')';
-      g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, r, a0 - 0.012, a1 + 0.012); g.closePath(); g.fill();
-    }
-    g.strokeStyle = 'rgba(220,240,255,0.95)'; g.lineWidth = (o.lw || 3) * 1.3;
-    g.shadowColor = C.sky; g.shadowBlur = 24;
-    g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(ang) * r, cy + Math.sin(ang) * r); g.stroke();
-    g.shadowBlur = 0;
-    // blipy
-    if (o.blips) o.blips.forEach(function (b) {
-      var ba = Math.atan2(b.y, b.x), d = ((ang - ba) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-      var life = Math.max(0, 1 - d / 3.2);
-      if (life <= 0) return;
-      var px = cx + b.x * r, py = cy + b.y * r;
-      g.fillStyle = b.hot ? 'rgba(255,210,63,' + life + ')' : 'rgba(191,224,255,' + life + ')';
-      g.shadowColor = b.hot ? C.yellow : C.sky; g.shadowBlur = 18 * life;
-      g.beginPath(); g.arc(px, py, (b.s || 8) * (0.7 + 0.5 * life), 0, Math.PI * 2); g.fill();
-      if (b.hot && life > 0.6) { g.strokeStyle = 'rgba(255,210,63,' + (life - 0.6) * 2 + ')'; g.lineWidth = 3; g.beginPath(); g.arc(px, py, 14 + (1 - life) * 60, 0, Math.PI * 2); g.stroke(); }
+    g.fillStyle = 'rgba(10,18,51,' + clamp(tint, 0, 1) + ')'; g.fillRect(0, 0, W, H);
+    var blobs = [
+      { x: 180 + Math.sin(t / 4300) * 110, y: 520 + Math.cos(t / 5100) * 80, c: '102,178,255', a: 0.6 },
+      { x: 900 + Math.cos(t / 4700) * 100, y: 1520 + Math.sin(t / 3900) * 90, c: '47,74,168', a: 0.35 }
+    ];
+    if (o.blobs === false) return;
+    blobs.forEach(function (b) {
+      var r = 230, gr = g.createRadialGradient(b.x, b.y, 0, b.x, b.y, r * 1.35);
+      gr.addColorStop(0, 'rgba(' + b.c + ',' + b.a + ')'); gr.addColorStop(0.55, 'rgba(' + b.c + ',' + (b.a * 0.55) + ')'); gr.addColorStop(1, 'rgba(' + b.c + ',0)');
+      g.fillStyle = gr; g.beginPath(); g.arc(b.x, b.y, r * 1.35, 0, 7); g.fill();
     });
-    g.shadowBlur = 0;
-    g.fillStyle = C.ice; g.beginPath(); g.arc(cx, cy, (o.lw || 3) * 2.2, 0, Math.PI * 2); g.fill();
-    g.restore();
   }
 
-  // ---- přechod: radarový sweep wipe (p 0..1)
-  function sweepWipe(g, p) {
-    if (p <= 0 || p >= 1) return;
-    var cx = W / 2, cy = H / 2, R0 = Math.hypot(W, H) / 2 + 10, base = -Math.PI / 2, a0, a1, edge;
-    if (p < 0.5) { var q = E.inOut(p / 0.5); a0 = base; a1 = base + q * Math.PI * 2; edge = a1; }
-    else { var q2 = E.inOut((p - 0.5) / 0.5); a0 = base + q2 * Math.PI * 2; a1 = base + Math.PI * 2; edge = a0; }
+  // ------------------------------------------------------------------ KIT: prvky
+  // zaoblený obdélník s různými rohy [tl, tr, br, bl]
+  function rrc(g, x, y, w, h, r) {
+    if (typeof r === 'number') return rr(g, x, y, w, h, r);
+    var tl = r[0], tr = r[1], br = r[2], bl = r[3];
+    g.beginPath(); g.moveTo(x + tl, y); g.lineTo(x + w - tr, y); g.arcTo(x + w, y, x + w, y + tr, tr); g.lineTo(x + w, y + h - br); g.arcTo(x + w, y + h, x + w - br, y + h, br);
+    g.lineTo(x + bl, y + h); g.arcTo(x, y + h, x, y + h - bl, bl); g.lineTo(x, y + tl); g.arcTo(x, y, x + tl, y, tl); g.closePath();
+  }
+  // skleněná plocha: ztmavení + bílá .09, rámeček .22, horní highlight .28, stín 0 10 26
+  function glass(g, x, y, w, h, r, o) {
+    o = o || {};
     g.save();
-    g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, R0, a0, a1); g.closePath(); g.clip();
-    var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, C.sky); bg.addColorStop(0.45, C.blue); bg.addColorStop(1, C.navy);
-    g.fillStyle = bg; g.fillRect(0, 0, W, H);
-    g.strokeStyle = 'rgba(255,255,255,0.18)'; g.lineWidth = 3;
-    for (var i = 1; i <= 7; i++) { g.beginPath(); g.arc(cx, cy, i * 150, 0, Math.PI * 2); g.stroke(); }
-    g.font = font(150, 900); g.fillStyle = 'rgba(255,255,255,0.95)'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    spacedText(g, 'RADAR', cx, cy, 14, 'center');
+    g.shadowColor = 'rgba(0,0,0,0.4)'; g.shadowBlur = 26; g.shadowOffsetY = 10;
+    g.fillStyle = 'rgba(10,18,51,' + (o.dark == null ? 0.42 : o.dark) + ')'; rrc(g, x, y, w, h, r); g.fill();
+    g.shadowBlur = 0; g.shadowOffsetY = 0;
+    g.fillStyle = o.fill || 'rgba(255,255,255,0.09)'; rrc(g, x, y, w, h, r); g.fill();
+    g.save(); rrc(g, x, y, w, h, r); g.clip(); g.fillStyle = 'rgba(255,255,255,0.28)'; g.fillRect(x, y, w, 1.5); g.restore();
+    g.strokeStyle = o.border || 'rgba(255,255,255,0.22)'; g.lineWidth = o.lw || 1.5; rrc(g, x, y, w, h, r); g.stroke();
     g.restore();
-    g.save();
-    var dir = p < 0.5 ? -1 : 1;
-    for (var k = 0; k < 14; k++) {
-      var b0 = edge + dir * 0.03 * k, b1 = edge + dir * 0.03 * (k + 1);
-      g.fillStyle = 'rgba(191,224,255,' + (0.28 * (1 - k / 14)) + ')';
-      g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, R0, Math.min(b0, b1) - 0.004, Math.max(b0, b1) + 0.004); g.closePath(); g.fill();
+  }
+  function solidBox(g, x, y, w, h, r) {
+    g.save(); g.shadowColor = 'rgba(0,0,0,0.35)'; g.shadowBlur = 24; g.shadowOffsetY = 10; g.fillStyle = C.acc; rrc(g, x, y, w, h, r); g.fill(); g.restore();
+  }
+  // čip (pill): glass, text Inter 600 bílý, čísla Archivo akcent; o.solid = plná akcentová výplň s tmavým textem
+  function chip(g, text, cx, y, o) {
+    o = o || {};
+    var size = o.size || 34, h = size * 1.75, padX = size * 0.75, parts = String(text).split(' '), ws = [], tw = 0, sp = size * 0.28;
+    parts.forEach(function (p) { var num = !o.solid && /^[+#]?\d[\d\s/]*%?$/.test(p); if (num) hf(g, size * 1.1, 800); else bf(g, size, 700); var w = num ? hw(g, p) : g.measureText(p).width; ws.push([w, num]); tw += w; });
+    tw += sp * (parts.length - 1);
+    var w = tw + padX * 2 + (o.icon ? h * 0.55 : 0), x = o.align === 'left' ? cx : o.align === 'right' ? cx - w : cx - w / 2;
+    var sc = o.scale == null ? 1 : Math.max(0.001, o.scale);
+    g.save(); g.globalAlpha = o.alpha == null ? 1 : clamp(o.alpha, 0, 1);
+    g.translate(x + w / 2, y); g.scale(sc, sc); g.translate(-(x + w / 2), -y);
+    if (o.solid) solidBox(g, x, y - h / 2, w, h, h / 2); else glass(g, x, y - h / 2, w, h, h / 2, o);
+    g.textBaseline = 'middle'; g.textAlign = 'left';
+    var tx = x + padX;
+    if (o.icon) { o.icon(g, x + padX + h * 0.08, y, h * 0.26); tx += h * 0.55; }
+    parts.forEach(function (p, i) {
+      if (ws[i][1]) { hf(g, size * 1.1, 800); g.fillStyle = o.numColor || C.acc; htext(g, p, tx, y + 1); }
+      else { bf(g, size, 700); g.fillStyle = o.solid ? C.ink : (o.color || C.white); g.fillText(p, tx, y + 1); }
+      tx += ws[i][0] + sp;
+    });
+    g.restore();
+    return w;
+  }
+  // razítko: Archivo 800 akcent, 3px rámeček, radius 10, rotace -6°
+  function stamp(g, text, cx, cy, o) {
+    o = o || {};
+    var size = o.size || 44, p = o.p == null ? 1 : o.p; if (p <= 0) return;
+    hf(g, size, 800); var tw = hw(g, text), padX = size * 0.55, w = tw + padX * 2, h = size * 1.45;
+    g.save(); g.globalAlpha = popA(p) * (o.alpha == null ? 1 : o.alpha);
+    g.translate(cx, cy); g.rotate(o.rot == null ? -0.105 : o.rot); var sc = popS(p); g.scale(sc, sc);
+    g.fillStyle = 'rgba(10,18,51,0.55)'; rr(g, -w / 2, -h / 2, w, h, 10); g.fill();
+    g.strokeStyle = C.acc; g.lineWidth = 3; rr(g, -w / 2, -h / 2, w, h, 10); g.stroke();
+    g.fillStyle = C.acc; g.textAlign = 'center'; g.textBaseline = 'middle'; hf(g, size, 800); htext(g, text, 0, 1);
+    g.restore();
+    return w;
+  }
+  // číselná karta: glass + velké číslo Archivo v akcentu + popisek Inter .8
+  function numCard(g, cx, cy, w, h, num, label, o) {
+    o = o || {};
+    var p = o.p == null ? 1 : o.p; if (p <= 0) return;
+    g.save(); g.globalAlpha = popA(p) * (o.alpha == null ? 1 : o.alpha); var sc = popS(p); g.translate(cx, cy); g.scale(sc, sc);
+    glass(g, -w / 2, -h / 2, w, h, 20);
+    var ns = o.numSize || h * 0.48; hf(g, ns, 800); g.fillStyle = C.acc; g.textAlign = 'center'; g.textBaseline = 'middle';
+    htext(g, num, 0, -h * 0.1 + (label ? 0 : h * 0.08));
+    if (label) { bf(g, o.labelSize || 28, 600); g.fillStyle = 'rgba(255,255,255,0.8)'; g.fillText(label, 0, h * 0.3); }
+    g.restore();
+  }
+  // chat bublina (glass): side 'left' → rohy 20 20 20 6, 'right' → 20 20 6 20. Vrací výšku.
+  function bubble(g, x, y, w, lines, o) {
+    o = o || {};
+    var pad = o.pad || 34, lh = o.lh || 50, headH = o.head ? 92 : 0, footH = o.foot ? 58 : 0, h = pad * 2 + headH + lines.length * lh + footH;
+    var r = o.side === 'right' ? [20, 20, 6, 20] : [20, 20, 20, 6];
+    g.save(); g.globalAlpha *= (o.alpha == null ? 1 : o.alpha);
+    glass(g, x, y, w, h, r);
+    var ty = y + pad;
+    if (o.head) {
+      var ar = 30, ax = x + pad + ar, ay = ty + ar;
+      g.save(); g.beginPath(); g.arc(ax, ay, ar, 0, 7); g.clip();
+      if (o.avatarImg) g.drawImage(o.avatarImg, ax - ar, ay - ar, ar * 2, ar * 2);
+      else { g.fillStyle = C.blue; g.fillRect(ax - ar, ay - ar, ar * 2, ar * 2); hf(g, 30, 800); g.fillStyle = C.white; g.textAlign = 'center'; g.textBaseline = 'middle'; htext(g, up(String(o.head).replace(/[^a-zA-Zá-žÁ-Ž0-9]/g, '')).slice(0, 1) || '?', ax, ay + 1); }
+      g.restore();
+      g.strokeStyle = C.acc; g.lineWidth = 3; g.beginPath(); g.arc(ax, ay, ar + 3, 0, 7); g.stroke();
+      bf(g, 30, 700); g.fillStyle = C.white; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(o.head, ax + ar + 18, ay - 14);
+      if (o.sub) { bf(g, 24, 500); g.fillStyle = 'rgba(255,255,255,0.65)'; g.fillText(o.sub, ax + ar + 18, ay + 18); }
+      ty += headH;
     }
-    g.strokeStyle = '#ffffff'; g.lineWidth = 8; g.shadowColor = C.sky; g.shadowBlur = 40;
-    g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(edge) * R0, cy + Math.sin(edge) * R0); g.stroke();
+    bf(g, o.size || 38, 600); g.fillStyle = C.white; g.textAlign = 'left'; g.textBaseline = 'middle';
+    var reveal = o.reveal == null ? 1 : o.reveal;
+    for (var i = 0; i < lines.length; i++) {
+      var li = clamp(reveal * lines.length - i, 0, 1); if (li <= 0) continue;
+      g.save(); g.globalAlpha *= li; g.fillText(lines[i], x + pad, ty + lh / 2 + i * lh + (1 - E.outCubic(li)) * 14); g.restore();
+    }
+    if (o.foot) o.foot(g, x + pad, ty + lines.length * lh + footH / 2 + 6, w - pad * 2);
     g.restore();
+    return h;
   }
-
-  // ---- kinetická typografie: jedna řádka, slova najíždějí se scale punch
+  // řádek nadpisu (Archivo): slova pop-in s malým zpožděním. o.box = glass pozadí, o.solid = akcentový blok s tmavým textem
   function kLine(g, text, cx, y, size, lt, delay, o) {
     o = o || {};
-    var weight = o.weight || 900, stagger = o.stagger == null ? 75 : o.stagger, maxW = o.maxW || 940;
-    size = fitSize(g, text, maxW - (o.sticker ? 70 : 0), size, weight, 30);
-    g.font = font(size, weight);
-    var words = String(text).split(' '), sp = size * 0.26;
-    var ws = words.map(function (w) { return g.measureText(w).width; });
+    var weight = o.weight || 800, stagger = o.stagger == null ? 45 : o.stagger, maxW = o.maxW || 960;
+    size = hfit(g, text, maxW - ((o.box || o.solid) ? 80 : 0), size, weight, 28); hf(g, size, weight);
+    var words = String(text).split(' '), sp = size * 0.24;
+    var ws = words.map(function (w) { return hw(g, w); });
     var total = ws.reduce(function (a, b) { return a + b; }, 0) + sp * (words.length - 1);
-    var x = cx - total / 2;
-    var outT = o.out, pIn = prog(lt, delay, delay + 360), pOut = outT != null ? prog(lt, outT, outT + 260) : 0;
+    var x = cx - total / 2, outT = o.out, pIn = prog(lt, delay, delay + POP), pOut = outT != null ? prog(lt, outT, outT + 200) : 0;
     if (pIn <= 0 || pOut >= 1) return { w: total, h: size };
-    g.save();
-    g.textBaseline = 'alphabetic'; g.textAlign = 'left';
-    if (o.sticker) {
-      var padX = size * 0.32, padY = size * 0.2, sw = total + padX * 2, sh = size * 1.12 + padY;
-      var e = E.outBack(pIn), sx = clamp(e, 0, 1.2) * (1 - pOut);
-      g.save(); g.translate(cx, y - size * 0.36); g.rotate((o.rot || -0.035)); g.scale(sx, 1);
-      g.shadowColor = 'rgba(0,0,0,0.35)'; g.shadowBlur = 30; g.shadowOffsetY = 10;
-      g.fillStyle = o.sticker; rr(g, -sw / 2, -sh / 2, sw, sh, size * 0.16); g.fill();
+    g.save(); g.textBaseline = 'middle'; g.textAlign = 'left';
+    if (o.box || o.solid) {
+      var padX = size * 0.4, bw = total + padX * 2, bh = size * 1.5, bs = popS(pIn) * (1 - pOut);
+      g.save(); g.globalAlpha = popA(pIn) * (1 - pOut); g.translate(cx, y); g.scale(bs, bs);
+      if (o.solid) solidBox(g, -bw / 2, -bh / 2, bw, bh, 14); else glass(g, -bw / 2, -bh / 2, bw, bh, 14);
       g.restore();
     }
     for (var i = 0; i < words.length; i++) {
-      var p = prog(lt, delay + i * stagger, delay + i * stagger + 380);
+      var p = prog(lt, delay + i * stagger, delay + i * stagger + POP);
       if (p <= 0) { x += ws[i] + sp; continue; }
-      var e2 = E.outBack(p), s = lerp(o.punch || 1.7, 1, e2), a = clamp(p * 4, 0, 1);
-      var dy = (1 - E.outCubic(p)) * size * 0.55, q = outT != null ? prog(lt, outT + i * 35, outT + i * 35 + 240) : 0;
-      dy -= E.inCubic(q) * size * 0.8; a *= 1 - q;
-      g.save(); g.globalAlpha = a;
-      g.translate(x + ws[i] / 2, y + dy - size * 0.35); g.rotate(o.sticker ? (o.rot || -0.035) : 0); g.scale(s, s);
-      if (!o.sticker && o.shadow !== false) { g.shadowColor = 'rgba(5,10,30,0.55)'; g.shadowBlur = size * 0.18; g.shadowOffsetY = size * 0.05; }
-      if (o.stroke) { g.lineJoin = 'round'; g.lineWidth = o.stroke; g.strokeStyle = o.strokeColor || C.navy; g.strokeText(words[i], -ws[i] / 2, size * 0.35); }
-      g.fillStyle = o.color || C.white; g.fillText(words[i], -ws[i] / 2, size * 0.35);
+      var s = popS(p), a = popA(p), q = outT != null ? prog(lt, outT + i * 25, outT + i * 25 + 180) : 0;
+      a *= 1 - q;
+      g.save(); g.globalAlpha = a; g.translate(x + ws[i] / 2, y - E.inCubic(q) * size * 0.4); g.scale(s, s);
+      if (!o.box && !o.solid && o.shadow !== false) { g.shadowColor = 'rgba(0,0,0,0.4)'; g.shadowBlur = size * 0.16; g.shadowOffsetY = size * 0.04; }
+      g.fillStyle = o.solid ? C.ink : (o.color || C.white); hf(g, size, weight); htext(g, words[i], -ws[i] / 2, 1);
       g.restore();
       x += ws[i] + sp;
     }
@@ -1080,26 +1113,8 @@
     return { w: total, h: size };
   }
 
-  function chip(g, text, cx, y, o) {
-    o = o || {};
-    var size = o.size || 38; g.font = font(size, o.weight || 800);
-    var sp = o.spacing == null ? 3 : o.spacing, tw = spacedWidth(g, text, sp), padX = size * 0.6, h = size * 1.7;
-    var w = tw + padX * 2 + (o.icon ? h * 0.6 : 0), x = o.align === 'left' ? cx : cx - w / 2;
-    g.save(); g.globalAlpha = o.alpha == null ? 1 : o.alpha;
-    if (o.scale) { g.translate(x + w / 2, y); g.scale(o.scale, o.scale); g.translate(-(x + w / 2), -y); }
-    g.fillStyle = o.bg || 'rgba(11,20,48,0.72)'; rr(g, x, y - h / 2, w, h, h / 2); g.fill();
-    if (o.border) { g.strokeStyle = o.border; g.lineWidth = 2.5; g.stroke(); }
-    g.fillStyle = o.color || C.white; g.textBaseline = 'middle';
-    var tx = x + padX;
-    if (o.icon) { o.icon(g, x + padX + h * 0.12, y, h * 0.32); tx += h * 0.6; }
-    spacedText(g, text, tx, y + size * 0.04, sp, 'left');
-    g.restore();
-    return w;
-  }
-
-  // ---- ikonky
+  // ---- ikonky (vektor, žádné emoji)
   function iconDot(color, t) { return function (g, x, y, r) { var p = (Math.sin(t / 180) + 1) / 2; g.fillStyle = color; g.beginPath(); g.arc(x, y, r * 0.55, 0, 7); g.fill(); g.strokeStyle = color; g.globalAlpha *= 1 - p; g.lineWidth = 3; g.beginPath(); g.arc(x, y, r * (0.6 + p * 0.9), 0, 7); g.stroke(); g.globalAlpha = 1; }; }
-  function iconRadar(t) { return function (g, x, y, r) { g.strokeStyle = C.sky; g.lineWidth = 2.5; g.beginPath(); g.arc(x, y, r, 0, 7); g.stroke(); g.beginPath(); g.arc(x, y, r * 0.5, 0, 7); g.stroke(); var a = t / 400; g.strokeStyle = C.white; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); g.stroke(); }; }
   function heart(g, x, y, s, color) {
     g.save(); g.translate(x, y); g.scale(s / 32, s / 32); g.fillStyle = color;
     g.beginPath(); g.moveTo(0, 10); g.bezierCurveTo(-26, -6, -14, -26, 0, -12); g.bezierCurveTo(14, -26, 26, -6, 0, 10); g.closePath(); g.fill(); g.restore();
@@ -1108,15 +1123,19 @@
     g.save(); g.translate(x, y); g.scale(w / 100, h / 120);
     g.beginPath(); g.moveTo(8, 8); g.lineTo(92, 8); g.lineTo(92, 60); g.bezierCurveTo(92, 88, 72, 104, 50, 113); g.bezierCurveTo(28, 104, 8, 88, 8, 60); g.closePath();
     g.fillStyle = color; g.fill(); g.lineWidth = 5; g.strokeStyle = '#fff'; g.stroke();
-    if (letter) { g.fillStyle = '#fff'; g.font = font(54, 900); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(letter, 50, 58); }
+    if (letter) { g.fillStyle = '#fff'; hf(g, 54, 800); g.textAlign = 'center'; g.textBaseline = 'middle'; htext(g, letter, 50, 58); }
     g.restore();
   }
+  function iconCheck(color) { return function (g, x, y, r) { g.strokeStyle = color; g.lineWidth = r * 0.42; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(x - r * 0.8, y); g.lineTo(x - r * 0.15, y + r * 0.65); g.lineTo(x + r * 0.95, y - r * 0.7); g.stroke(); }; }
+  function iconStar(color) { return function (g, x, y, r) { g.fillStyle = color; g.beginPath(); for (var k = 0; k < 5; k++) { var a = -Math.PI / 2 + k * Math.PI * 2 / 5, b = a + Math.PI / 5; g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); g.lineTo(x + Math.cos(b) * r * 0.42, y + Math.sin(b) * r * 0.42); } g.closePath(); g.fill(); }; }
+  function iconPin(color) { return function (g, x, y, r) { pin(g, x, y + r, r * 2, color, null); }; }
+  function iconArrow(color) { return function (g, x, y, r) { g.strokeStyle = color; g.lineWidth = r * 0.4; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(x, y - r * 0.9); g.lineTo(x, y + r * 0.9); g.moveTo(x - r * 0.7, y + r * 0.2); g.lineTo(x, y + r * 0.9); g.lineTo(x + r * 0.7, y + r * 0.2); g.stroke(); }; }
 
-  // ---- odometr (rolovací číslice)
+  // ---- odometr (rolovací číslice, Archivo akcent)
   function odometer(g, value, cx, y, size, color) {
-    var v = Math.max(0, value), str = fmt(Math.floor(v)), digits = String(Math.floor(v)).length;
-    g.font = font(size, 900);
-    var cw = g.measureText('0').width * 1.02, gap = size * 0.18, ch = size * 1.05;
+    var v = Math.max(0, value), digits = String(Math.floor(v)).length;
+    hf(g, size, 800);
+    var cw = hw(g, '0') * 1.02, gap = size * 0.18, ch = size * 1.05;
     var groups = Math.floor((digits - 1) / 3), totalW = digits * cw + groups * gap;
     var x = cx - totalW / 2;
     g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
@@ -1127,10 +1146,9 @@
       else { var lower = v % pk; frac = clamp(lower - (pk - 1), 0, 1); }
       var e = E.inOut(frac);
       g.save(); g.beginPath(); g.rect(x, y - ch / 2, cw, ch); g.clip();
-      g.fillStyle = color || C.white;
-      g.shadowColor = 'rgba(5,10,30,0.5)'; g.shadowBlur = 20;
-      g.fillText(String(dVal), x + cw / 2, y - e * ch);
-      g.fillText(String((dVal + 1) % 10), x + cw / 2, y + ch - e * ch);
+      g.fillStyle = color || C.acc;
+      hf(g, size, 800); htext(g, String(dVal), x + cw / 2, y - e * ch);
+      htext(g, String((dVal + 1) % 10), x + cw / 2, y + ch - e * ch);
       g.restore();
       x += cw; if (k > 0 && k % 3 === 0) x += gap;
     }
@@ -1138,66 +1156,24 @@
     return totalW;
   }
 
-  // ---- reticle (zaměření obce)
+  // ---- reticle (zaměření obce / domku) – akcent
   function reticle(g, cx, cy, lt, color) {
     var p = E.outBack(prog(lt, 250, 750)), r = 120 * p + 10, a = lt / 900;
     if (p <= 0) return;
     g.save(); g.translate(cx, cy); g.globalAlpha = clamp(p, 0, 1);
-    g.strokeStyle = color || C.yellow; g.lineWidth = 6; g.lineCap = 'round';
-    for (var i = 0; i < 4; i++) {
-      g.save(); g.rotate(a + i * Math.PI / 2);
-      g.beginPath(); g.arc(0, 0, r, -0.35, 0.35); g.stroke();
-      g.restore();
-    }
-    g.lineWidth = 2.5; g.globalAlpha *= 0.7;
-    g.beginPath(); g.arc(0, 0, r * 0.55, 0, 7); g.stroke();
+    g.strokeStyle = color || C.acc; g.lineWidth = 5; g.lineCap = 'round';
+    for (var i = 0; i < 4; i++) { g.save(); g.rotate(a + i * Math.PI / 2); g.beginPath(); g.arc(0, 0, r, -0.35, 0.35); g.stroke(); g.restore(); }
+    g.lineWidth = 2; g.globalAlpha *= 0.7; g.beginPath(); g.arc(0, 0, r * 0.55, 0, 7); g.stroke();
     var pp = (lt % 1200) / 1200;
-    g.globalAlpha = (1 - pp) * 0.8; g.lineWidth = 4; g.beginPath(); g.arc(0, 0, r * (0.6 + pp * 1.4), 0, 7); g.stroke();
+    g.globalAlpha = (1 - pp) * 0.8; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, r * (0.6 + pp * 1.4), 0, 7); g.stroke();
     g.restore();
   }
+  // kamera „shake“ – vrátí offset
+  function shakeAt(lt, t0, amp) { var q = 1 - prog(lt, t0, t0 + 320); return q > 0 ? [Math.sin(lt / 15) * amp * q, Math.cos(lt / 21) * amp * q] : [0, 0]; }
 
   // ------------------------------------------------------------------ SCÉNY
   var SCENES = {};
-
   var HOOKS = {};
-  HOOKS.classic = {
-    enter: function (s, sc) {
-      var st = safeState(), town = (st.towns || []).filter(function (t) { return t.name === s.town; })[0] || (st.towns || [])[0];
-      var h = town && town.houses && town.houses[town.houses.length - 1];
-      gcall('orbit', 0);
-      (h ? gcall('focusHouse', h.id, 0) : gcall('overview', 0)).then(function () {
-        later(function () { (town ? gcall('focusTown', town.name, 2300) : gcall('overview', 2300)).then(function () { gcall('orbit', 0.35); }); }, 120);
-      });
-      AU.boom(0); AU.ping(0.08, 1480); AU.whoosh(s.dur / 1000 - 0.3, 0.6);
-      var bl = []; for (var i = 0; i < 26; i++) { var r = 0.15 + ((hash('b' + i) % 1000) / 1000) * 0.8, a = (hash('a' + i) % 6283) / 1000; bl.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, s: 7 + (i % 3) * 3, hot: i % 5 === 0 }); }
-      s._blips = bl;
-    },
-    draw: function (g, s, lt) {
-      grade(g, 0.55, 0.6, 0);
-      // radarové intro, které se „otevře“ do mapy (iris)
-      var iris = E.inOut(prog(lt, 380, 1100));
-      if (iris < 1) {
-        g.save();
-        var holeR = iris * Math.hypot(W, H) * 0.6;
-        g.beginPath(); g.rect(0, 0, W, H); g.arc(W / 2, 1180, holeR, 0, Math.PI * 2, true); g.clip('evenodd');
-        var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, C.navy2); bg.addColorStop(1, C.navy); g.fillStyle = bg; g.fillRect(0, 0, W, H);
-        drawRadar(g, W / 2, 1180, 430, -Math.PI / 2 + lt / 260, 1, { blips: s._blips, lw: 3 });
-        g.restore();
-        if (holeR > 4) { g.save(); g.strokeStyle = C.sky; g.lineWidth = 6; g.shadowColor = C.sky; g.shadowBlur = 30; g.beginPath(); g.arc(W / 2, 1180, holeR, 0, 7); g.stroke(); g.restore(); }
-      }
-      // flash na začátku
-      var fl = 1 - prog(lt, 0, 220); if (fl > 0) { g.fillStyle = 'rgba(255,255,255,' + fl * 0.5 + ')'; g.fillRect(0, 0, W, H); }
-      // kamera „shake“ simulace přes offset textu
-      var shake = (1 - prog(lt, 0, 400)) * 10;
-      g.save(); g.translate(Math.sin(lt / 17) * shake, Math.cos(lt / 23) * shake);
-      var out = s.dur - 340;
-      var bigIsNum = /^\+\d/.test(s.big);
-      kLine(g, s.big, W / 2, bigIsNum ? 835 : 720, bigIsNum ? 340 : 230, lt, 60, { color: C.yellow, out: out, punch: 2.2, stroke: 0 });
-      kLine(g, s.big2, W / 2, bigIsNum ? 985 : 900, 108, lt, 300, { color: C.white, out: out + 40, stagger: 90 });
-      kLine(g, s.sticker, W / 2, bigIsNum ? 1130 : 1060, 64, lt, 620, { sticker: C.white, color: C.ink, out: out + 80, punch: 1.3, stagger: 50 });
-      g.restore();
-    }
-  };
 
   // ---- kamera
   function camHouse(h, dist, ms) {
@@ -1208,8 +1184,33 @@
   function camTown(name, ms) { return name ? gcall('focusTown', name, Math.max(16, ms || 0)) : gcall('overview', Math.max(16, ms || 0)); }
   function houseY() { return R.opts.houseY || H / 2; }
   function townY() { return R.opts.focusY || 1130; }
+  function flash(g, lt, t0, a) { var f = 1 - prog(lt, t0, t0 + 180); if (f > 0) { g.fillStyle = 'rgba(255,255,255,' + f * a + ')'; g.fillRect(0, 0, W, H); } }
 
-  // ---------- HOOK: VÝPADEK RADARU (glitch → odhalení čísla)
+  // ---------- HOOK: klasika (+N nových sousedů)
+  HOOKS.classic = {
+    enter: function (s, sc) {
+      var st = safeState(), town = (st.towns || []).filter(function (t) { return t.name === s.town; })[0] || (st.towns || [])[0];
+      var h = town && town.houses && town.houses[town.houses.length - 1];
+      gcall('orbit', 0);
+      (h ? gcall('focusHouse', h.id, 0) : gcall('overview', 0)).then(function () {
+        later(function () { (town ? gcall('focusTown', town.name, 2300) : gcall('overview', 2300)).then(function () { gcall('orbit', 0.35); }); }, 120);
+      });
+      AU.boom(0); AU.ping(0.08, 1480); AU.whoosh(s.dur / 1000 - 0.3, 0.6);
+    },
+    draw: function (g, s, lt) {
+      backdrop(g, lt, 0.3);
+      flash(g, lt, 0, 0.35);
+      var sh = shakeAt(lt, 0, 8), out = s.dur - 320;
+      g.save(); g.translate(sh[0], sh[1]);
+      var bigIsNum = /^\+\d/.test(s.big);
+      kLine(g, s.big, W / 2, bigIsNum ? 780 : 740, bigIsNum ? 270 : 190, lt, 60, { color: C.acc, out: out });
+      kLine(g, s.big2, W / 2, bigIsNum ? 985 : 900, 94, lt, 300, { out: out + 40, stagger: 60 });
+      chip(g, s.sticker, W / 2, bigIsNum ? 1115 : 1040, { size: 34, scale: popS(prog(lt, 620, 620 + POP)), alpha: popA(prog(lt, 620, 620 + POP)) * (1 - prog(lt, out + 60, out + 220)) });
+      g.restore();
+    }
+  };
+
+  // ---------- HOOK: VÝPADEK RADARU (glitch → střih na číslo)
   HOOKS.glitch = {
     cut: 950, headerAt: 950,
     enter: function (s) {
@@ -1219,70 +1220,64 @@
     draw: function (g, s, lt) {
       var cut = this.cut, seed = 'g' + Math.floor(lt / 70);
       if (lt < cut) {
-        g.fillStyle = 'rgba(4,8,22,0.9)'; g.fillRect(0, 0, W, H);
-        drawRadar(g, W / 2, 900, 420, -Math.PI / 2 + lt / 300, 0.35, { fill: false, lw: 3 });
+        g.fillStyle = 'rgba(10,18,51,0.92)'; g.fillRect(0, 0, W, H);
         var jit = rnd(seed) > 0.72 ? 1 : 0, amt = 5 + jit * 12;
-        var cp = E.outBack(prog(lt, 60, 300));
-        chip(g, '⚠ SIGNÁL ZTRACEN', W / 2, 560, { size: 40, bg: C.red, color: C.white, weight: 900, spacing: 5, scale: Math.max(0.001, cp), alpha: clamp(cp, 0, 1) });
+        stamp(g, 'SIGNÁL ZTRACEN', W / 2, 600, { size: 40, p: prog(lt, 60, 60 + POP) });
         var tp = prog(lt, 80, 260);
         g.save(); g.globalAlpha = tp;
-        rgbText(g, 'VÝPADEK', W / 2 + (jit ? (rnd(seed + 'q') - 0.5) * 24 : 0), 780, 180, C.white, amt);
-        rgbText(g, 'RADARU', W / 2 - (jit ? (rnd(seed + 'w') - 0.5) * 24 : 0), 960, 180, C.yellow, amt * 0.8);
+        rgbText(g, 'VÝPADEK', W / 2 + (jit ? (rnd(seed + 'q') - 0.5) * 24 : 0), 800, 170, C.white, amt);
+        rgbText(g, 'RADARU', W / 2 - (jit ? (rnd(seed + 'w') - 0.5) * 24 : 0), 970, 170, C.acc, amt * 0.8);
         g.restore();
-        // šum
         g.save(); for (var i = 0; i < 24; i++) { g.fillStyle = 'rgba(255,255,255,' + (0.04 + rnd(seed + 'n' + i) * 0.16) + ')'; g.fillRect(rnd(seed + 'x' + i) * W, rnd(seed + 'y' + i) * H, 20 + rnd(seed + 'w' + i) * 220, 3); } g.restore();
-        scanlines(g, 0.22);
+        scanlines(g, 0.2);
         sliceShift(g, jit ? 46 : 10, seed, jit ? 5 : 2);
-        // blik do bíla těsně před střihem
         var fl = prog(lt, cut - 90, cut); if (fl > 0) { g.fillStyle = 'rgba(255,255,255,' + fl * 0.9 + ')'; g.fillRect(0, 0, W, H); }
         return;
       }
       var l2 = lt - cut;
-      grade(g, 0.55, 0.6, 0);
-      var fl2 = 1 - prog(l2, 0, 260); if (fl2 > 0) { g.fillStyle = 'rgba(255,255,255,' + fl2 * 0.7 + ')'; g.fillRect(0, 0, W, H); }
-      var out = s.dur - cut - 340;
-      kLine(g, s.big, W / 2, 835, 340, l2, 40, { color: C.yellow, out: out, punch: 2.2 });
-      kLine(g, s.big2, W / 2, 985, 108, l2, 220, { color: C.white, out: out + 40, stagger: 80 });
-      kLine(g, s.sticker, W / 2, 1130, 64, l2, 450, { sticker: C.white, color: C.ink, out: out + 80, punch: 1.3, stagger: 50 });
-      if (l2 < 300) sliceShift(g, 50 * (1 - l2 / 300), 'r' + Math.floor(l2 / 60), 4, C.navy);
+      backdrop(g, lt, 0.3);
+      flash(g, l2, 0, 0.6);
+      var out = s.dur - cut - 320;
+      kLine(g, s.big, W / 2, 780, 270, l2, 40, { color: C.acc, out: out });
+      kLine(g, s.big2, W / 2, 985, 94, l2, 220, { out: out + 40, stagger: 60 });
+      chip(g, s.sticker, W / 2, 1115, { size: 34, scale: popS(prog(l2, 450, 450 + POP)), alpha: popA(prog(l2, 450, 450 + POP)) * (1 - prog(l2, out + 60, out + 220)) });
+      if (l2 < 300) sliceShift(g, 50 * (1 - l2 / 300), 'r' + Math.floor(l2 / 60), 4, C.night);
     }
   };
 
-  // ---------- HOOK: +38 LIDÍ ZA 24 HODIN (ciferník 24 h)
+  // ---------- HOOK: +38 LIDÍ ZA 24 HODIN (ciferník)
   HOOKS.counter = {
     enter: function (s) {
       gcall('orbit', 0); gcall('overview', 16); later(function () { if (R.running) camTown(s.town, 2400).then(function () { gcall('orbit', 0.3); }); }, 200);
       AU.boom(0); AU.ping(0.1, 1480); AU.ping(1.45, 1760); AU.whoosh(s.dur / 1000 - 0.3, 0.6); R.lastCount = -1;
     },
     draw: function (g, s, lt) {
-      grade(g, 0.6, 0.6, 0.35 * (1 - prog(lt, s.dur - 300, s.dur)));
-      var fl = 1 - prog(lt, 0, 200); if (fl > 0) { g.fillStyle = 'rgba(255,255,255,' + fl * 0.5 + ')'; g.fillRect(0, 0, W, H); }
+      backdrop(g, lt, 0.4);
+      flash(g, lt, 0, 0.3);
       var cx = W / 2, cy = 860, r = 250, out = s.dur - 320;
-      var a = E.outBack(prog(lt, 0, 380)) * (1 - prog(lt, out, out + 250)), p = E.outCubic(prog(lt, 150, 1400));
+      var ap = prog(lt, 0, POP), a = popA(ap) * (1 - prog(lt, out, out + 250)), p = E.outCubic(prog(lt, 150, 1400));
       if (a > 0) {
-        g.save(); g.globalAlpha = clamp(a, 0, 1); g.translate(cx, cy); g.scale(a, a);
-        g.fillStyle = 'rgba(11,20,48,0.55)'; g.beginPath(); g.arc(0, 0, r + 60, 0, 7); g.fill();
-        g.lineWidth = 28; g.strokeStyle = 'rgba(255,255,255,0.14)'; g.beginPath(); g.arc(0, 0, r, 0, 7); g.stroke();
+        g.save(); g.globalAlpha = a; g.translate(cx, cy); g.scale(popS(ap), popS(ap));
+        glass(g, -r - 60, -r - 60, (r + 60) * 2, (r + 60) * 2, r + 60);
+        g.lineWidth = 22; g.strokeStyle = 'rgba(255,255,255,0.14)'; g.beginPath(); g.arc(0, 0, r, 0, 7); g.stroke();
         for (var i = 0; i < 24; i++) {
-          var ang = -Math.PI / 2 + i / 24 * Math.PI * 2, on = i / 24 <= p, l = i % 6 === 0 ? 30 : 16;
-          g.strokeStyle = on ? C.yellow : 'rgba(191,224,255,0.4)'; g.lineWidth = i % 6 === 0 ? 6 : 4;
-          g.beginPath(); g.moveTo(Math.cos(ang) * (r + 26), Math.sin(ang) * (r + 26)); g.lineTo(Math.cos(ang) * (r + 26 + l), Math.sin(ang) * (r + 26 + l)); g.stroke();
+          var ang = -Math.PI / 2 + i / 24 * Math.PI * 2, on = i / 24 <= p, l = i % 6 === 0 ? 26 : 14;
+          g.strokeStyle = on ? C.acc : 'rgba(255,255,255,0.35)'; g.lineWidth = i % 6 === 0 ? 5 : 3;
+          g.beginPath(); g.moveTo(Math.cos(ang) * (r + 24), Math.sin(ang) * (r + 24)); g.lineTo(Math.cos(ang) * (r + 24 + l), Math.sin(ang) * (r + 24 + l)); g.stroke();
         }
-        g.shadowColor = C.yellow; g.shadowBlur = 30; g.strokeStyle = C.yellow; g.lineWidth = 28; g.lineCap = 'round';
+        g.strokeStyle = C.acc; g.lineWidth = 22; g.lineCap = 'round';
         if (p > 0.002) { g.beginPath(); g.arc(0, 0, r, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); g.stroke(); }
-        var ea = -Math.PI / 2 + p * Math.PI * 2; g.shadowBlur = 0;
-        g.fillStyle = '#fff'; g.beginPath(); g.arc(Math.cos(ea) * r, Math.sin(ea) * r, 22, 0, 7); g.fill();
+        var ea = -Math.PI / 2 + p * Math.PI * 2;
+        g.fillStyle = C.white; g.beginPath(); g.arc(Math.cos(ea) * r, Math.sin(ea) * r, 18, 0, 7); g.fill();
         g.restore();
-        var val = Math.round(lerp(0, s.n, p)), bump = 1 + Math.sin(prog(lt, 1400, 1700) * Math.PI) * 0.12;
+        var val = Math.round(lerp(0, s.n, p)), bump = 1 + Math.sin(prog(lt, 1400, 1700) * Math.PI) * 0.1;
         if (val !== R.lastCount && lt - (R._lastTick || 0) > 45 && lt < 1450) { AU.tick(0, 1900 + (val % 7) * 90); R._lastTick = lt; R.lastCount = val; }
-        g.save(); g.globalAlpha = clamp(a, 0, 1); g.translate(cx, cy - 30); g.scale(a * bump, a * bump);
-        var txt = '+' + val, size = fitSize(g, '+' + s.n, 400, 200, 900, 80);
-        g.font = font(size, 900); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = C.yellow;
-        g.shadowColor = 'rgba(5,10,30,0.5)'; g.shadowBlur = 24; g.fillText(txt, 0, 0);
-        g.shadowBlur = 0; g.font = font(64, 900); g.fillStyle = '#fff'; spacedText(g, s.big2, 0, size * 0.62, 8, 'center');
+        g.save(); g.globalAlpha = a; g.translate(cx, cy - 24); g.scale(popS(ap) * bump, popS(ap) * bump);
+        var size = hfit(g, '+' + s.n, 380, 190, 800, 80); hf(g, size, 800); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = C.acc; htext(g, '+' + val, 0, 0);
+        hf(g, 56, 800); g.fillStyle = C.white; htext(g, s.big2, 0, size * 0.62);
         g.restore();
       }
-      kLine(g, s.sticker, W / 2, 1250, 62, lt, 900, { sticker: C.white, color: C.ink, out: out + 60, punch: 1.3, stagger: 50 });
+      chip(g, s.sticker, W / 2, 1250, { size: 34, scale: popS(prog(lt, 900, 900 + POP)), alpha: popA(prog(lt, 900, 900 + POP)) * (1 - prog(lt, out + 60, out + 220)) });
     }
   };
 
@@ -1295,46 +1290,42 @@
       AU.whoosh(s.dur / 1000 - 0.3, 0.6);
     },
     draw: function (g, s, lt) {
-      grade(g, 0.65, 0.5, 0);
-      var out = s.dur - 320;
-      // lupa – zvětšený výřez hry
-      var lp = E.outBack(prog(lt, 800, 1150)) * (1 - prog(lt, out, out + 200));
+      backdrop(g, lt, 0.35);
+      var out = s.dur - 320, oa = 1 - prog(lt, out, out + 200);
+      var lp = popS(prog(lt, 800, 800 + POP)) * popA(prog(lt, 800, 800 + POP)) * oa;
       var lx = W / 2 + Math.sin(lt / 650) * 250, ly = 1110 + Math.sin(lt / 410) * 80, lr = 150;
-      // špendlíky
       for (var i = 0; i < 12; i++) {
         var px = 130 + rnd('px' + i) * 820, py = 990 + rnd('py' + i) * 290, t0 = 280 + i * 70, q = prog(lt, t0, t0 + 420);
         if (q <= 0) continue;
         var by = (1 - E.outBack(q)) * -260, hot = Math.hypot(px - lx, py - 50 - ly) < lr && lp > 0.5;
-        g.save(); g.globalAlpha = clamp(q * 3, 0, 1) * (1 - prog(lt, out, out + 200));
-        pin(g, px, py + by, hot ? 92 : 70, hot ? C.white : C.yellow, 'house');
+        g.save(); g.globalAlpha = clamp(q * 3, 0, 1) * oa;
+        pin(g, px, py + by, hot ? 92 : 70, hot ? C.white : C.acc, 'house');
         g.restore();
       }
-      if (lp > 0) {
+      if (lp > 0.01) {
         var gc = G() && G().canvas;
         g.save(); g.translate(lx, ly); g.scale(lp, lp); g.translate(-lx, -ly);
         g.save(); g.beginPath(); g.arc(lx, ly, lr, 0, 7); g.clip();
         if (gc && gc.width) {
           var sc = Math.max(W / gc.width, H / gc.height), ox = (W - gc.width * sc) / 2, oy = (H - gc.height * sc) / 2, z = 2;
-          var sx = (lx - ox) / sc, sy = (ly - oy) / sc, hw = lr / (sc * z);
-          try { g.drawImage(gc, sx - hw, sy - hw, hw * 2, hw * 2, lx - lr, ly - lr, lr * 2, lr * 2); } catch (e) {}
+          var sx = (lx - ox) / sc, sy = (ly - oy) / sc, hwid = lr / (sc * z);
+          try { g.drawImage(gc, sx - hwid, sy - hwid, hwid * 2, hwid * 2, lx - lr, ly - lr, lr * 2, lr * 2); } catch (e) {}
         }
-        var sh = g.createRadialGradient(lx - 50, ly - 60, 10, lx, ly, lr); sh.addColorStop(0, 'rgba(255,255,255,0.25)'); sh.addColorStop(0.5, 'rgba(255,255,255,0)'); sh.addColorStop(1, 'rgba(11,20,48,0.25)');
-        g.fillStyle = sh; g.fillRect(lx - lr, ly - lr, lr * 2, lr * 2);
         g.restore();
-        g.lineCap = 'round'; g.strokeStyle = C.navy; g.lineWidth = 44;
+        g.lineCap = 'round'; g.strokeStyle = C.night; g.lineWidth = 40;
         g.beginPath(); g.moveTo(lx + Math.cos(0.8) * (lr + 14), ly + Math.sin(0.8) * (lr + 14)); g.lineTo(lx + Math.cos(0.8) * (lr + 120), ly + Math.sin(0.8) * (lr + 120)); g.stroke();
-        g.strokeStyle = C.yellow; g.lineWidth = 30; g.stroke();
-        g.strokeStyle = '#fff'; g.lineWidth = 14; g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 20; g.beginPath(); g.arc(lx, ly, lr, 0, 7); g.stroke();
+        g.strokeStyle = C.acc; g.lineWidth = 26; g.stroke();
+        g.strokeStyle = C.white; g.lineWidth = 12; g.shadowColor = 'rgba(0,0,0,.4)'; g.shadowBlur = 20; g.beginPath(); g.arc(lx, ly, lr, 0, 7); g.stroke();
         g.restore();
       }
-      var fl = 1 - prog(lt, 0, 200); if (fl > 0) { g.fillStyle = 'rgba(255,255,255,' + fl * 0.45 + ')'; g.fillRect(0, 0, W, H); }
-      kLine(g, 'KDE JE', W / 2, 655, 130, lt, 30, { out: out, punch: 2 });
-      kLine(g, 'TVŮJ DOMEK?', W / 2, 790, 124, lt, 200, { color: C.yellow, out: out + 30, punch: 1.8 });
-      kLine(g, s.sticker, W / 2, 915, 52, lt, 640, { sticker: C.white, color: C.ink, out: out + 60, punch: 1.3, stagger: 45 });
+      flash(g, lt, 0, 0.3);
+      kLine(g, 'KDE JE', W / 2, 655, 124, lt, 30, { out: out });
+      kLine(g, 'TVŮJ DOMEK?', W / 2, 790, 118, lt, 200, { color: C.acc, out: out + 30 });
+      chip(g, s.sticker, W / 2, 915, { size: 32, scale: popS(prog(lt, 640, 640 + POP)), alpha: popA(prog(lt, 640, 640 + POP)) * oa });
     }
   };
 
-  // ---------- HOOK: odpočet 3·2·1 → DEN 7
+  // ---------- HOOK: odpočet 3·2·1 → DEN X
   HOOKS.countdown = {
     step: 380, noDay: true,
     enter: function (s) {
@@ -1346,31 +1337,30 @@
     },
     draw: function (g, s, lt) {
       var stp = this.step, end = stp * 3, cx = W / 2, cy = 860, out = s.dur - 320;
-      grade(g, 0.55, 0.6, 0);
+      backdrop(g, lt, 0.3);
       if (lt < end + 200) {
         var oa = 1 - prog(lt, end, end + 200);
-        g.fillStyle = 'rgba(8,14,36,' + 0.82 * oa + ')'; g.fillRect(0, 0, W, H);
+        g.fillStyle = 'rgba(10,18,51,' + 0.85 * oa + ')'; g.fillRect(0, 0, W, H);
         if (lt < end) {
           var k = Math.floor(lt / stp), f = (lt % stp) / stp, dgt = 3 - k;
           g.save();
-          // filmový leader
-          g.strokeStyle = 'rgba(191,224,255,0.55)'; g.lineWidth = 4;
+          g.strokeStyle = 'rgba(255,255,255,0.3)'; g.lineWidth = 3;
           g.beginPath(); g.arc(cx, cy, 280, 0, 7); g.stroke(); g.beginPath(); g.arc(cx, cy, 225, 0, 7); g.stroke();
           g.beginPath(); g.moveTo(cx - 420, cy); g.lineTo(cx + 420, cy); g.moveTo(cx, cy - 320); g.lineTo(cx, cy + 380); g.stroke();
-          g.fillStyle = 'rgba(95,168,232,0.38)'; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, 280, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2); g.closePath(); g.fill();
-          g.strokeStyle = C.yellow; g.lineWidth = 10; g.beginPath(); g.arc(cx, cy, 280 + E.outCubic(f) * 110, 0, 7); g.globalAlpha = 1 - f; g.stroke(); g.globalAlpha = 1;
-          var sc = lerp(1.5, 1, E.outBack(prog(f, 0, 0.45)));
-          g.translate(cx, cy); g.scale(sc, sc); g.font = font(330, 900); g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillStyle = '#fff'; g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 30; g.fillText(String(dgt), 0, 10);
+          g.fillStyle = 'rgba(198,255,61,0.22)'; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, 280, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2); g.closePath(); g.fill();
+          g.strokeStyle = C.acc; g.lineWidth = 8; g.beginPath(); g.arc(cx, cy, 280 + E.outCubic(f) * 110, 0, 7); g.globalAlpha = 1 - f; g.stroke(); g.globalAlpha = 1;
+          var sc = popS(prog(f, 0, 0.5));
+          g.translate(cx, cy); g.scale(sc, sc); hf(g, 330, 800); g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillStyle = C.white; htext(g, String(dgt), 0, 10);
           g.restore();
-          scanlines(g, 0.12);
+          scanlines(g, 0.1);
         }
       }
-      var fl = prog(lt, end, end + 40) * (1 - prog(lt, end + 40, end + 300)); if (fl > 0) { g.fillStyle = 'rgba(255,255,255,' + fl * 0.8 + ')'; g.fillRect(0, 0, W, H); }
-      var shake = lt > end ? (1 - prog(lt, end, end + 400)) * 12 : 0;
-      g.save(); g.translate(Math.sin(lt / 17) * shake, Math.cos(lt / 23) * shake);
-      kLine(g, 'DEN ' + s.day, W / 2, 840, 270, lt, end, { color: C.yellow, out: out, punch: 2.3, stagger: 60 });
-      kLine(g, s.sticker, W / 2, 1050, 64, lt, end + 260, { sticker: C.white, color: C.ink, out: out + 60, punch: 1.3, stagger: 50 });
+      var fl = prog(lt, end, end + 40) * (1 - prog(lt, end + 40, end + 300)); if (fl > 0) { g.fillStyle = 'rgba(255,255,255,' + fl * 0.7 + ')'; g.fillRect(0, 0, W, H); }
+      var sh = shakeAt(lt, end, 10);
+      g.save(); g.translate(sh[0], sh[1]);
+      kLine(g, 'DEN ' + s.day, W / 2, 840, 250, lt, end, { color: C.acc, out: out, stagger: 60 });
+      chip(g, s.sticker, W / 2, 1040, { size: 34, scale: popS(prog(lt, end + 260, end + 260 + POP)), alpha: popA(prog(lt, end + 260, end + 260 + POP)) * (1 - prog(lt, out + 60, out + 220)) });
       g.restore();
     }
   };
@@ -1387,32 +1377,26 @@
     },
     draw: function (g, s, lt) {
       var out = s.dur - 320, cx = W / 2, cy = houseY(), rv = this.reveal;
-      grade(g, 0.55, 0.55, 0);
-      var fl = 1 - prog(lt, 0, 200); if (fl > 0) { g.fillStyle = 'rgba(255,255,255,' + fl * 0.5 + ')'; g.fillRect(0, 0, W, H); }
+      backdrop(g, lt, 0.3);
+      flash(g, lt, 0, 0.3);
       var bp = E.outCubic(prog(lt, 0, 900)), hs = lerp(240, 180, bp), oa = 1 - prog(lt, out, out + 200);
       g.save(); g.globalAlpha = oa;
-      brackets(g, cx, cy, hs, hs, 70, 9, lt > rv ? C.yellow : '#fff');
-      // skenovací linka
-      if (lt < rv) { var yy = cy - hs + ((lt * 0.5) % (hs * 2)); g.fillStyle = 'rgba(95,168,232,0.55)'; g.fillRect(cx - hs, yy - 2, hs * 2, 4); }
-      // REC
-      if (Math.floor(lt / 400) % 2 === 0 || lt > rv) { g.fillStyle = C.red; g.beginPath(); g.arc(cx - hs + 34, cy - hs + 36, 11, 0, 7); g.fill(); }
-      g.fillStyle = '#fff'; g.font = font(30, 800); g.textBaseline = 'middle'; g.textAlign = 'left'; spacedText(g, 'REC', cx - hs + 56, cy - hs + 37, 3, 'left');
+      brackets(g, cx, cy, hs, hs, 70, 8, lt > rv ? C.acc : C.white);
+      if (lt < rv) { var yy = cy - hs + ((lt * 0.5) % (hs * 2)); g.fillStyle = 'rgba(198,255,61,0.55)'; g.fillRect(cx - hs, yy - 2, hs * 2, 4); }
+      if (Math.floor(lt / 400) % 2 === 0 || lt > rv) { g.fillStyle = C.acc; g.beginPath(); g.arc(cx - hs + 34, cy - hs + 36, 10, 0, 7); g.fill(); }
+      bf(g, 26, 700); g.fillStyle = C.white; g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillText('REC', cx - hs + 54, cy - hs + 37);
       g.strokeStyle = 'rgba(255,255,255,0.7)'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - 22, cy); g.lineTo(cx + 22, cy); g.moveTo(cx, cy - 22); g.lineTo(cx, cy + 22); g.stroke();
       g.restore();
-      if (lt > rv) reticle(g, cx, cy, lt - rv + 250, C.yellow);
-      kLine(g, 'KDO TO JE?', W / 2, 680, 140, lt, 40, { out: out, punch: 2.1, stagger: 90 });
-      // nick: šifrovaný → odkrytý
+      if (lt > rv) reticle(g, cx, cy, lt - rv + 250, C.acc);
+      kLine(g, 'KDO TO JE?', W / 2, 680, 134, lt, 40, { out: out, stagger: 70 });
       var txt = s.reveal || '?', chars = 'ABCDEFHJKLMNPRSTUVXYZ0123456789_', shown = '';
-      for (var i = 0; i < txt.length; i++) {
-        var at = rv + i * 30;
-        shown += (lt >= at || txt[i] === ' ') ? txt[i] : chars[hash(i + ':' + Math.floor(lt / 55)) % chars.length];
-      }
-      var cp = E.outBack(prog(lt, 500, 800)), done = lt >= rv + txt.length * 30;
-      if (cp > 0) chip(g, shown, W / 2, 1290, { size: 52, bg: done ? C.yellow : 'rgba(11,20,48,0.85)', color: done ? C.ink : '#fff', border: done ? null : 'rgba(95,168,232,.8)', weight: 900, spacing: 2, scale: Math.max(0.001, cp * (1 + Math.sin(prog(lt, rv, rv + 260) * Math.PI) * 0.12)), alpha: clamp(cp, 0, 1) * (1 - prog(lt, out, out + 200)) });
+      for (var i = 0; i < txt.length; i++) { var at = rv + i * 30; shown += (lt >= at || txt[i] === ' ') ? txt[i] : chars[hash(i + ':' + Math.floor(lt / 55)) % chars.length]; }
+      var cp = prog(lt, 500, 500 + POP), done = lt >= rv + txt.length * 30;
+      if (cp > 0) chip(g, shown, W / 2, 1290, { size: 44, solid: done, scale: popS(cp) * (1 + Math.sin(prog(lt, rv, rv + 260) * Math.PI) * 0.1), alpha: popA(cp) * (1 - prog(lt, out, out + 200)) });
     }
   };
 
-  // ---------- HOOK: MIMOŘÁDNĚ (zpravodajská páska)
+  // ---------- HOOK: MIMOŘÁDNĚ (razítko + pásky)
   HOOKS.breaking = {
     enter: function (s) {
       gcall('orbit', 0); camTown(s.townB || s.town, 1400).then(function () { gcall('orbit', 0.25); });
@@ -1420,22 +1404,23 @@
       AU.whoosh(s.dur / 1000 - 0.3, 0.6);
     },
     draw: function (g, s, lt) {
-      grade(g, 0.65, 0.6, 0.2);
+      backdrop(g, lt, 0.45);
       var out = s.dur - 320, oa = 1 - prog(lt, out, out + 220);
-      var fl = 1 - prog(lt, 0, 200); if (fl > 0) { g.fillStyle = 'rgba(255,77,94,' + fl * 0.45 + ')'; g.fillRect(0, 0, W, H); }
-      var cp = E.outBack(prog(lt, 0, 300));
-      chip(g, 'MIMOŘÁDNĚ', W / 2, 590, { size: 46, bg: C.red, color: '#fff', weight: 900, spacing: 7, scale: Math.max(0.001, cp), alpha: clamp(cp, 0, 1) * oa, icon: iconDot('#fff', lt) });
-      kLine(g, s.line1, W / 2, 785, 160, lt, 80, { out: out, punch: 2 });
-      kLine(g, s.line2, W / 2, 905, 84, lt, 260, { out: out + 30, color: C.ice });
-      kLine(g, s.sticker, W / 2, 1020, 58, lt, 520, { sticker: C.yellow, color: C.ink, out: out + 60, punch: 1.4, stagger: 50 });
-      // pásky
-      [[s.ticker1, 1165, -0.05, C.yellow, C.ink, 1], [s.ticker2, 1262, 0.035, C.red, '#fff', -1]].forEach(function (b, k) {
+      flash(g, lt, 0, 0.4);
+      var sh = shakeAt(lt, 0, 9);
+      g.save(); g.translate(sh[0], sh[1]);
+      stamp(g, 'MIMOŘÁDNĚ', W / 2, 600, { size: 50, p: prog(lt, 0, POP), alpha: oa });
+      kLine(g, s.line1, W / 2, 785, 150, lt, 80, { out: out });
+      kLine(g, s.line2, W / 2, 905, 80, lt, 260, { out: out + 30, color: C.sky });
+      kLine(g, s.sticker, W / 2, 1020, 54, lt, 520, { solid: true, out: out + 60, stagger: 30 });
+      g.restore();
+      [[s.ticker1, 1165, -0.05, 'acc', 1], [s.ticker2, 1262, 0.035, 'glass', -1]].forEach(function (b, k) {
         var ip = E.outCubic(prog(lt, 180 + k * 120, 560 + k * 120)); if (ip <= 0) return;
-        g.save(); g.globalAlpha = oa; g.translate(W / 2 + (1 - ip) * b[5] * -1400, b[1]); g.rotate(b[2]);
-        g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 24; g.fillStyle = b[3]; g.fillRect(-800, -40, 1600, 80); g.shadowBlur = 0;
-        g.font = font(40, 900); g.fillStyle = b[4]; g.textBaseline = 'middle';
-        var txt = b[0], tw = spacedWidth(g, txt, 4), x0 = -800 - ((lt * 0.35 * b[5]) % tw + tw) % tw;
-        for (var x = x0; x < 800; x += tw) spacedText(g, txt, x, 2, 4, 'left');
+        g.save(); g.globalAlpha = oa; g.translate(W / 2 + (1 - ip) * b[4] * -1400, b[1]); g.rotate(b[2]);
+        if (b[3] === 'acc') { g.fillStyle = C.acc; g.fillRect(-800, -38, 1600, 76); } else glass(g, -800, -38, 1600, 76, 0);
+        hf(g, 36, 800); g.fillStyle = b[3] === 'acc' ? C.ink : C.white; g.textBaseline = 'middle'; g.textAlign = 'left';
+        var txt = b[0], tw = hw(g, txt), x0 = -800 - ((lt * 0.35 * b[4]) % tw + tw) % tw;
+        for (var x = x0; x < 800; x += tw) htext(g, txt, x, 2);
         g.restore();
       });
     }
@@ -1451,79 +1436,76 @@
     },
     draw: function (g, s, lt) {
       var out = s.dur - 320, oa = 1 - prog(lt, out, out + 220), sl = this.slam;
-      grade(g, 0.6, 0.6, 0.15);
-      // diagonální dělení
+      backdrop(g, lt, 0.4);
       var dp = E.outCubic(prog(lt, 0, 420));
-      g.save(); g.globalAlpha = 0.72 * oa;
+      g.save(); g.globalAlpha = 0.6 * oa;
       g.fillStyle = C.blue; g.beginPath(); g.moveTo(0, 570); g.lineTo(lerp(-200, 600, dp), 570); g.lineTo(lerp(-400, 480, dp), 1300); g.lineTo(0, 1300); g.closePath(); g.fill();
-      g.fillStyle = C.navy2; g.beginPath(); g.moveTo(W, 570); g.lineTo(lerp(W + 400, 600, dp), 570); g.lineTo(lerp(W + 200, 480, dp), 1300); g.lineTo(W, 1300); g.closePath(); g.fill();
+      g.fillStyle = C.night; g.beginPath(); g.moveTo(W, 570); g.lineTo(lerp(W + 400, 600, dp), 570); g.lineTo(lerp(W + 200, 480, dp), 1300); g.lineTo(W, 1300); g.closePath(); g.fill();
       g.restore();
-      if (dp > 0.6) { g.save(); g.globalAlpha = oa; g.strokeStyle = '#fff'; g.lineWidth = 8; g.shadowColor = C.sky; g.shadowBlur = 30; g.beginPath(); g.moveTo(600, 570); g.lineTo(480, 1300); g.stroke(); g.restore(); }
-      var shake = lt > sl ? (1 - prog(lt, sl, sl + 380)) * 14 : 0;
-      g.save(); g.translate(Math.sin(lt / 15) * shake, Math.cos(lt / 21) * shake);
+      if (dp > 0.6) { g.save(); g.globalAlpha = oa; g.strokeStyle = C.white; g.lineWidth = 6; g.beginPath(); g.moveTo(600, 570); g.lineTo(480, 1300); g.stroke(); g.restore(); }
+      var sh = shakeAt(lt, sl, 12);
+      g.save(); g.translate(sh[0], sh[1]);
       [[s.a, 285, -1, 1], [s.b, 795, 1, 2]].forEach(function (it) {
-        var o = it[0], x = it[1], p = E.outBack(prog(lt, 60 + it[3] * 80, 480 + it[3] * 80)), img = s._img && s._img[it[3] === 1 ? 'a' : 'b'];
-        if (p <= 0) return;
-        var px = x + (1 - clamp(p, 0, 1)) * it[2] * 500;
-        g.save(); g.globalAlpha = clamp(p, 0, 1) * oa; g.translate(px, 770); g.rotate(it[2] * 0.06);
+        var o = it[0], x = it[1], pp = prog(lt, 60 + it[3] * 80, 60 + it[3] * 80 + POP), img = s._img && s._img[it[3] === 1 ? 'a' : 'b'];
+        if (pp <= 0) return;
+        var px = x + (1 - E.outCubic(pp)) * it[2] * 400;
+        g.save(); g.globalAlpha = popA(pp) * oa; g.translate(px, 770); g.rotate(it[2] * 0.05); g.scale(popS(pp), popS(pp));
         g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 40; g.shadowOffsetY = 14;
-        if (img) g.drawImage(img, -95, -114, 190, 228); else shield(g, -95, -114, 190, 228, it[3] === 1 ? C.blue : C.red, up(o.name)[0]);
+        if (img) g.drawImage(img, -95, -114, 190, 228); else shield(g, -95, -114, 190, 228, it[3] === 1 ? C.blue : C.sky, up(o.name)[0]);
         g.restore();
-        g.save(); g.globalAlpha = clamp(p, 0, 1) * oa;
-        g.font = font(fitSize(g, up(o.name), 400, 64, 900, 30), 900); g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 16; g.fillText(up(o.name), px, 950);
+        g.save(); g.globalAlpha = popA(pp) * oa;
+        var fs = hfit(g, up(o.name), 400, 58, 800, 30); hf(g, fs, 800); g.fillStyle = C.white; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 16; htext(g, up(o.name), px, 950);
         g.restore();
-        var np = E.outBack(prog(lt, sl + 200 + it[3] * 120, sl + 520 + it[3] * 120));
-        if (np > 0) chip(g, '+' + o.n, px, 1050, { size: 54, bg: it[3] === 1 ? C.yellow : 'rgba(255,255,255,0.95)', color: C.ink, weight: 900, scale: Math.max(0.001, np), alpha: clamp(np, 0, 1) * oa });
+        var np = prog(lt, sl + 200 + it[3] * 120, sl + 200 + it[3] * 120 + POP);
+        if (np > 0) chip(g, '+' + o.n, px, 1050, { size: 40, scale: popS(np), alpha: popA(np) * oa });
       });
-      // VS
       var vp = prog(lt, sl - 120, sl + 160);
       if (vp > 0) {
         var vs = lerp(3, 1, E.outBack(vp));
-        g.save(); g.globalAlpha = clamp(vp * 2, 0, 1) * oa; g.translate(540, 800); g.rotate(-0.12); g.scale(vs, vs);
-        g.font = 'italic ' + font(170, 900); g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
-        g.lineWidth = 22; g.strokeStyle = C.navy; g.strokeText('VS', 0, 0); g.fillStyle = C.yellow; g.fillText('VS', 0, 0);
+        g.save(); g.globalAlpha = clamp(vp * 2, 0, 1) * oa; g.translate(540, 800); g.rotate(-0.105); g.scale(vs, vs);
+        hf(g, 160, 800); g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillStyle = 'rgba(10,18,51,0.7)'; rr(g, -150, -95, 300, 190, 10); g.fill(); g.strokeStyle = C.acc; g.lineWidth = 4; rr(g, -150, -95, 300, 190, 10); g.stroke();
+        g.fillStyle = C.acc; htext(g, 'VS', 0, 4);
         g.restore();
       }
       g.restore();
-      kLine(g, 'KDO DNES VYHRÁL?', W / 2, 1190, 70, lt, sl + 400, { sticker: C.white, color: C.ink, out: out + 40, punch: 1.3, stagger: 50 });
-      var fl = 1 - prog(lt, sl, sl + 200); if (lt > sl && fl > 0) { g.fillStyle = 'rgba(255,255,255,' + fl * 0.5 + ')'; g.fillRect(0, 0, W, H); }
+      kLine(g, 'KDO DNES VYHRÁL?', W / 2, 1190, 64, lt, sl + 400, { box: true, out: out + 40, stagger: 30 });
+      flash(g, lt, sl, 0.4);
     }
   };
 
-  // ---------- společná hlavička hooku: DEN X + stav (vidět hned v 1. sekundě)
+  // ---------- společná hlavička hooku: DEN X (glass chip) + stav s číslem v akcentu (counter)
   function hookHeader(g, s, lt, h) {
     if (lt < 0) return;
     var out = s.dur - 320 - (h.headerAt || 0), oa = 1 - prog(lt, out, out + 220);
-    if (!h.noDay) chip(g, 'DEN ' + s.day, W / 2, 395, { size: 44, bg: C.yellow, color: C.ink, weight: 900, spacing: 4, scale: Math.max(0.001, E.outBack(prog(lt, 0, 280))), alpha: prog(lt, 0, 100) * oa });
-    var p = E.outCubic(prog(lt, 60, 700)), a = prog(lt, 60, 220) * oa;
+    if (!h.noDay) { var dp = prog(lt, 0, POP); chip(g, 'DEN ' + s.day, W / 2, 395, { size: 36, scale: popS(dp), alpha: popA(dp) * oa }); }
+    var p = E.outCubic(prog(lt, 60, 760)), a = prog(lt, 60, 220) * oa;
     if (a <= 0) return;
     var num = fmt(Math.round(lerp(s.from || 0, s.pop || 0, p))), pre = s.statusPre, post = ' ' + s.statusPost;
     g.save(); g.globalAlpha = a; g.textBaseline = 'middle';
-    var size = 52; g.font = font(size, 900);
-    var w1 = g.measureText(pre).width, w2 = g.measureText(fmt(s.pop || 0)).width, w3 = g.measureText(post).width, tot = w1 + w2 + w3;
-    if (tot > 960) { size = Math.floor(size * 960 / tot); g.font = font(size, 900); w1 = g.measureText(pre).width; w2 = g.measureText(fmt(s.pop || 0)).width; w3 = g.measureText(post).width; tot = w1 + w2 + w3; }
+    var size = 50; hf(g, size, 800);
+    var w1 = hw(g, pre), w2 = hw(g, fmt(s.pop || 0)), w3 = hw(g, post), tot = w1 + w2 + w3;
+    if (tot > 960) { size = Math.floor(size * 960 / tot); hf(g, size, 800); w1 = hw(g, pre); w2 = hw(g, fmt(s.pop || 0)); w3 = hw(g, post); tot = w1 + w2 + w3; }
     var x = W / 2 - tot / 2, y = 483 + (1 - E.outCubic(prog(lt, 60, 360))) * 24;
-    g.shadowColor = 'rgba(5,10,30,0.6)'; g.shadowBlur = 18; g.textAlign = 'left';
-    g.fillStyle = '#fff'; g.fillText(pre, x, y);
-    g.fillStyle = C.yellow; g.textAlign = 'center'; g.fillText(num, x + w1 + w2 / 2, y);
-    g.fillStyle = '#fff'; g.textAlign = 'left'; g.fillText(post, x + w1 + w2, y);
+    g.shadowColor = 'rgba(0,0,0,0.5)'; g.shadowBlur = 18; g.textAlign = 'left';
+    g.fillStyle = C.white; htext(g, pre, x, y);
+    g.fillStyle = C.acc; g.textAlign = 'center'; htext(g, num, x + w1 + w2 / 2, y);
+    g.fillStyle = C.white; g.textAlign = 'left'; htext(g, post, x + w1 + w2, y);
     g.restore();
   }
 
-  // ---------- koruna (vektor; x,y = střed spodní hrany)
+  // ---------- koruna (vektor, akcent; x,y = střed spodní hrany)
   function drawCrown(g, x, y, w, t) {
     var h = w * 0.66;
     g.save(); g.translate(x, y);
-    var gr = g.createLinearGradient(0, -h, 0, 0); gr.addColorStop(0, '#fff5b0'); gr.addColorStop(0.45, C.yellow); gr.addColorStop(1, '#d99a00');
-    g.shadowColor = 'rgba(255,190,0,0.6)'; g.shadowBlur = w * 0.25;
+    g.shadowColor = 'rgba(198,255,61,0.5)'; g.shadowBlur = w * 0.2;
     g.beginPath(); g.moveTo(-w / 2, 0); g.lineTo(-w / 2, -h * 0.58); g.lineTo(-w * 0.24, -h * 0.28); g.lineTo(0, -h); g.lineTo(w * 0.24, -h * 0.28); g.lineTo(w / 2, -h * 0.58); g.lineTo(w / 2, 0); g.closePath();
-    g.fillStyle = gr; g.fill(); g.shadowBlur = 0;
-    g.lineJoin = 'round'; g.lineWidth = w * 0.03; g.strokeStyle = '#a86f00'; g.stroke();
-    g.fillStyle = '#e5a500'; g.fillRect(-w / 2 + w * 0.015, -h * 0.2, w - w * 0.03, h * 0.2 - w * 0.015);
-    [[-w / 2, -h * 0.58], [0, -h], [w / 2, -h * 0.58]].forEach(function (p) { g.fillStyle = '#fff5b0'; g.beginPath(); g.arc(p[0], p[1], w * 0.065, 0, 7); g.fill(); g.strokeStyle = '#a86f00'; g.lineWidth = w * 0.02; g.stroke(); });
-    [[-w * 0.29, C.red], [0, C.blue], [w * 0.29, C.red]].forEach(function (j) { g.fillStyle = j[1]; g.beginPath(); g.arc(j[0], -h * 0.1, w * 0.05, 0, 7); g.fill(); g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(j[0] - w * 0.015, -h * 0.115, w * 0.015, 0, 7); g.fill(); });
-    // jiskry
+    g.fillStyle = C.acc; g.fill(); g.shadowBlur = 0;
+    g.lineJoin = 'round'; g.lineWidth = w * 0.03; g.strokeStyle = C.ink; g.stroke();
+    g.fillStyle = C.ink; g.fillRect(-w / 2 + w * 0.015, -h * 0.2, w - w * 0.03, w * 0.03);
+    [[-w / 2, -h * 0.58], [0, -h], [w / 2, -h * 0.58]].forEach(function (p) { g.fillStyle = C.white; g.beginPath(); g.arc(p[0], p[1], w * 0.06, 0, 7); g.fill(); g.strokeStyle = C.ink; g.lineWidth = w * 0.02; g.stroke(); });
+    [[-w * 0.29], [0], [w * 0.29]].forEach(function (j) { g.fillStyle = C.ink; g.beginPath(); g.arc(j[0], -h * 0.1, w * 0.045, 0, 7); g.fill(); });
     for (var i = 0; i < 3; i++) {
       var q = ((t || 0) / 900 + i / 3) % 1, a = (1 - Math.abs(q - 0.5) * 2), sx = [-w * 0.42, w * 0.38, w * 0.05][i], sy = [-h * 0.95, -h * 0.85, -h * 1.25][i], r = w * 0.07 * a;
       g.fillStyle = 'rgba(255,255,255,' + a + ')'; g.beginPath(); g.moveTo(sx, sy - r); g.lineTo(sx + r * 0.25, sy - r * 0.25); g.lineTo(sx + r, sy); g.lineTo(sx + r * 0.25, sy + r * 0.25); g.lineTo(sx, sy + r); g.lineTo(sx - r * 0.25, sy + r * 0.25); g.lineTo(sx - r, sy); g.lineTo(sx - r * 0.25, sy - r * 0.25); g.closePath(); g.fill();
@@ -1532,7 +1514,7 @@
   }
   function iconCrown(g, x, y, r) { drawCrown(g, x, y + r * 0.7, r * 2.1, 0); }
 
-  // ---------- HOOK: KDO MÁ KORUNU TÝDNE? (teaser) / KORUNU MÁ … (když scéna koruny chybí)
+  // ---------- HOOK: KDO MÁ KORUNU TÝDNE?
   HOOKS.crown = {
     land: 650,
     enter: function (s) {
@@ -1542,20 +1524,18 @@
     },
     draw: function (g, s, lt) {
       var out = s.dur - 320, oa = 1 - prog(lt, out, out + 220), land = this.land;
-      grade(g, 0.62, 0.6, 0.25 * oa);
-      var rp = prog(lt, land - 100, land + 300) * oa;
-      if (rp > 0) { g.save(); g.translate(W / 2, 760); g.rotate(lt / 3000); g.globalAlpha = 0.18 * rp; g.fillStyle = C.yellow; for (var r = 0; r < 14; r++) { g.rotate(Math.PI / 7); g.beginPath(); g.moveTo(0, 0); g.lineTo(-50, -800); g.lineTo(50, -800); g.closePath(); g.fill(); } g.restore(); }
+      backdrop(g, lt, 0.4);
       var p = prog(lt, 120, land), y = lerp(-200, 840, E.inCubic(p)), sq = lt > land ? 1 + Math.sin(prog(lt, land, land + 260) * Math.PI) * 0.12 : 1;
-      if (p > 0) { g.save(); g.globalAlpha = oa; g.translate(W / 2, y); g.scale(sq, 1 / sq); drawCrown(g, 0, 0, 330, lt); g.restore(); }
+      if (p > 0) { g.save(); g.globalAlpha = oa; g.translate(W / 2, y); g.scale(sq, 1 / sq); drawCrown(g, 0, 0, 320, lt); g.restore(); }
       if (s.reveal) {
-        kLine(g, 'KORUNU TÝDNE MÁ', W / 2, 940, 64, lt, land + 80, { out: out, color: C.ice, stagger: 50 });
-        kLine(g, up(s.crown.name), W / 2, 1075, 120, lt, land + 260, { out: out, color: C.yellow, punch: 2 });
-        kLine(g, 'KDO ' + up(townPron(s.crown.name)) + ' JI VEZME?', W / 2, 1200, 58, lt, land + 600, { sticker: '#fff', color: C.ink, out: out + 40, stagger: 45 });
+        kLine(g, 'KORUNU TÝDNE MÁ', W / 2, 940, 60, lt, land + 80, { out: out, color: C.sky, stagger: 40 });
+        kLine(g, up(s.crown.name), W / 2, 1075, 116, lt, land + 260, { out: out, color: C.acc });
+        kLine(g, 'KDO ' + up(townPron(s.crown.name)) + ' JI VEZME?', W / 2, 1200, 54, lt, land + 600, { box: true, out: out + 40, stagger: 30 });
       } else {
-        kLine(g, 'KDO MÁ', W / 2, 970, 110, lt, land + 60, { out: out, punch: 1.8 });
-        kLine(g, 'KORUNU TÝDNE?', W / 2, 1100, 104, lt, land + 240, { color: C.yellow, out: out + 30, punch: 1.9 });
+        kLine(g, 'KDO MÁ', W / 2, 970, 106, lt, land + 60, { out: out });
+        kLine(g, 'KORUNU TÝDNE?', W / 2, 1100, 100, lt, land + 240, { color: C.acc, out: out + 30 });
       }
-      var fl = 1 - prog(lt, land, land + 220); if (lt > land && fl > 0) { g.fillStyle = 'rgba(255,240,180,' + fl * 0.5 + ')'; g.fillRect(0, 0, W, H); }
+      flash(g, lt, land, 0.4);
     }
   };
 
@@ -1569,6 +1549,7 @@
     }
   };
 
+  // ---------- POČÍTADLO
   SCENES.overview = {
     enter: function (s) {
       gcall('orbit', 0);
@@ -1576,42 +1557,43 @@
       AU.ping(0.5, 1180); R.lastCount = -1;
     },
     draw: function (g, s, lt) {
-      grade(g, 0.6, 0.55, 0);
+      backdrop(g, lt, 0.4);
       var out = s.dur - 300;
-      kLine(g, 'ZATÍM NÁS JE…', W / 2, 450, 88, lt, 80, { out: out, color: C.white });
+      kLine(g, 'ZATÍM NÁS JE', W / 2, 460, 84, lt, 80, { out: out });
       var p = E.outCubic(prog(lt, 500, 2600)), val = lerp(s.from, s.to, p);
-      var a = prog(lt, 420, 600) * (1 - prog(lt, out, out + 250));
+      var ap = prog(lt, 420, 420 + POP), a = popA(ap) * (1 - prog(lt, out, out + 250));
       if (a > 0) {
-        g.save(); g.globalAlpha = a;
-        var punch = 1 + (1 - E.outBack(prog(lt, 420, 760))) * 0.5;
-        g.translate(W / 2, 650); g.scale(punch, punch); g.translate(-W / 2, -650);
-        odometer(g, val, W / 2, 650, 250, C.white);
+        g.save(); g.globalAlpha = a; g.translate(W / 2, 700); g.scale(popS(ap), popS(ap));
+        glass(g, -380, -170, 760, 340, 20);
+        odometer(g, val, 0, -30, 220, C.acc);
+        bf(g, 30, 600); g.fillStyle = 'rgba(255,255,255,0.8)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(plural(s.to, 'obyvatel', 'obyvatelé', 'obyvatel') + ' Říčanska', 0, 110);
         g.restore();
         var cur = Math.floor(val); if (cur !== R.lastCount && lt < 2650) { if (R.lastCount >= 0 && lt - (R._lastTick || 0) > 45) { AU.tick(0, 1900 + (cur % 7) * 90); R._lastTick = lt; } R.lastCount = cur; }
-        chip(g, up(plural(s.to, 'obyvatel', 'obyvatelé', 'obyvatel')) + ' ŘÍČANSKA', W / 2, 815, { size: 38, bg: 'rgba(11,20,48,0.82)', color: C.yellow, weight: 900, spacing: 7, alpha: a });
       }
-      // chips
-      var cp = E.outBack(prog(lt, 2300, 2700)), co = 1 - prog(lt, out, out + 250);
-      if (cp > 0) {
-        var items = [{ t: '+' + s.n + ' DNES', bg: C.yellow, c: C.ink }, { t: s.towns + ' ' + up(plural(s.towns, 'obec', 'obce', 'obcí')), bg: 'rgba(11,20,48,0.78)', c: C.white, b: 'rgba(95,168,232,.7)' }];
-        if (s.expanded) items.push({ t: 'NOVÉ ÚZEMÍ', bg: C.sky, c: C.ink });
-        g.font = font(40, 900);
-        var widths = items.map(function (it) { return spacedWidth(g, it.t, 3) + 48; }), gap = 22, tot = widths.reduce(function (a2, b) { return a2 + b; }, 0) + gap * (items.length - 1), x = W / 2 - tot / 2;
-        items.forEach(function (it, i) {
-          var pi = E.outBack(prog(lt, 2300 + i * 110, 2700 + i * 110));
-          chip(g, it.t, x, 925, { size: 40, bg: it.bg, color: it.c, border: it.b, align: 'left', weight: 900, scale: Math.max(0.001, pi), alpha: clamp(pi, 0, 1) * co });
-          x += widths[i] + gap;
-        });
-      }
+      var items = [{ t: '+' + s.n + ' dnes' }, { t: s.towns + ' ' + plural(s.towns, 'obec', 'obce', 'obcí') }];
+      if (s.expanded) items.push({ t: 'nové území', solid: true });
+      var co = 1 - prog(lt, out, out + 250), widths = [], gap = 20;
+      items.forEach(function (it) { bf(g, 34, 700); widths.push(chipWidth(g, it.t, 34, it.solid)); });
+      var tot = widths.reduce(function (a2, b) { return a2 + b; }, 0) + gap * (items.length - 1), x = W / 2 - tot / 2;
+      items.forEach(function (it, i) {
+        var pi = prog(lt, 2300 + i * 110, 2300 + i * 110 + POP);
+        if (pi > 0) chip(g, it.t, x, 960 - (1 - E.outCubic(pi)) * 120, { size: 34, solid: it.solid, align: 'left', scale: popS(pi), alpha: popA(pi) * co });
+        x += widths[i] + gap;
+      });
       if (lt > 2300 && !s._p) { s._p = 1; AU.pop(0, 700); }
     }
   };
+  function chipWidth(g, text, size, solid) {
+    var parts = String(text).split(' '), tw = 0, sp = size * 0.28;
+    parts.forEach(function (p) { var num = !solid && /^[+#]?\d[\d\s/]*%?$/.test(p); if (num) { hf(g, size * 1.1, 800); tw += hw(g, p); } else { bf(g, size, 700); tw += g.measureText(p).width; } });
+    return tw + sp * (parts.length - 1) + size * 1.5;
+  }
 
+  // ---------- TOP OBEC
   SCENES.town = {
     enter: function (s) {
       gcall('orbit', 0);
       gcall('focusTown', s.name, 1150).then(function () { gcall('orbit', 0.22); });
-      // domky vyrostou na kameru, pokud je hra ještě nemá
       var st = safeState(), t = (st.towns || []).filter(function (x) { return x.name === s.name; })[0];
       var have = {}; if (t) (t.houses || []).forEach(function (h) { have[h.owner] = 1; });
       var add = (s.list || []).filter(function (p) { return !have[p.owner]; }).map(function (p) { return { owner: p.owner, no: p.no }; });
@@ -1622,55 +1604,31 @@
       if (s.img === undefined) { s.img = null; svgToImage(s.erbSvg).then(function (im) { s.img = im; }); }
     },
     draw: function (g, s, lt) {
-      grade(g, 0.62, 0.5, 0);
-      var out = s.dur - 300;
-      reticle(g, W / 2, R.opts.focusY || 1130, lt, C.yellow);
-      // pořadí
-      var rp = E.outBack(prog(lt, 60, 400)), ro = 1 - prog(lt, out, out + 200);
-      chip(g, '#' + s.rank + '  DNEŠNÍ PŘÍRŮSTEK', W / 2, 390, { size: 34, bg: s.rank === 1 ? C.yellow : 'rgba(11,20,48,0.8)', color: s.rank === 1 ? C.ink : C.white, border: s.rank === 1 ? null : 'rgba(95,168,232,.7)', weight: 900, scale: Math.max(0.001, rp), alpha: clamp(rp, 0, 1) * ro });
-      // erb
-      var ep = prog(lt, 120, 620), eo = prog(lt, out, out + 260);
+      backdrop(g, lt, 0.38);
+      var out = s.dur - 300, oa = 1 - prog(lt, out, out + 200);
+      reticle(g, W / 2, townY(), lt, C.acc);
+      var rp = prog(lt, 60, 60 + POP);
+      chip(g, '#' + s.rank + ' dnešní přírůstek', W / 2, 390, { size: 32, solid: s.rank === 1, scale: popS(rp), alpha: popA(rp) * oa });
+      var ep = prog(lt, 120, 120 + POP), eo = prog(lt, out, out + 260);
       if (ep > 0 && eo < 1) {
-        var es = E.outBack(ep) * (1 - E.inCubic(eo)), ew = 170, eh = 204, ex = W / 2, ey = 560, wob = Math.sin(lt / 420) * 0.04;
-        g.save(); g.translate(ex, ey); g.rotate(wob + (1 - E.outCubic(ep)) * -0.5); g.scale(es, es);
+        var es = popS(ep) * (1 - E.inCubic(eo)), ew = 160, eh = 192, ex = W / 2, ey = 560;
+        g.save(); g.globalAlpha = popA(ep); g.translate(ex, ey); g.rotate(Math.sin(lt / 420) * 0.03); g.scale(es, es);
         g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 40; g.shadowOffsetY = 14;
         if (s.img) g.drawImage(s.img, -ew / 2, -eh / 2, ew, eh); else shield(g, -ew / 2, -eh / 2, ew, eh, C.blue, up(s.name)[0]);
-        g.shadowBlur = 0;
-        // lesk
-        var sh = prog(lt, 500, 1100);
-        if (sh > 0 && sh < 1) { g.globalCompositeOperation = 'source-atop'; }
         g.restore();
-        if (sh > 0 && sh < 1) {
-          g.save(); g.translate(ex, ey); g.scale(es, es);
-          g.beginPath(); g.moveTo(-ew / 2 + 8, -eh / 2 + 8); g.lineTo(ew / 2 - 8, -eh / 2 + 8); g.lineTo(ew / 2 - 8, 0); g.quadraticCurveTo(ew / 2 - 8, eh / 2 - 10, 0, eh / 2 - 6); g.quadraticCurveTo(-ew / 2 + 8, eh / 2 - 10, -ew / 2 + 8, 0); g.closePath(); g.clip();
-          var gx = lerp(-ew, ew, sh), lg = g.createLinearGradient(gx - 60, -eh / 2, gx + 60, eh / 2);
-          lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.5, 'rgba(255,255,255,0.55)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
-          g.fillStyle = lg; g.fillRect(-ew / 2, -eh / 2, ew, eh); g.restore();
-        }
       }
-      // jméno obce
-      kLine(g, up(s.name), W / 2, 775, 116, lt, 260, { out: out, stagger: 70 });
-      // +N obyvatel (pill)
-      var pp = E.outBack(prog(lt, 560, 900)), po = 1 - prog(lt, out, out + 220);
+      kLine(g, up(s.name), W / 2, 775, 110, lt, 260, { out: out, stagger: 50 });
+      var pp = prog(lt, 560, 560 + POP);
       if (pp > 0) {
         var cnt = Math.round(lerp(0, s.n, E.outCubic(prog(lt, 600, 1300))));
-        chip(g, '+' + cnt + ' ' + up(plural(s.n, 'obyvatel', 'obyvatelé', 'obyvatel')), W / 2, 885, { size: 54, bg: C.yellow, color: C.ink, weight: 900, spacing: 2, scale: Math.max(0.001, pp), alpha: clamp(pp, 0, 1) * po });
+        numCard(g, W / 2, 940, 420, 170, '+' + cnt, plural(s.n, 'obyvatel', 'obyvatelé', 'obyvatel'), { p: pp, alpha: oa, numSize: 84, labelSize: 26 });
       }
-      var tier = TIERS[s.tier] || TIERS.wood, tp = prog(lt, 800, 1100);
-      if (tp > 0) {
-        g.save(); g.globalAlpha = tp * po;
-        g.font = font(30, 800);
-        var tw = spacedWidth(g, tier.label, 4) + 70, tx = W / 2 - tw / 2, ty = 975;
-        var lg2 = g.createLinearGradient(tx, 0, tx + tw, 0); lg2.addColorStop(0, tier.c1); lg2.addColorStop(1, tier.c2);
-        g.fillStyle = lg2; rr(g, tx, ty - 26, tw, 52, 26); g.fill();
-        g.fillStyle = tier.fg; g.textBaseline = 'middle';
-        g.beginPath(); var sx = tx + 30; for (var k = 0; k < 5; k++) { var aa = -Math.PI / 2 + k * Math.PI * 2 / 5, bb = aa + Math.PI / 5; g.lineTo(sx + Math.cos(aa) * 11, ty + Math.sin(aa) * 11); g.lineTo(sx + Math.cos(bb) * 4.5, ty + Math.sin(bb) * 4.5); } g.closePath(); g.fill();
-        spacedText(g, tier.label, tx + 50, ty + 1, 4, 'left');
-        g.restore();
-      }
+      var tier = TIERS[s.tier] || TIERS.wood, tp = prog(lt, 900, 900 + POP);
+      if (tp > 0) chip(g, tier.label, W / 2, 1100, { size: 28, scale: popS(tp), alpha: popA(tp) * oa, icon: iconStar(C.acc) });
     }
   };
 
+  // ---------- CHTĚLI JSTE → POSTAVILI JSME (chat bubliny)
   SCENES.comment = {
     enter: function (s) {
       gcall('orbit', 0);
@@ -1682,108 +1640,47 @@
       if (s.avatar && s._av === undefined) { s._av = null; loadImage(s.avatar).then(function (im) { s._av = im; }); }
     },
     draw: function (g, s, lt) {
-      var out = s.dur - 300;
+      var out = s.dur - 300, oa = 1 - prog(lt, out, out + 220);
       if (s._buildAt == null) s._buildAt = s.building ? Math.max(1800, wordStart(s, /^Tak$/, s.dur * 0.5) - 150) : Math.max(2200, s.dur * 0.56);
-      grade(g, 0.6, 0.6, 0.3 * prog(lt, 0, 400) * (1 - prog(lt, out, out + 250)));
-      // label
-      var lp = E.outBack(prog(lt, 50, 380)), lo = 1 - prog(lt, out, out + 200);
-      chip(g, s.building ? 'CHTĚLI JSTE' : 'TOP KOMENTÁŘ', W / 2, 400, {
-        size: 40, bg: C.yellow, color: C.ink, weight: 900, spacing: 5, scale: Math.max(0.001, lp), alpha: clamp(lp, 0, 1) * lo,
-        icon: function (g2, x, y, r) { // korunka
-          g2.fillStyle = C.ink; g2.beginPath(); g2.moveTo(x - r, y + r * 0.7); g2.lineTo(x - r, y - r * 0.5); g2.lineTo(x - r * 0.45, y); g2.lineTo(x, y - r * 0.85); g2.lineTo(x + r * 0.45, y); g2.lineTo(x + r, y - r * 0.5); g2.lineTo(x + r, y + r * 0.7); g2.closePath(); g2.fill();
-        }
-      });
-      // karta
-      var cp = prog(lt, 150, 650), co = prog(lt, out, out + 260);
+      backdrop(g, lt, 0.48);
+      var lp = prog(lt, 50, 50 + POP);
+      stamp(g, s.building ? 'CHTĚLI JSTE' : 'TOP KOMENTÁŘ', 300, 400, { size: 40, p: lp, alpha: oa, rot: -0.07 });
+      // bublina komentáře (vlevo)
+      var cp = prog(lt, 150, 150 + POP), co = prog(lt, out, out + 260);
       if (cp > 0 && co < 1) {
-        var cardW = 920, x = (W - cardW) / 2, pad = 44;
-        g.font = font(50, 700);
-        var lines = wrap(g, '„' + s.text + '“', cardW - pad * 2);
-        if (lines.length > 4) { g.font = font(42, 700); lines = wrap(g, '„' + s.text + '“', cardW - pad * 2); }
-        var lh = lines.length > 4 ? 54 : 64, cardH = pad + 104 + 26 + lines.length * lh + 30 + 70;
-        var building = s.building && lt > s._buildAt - 200;
-        var y = 470;
-        var e = E.outBack(cp);
-        g.save();
-        g.translate(W / 2, y + cardH / 2 + (1 - E.outCubic(cp)) * 260 - E.inCubic(co) * 200);
-        g.rotate((1 - e) * 0.12 - 0.012); g.scale(lerp(0.85, 1, e), lerp(0.85, 1, e));
-        g.globalAlpha = clamp(cp * 3, 0, 1) * (1 - co);
-        g.translate(-W / 2, -(y + cardH / 2));
-        g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 60; g.shadowOffsetY = 24;
-        g.fillStyle = '#ffffff'; rr(g, x, y, cardW, cardH, 44); g.fill();
-        g.shadowBlur = 0; g.shadowOffsetY = 0;
-        // akcent pruh
-        var ag = g.createLinearGradient(x, 0, x + cardW, 0); ag.addColorStop(0, C.sky); ag.addColorStop(1, C.blue);
-        g.save(); rr(g, x, y, cardW, cardH, 44); g.clip(); g.fillStyle = ag; g.fillRect(x, y, cardW, 12); g.restore();
-        // avatar
-        var ax = x + pad + 48, ay = y + pad + 52, ar = 48;
-        g.save(); g.beginPath(); g.arc(ax, ay, ar, 0, 7); g.clip();
-        if (s._av) g.drawImage(s._av, ax - ar, ay - ar, ar * 2, ar * 2);
-        else {
-          var hue = hash(s.author) % 360, avg = g.createLinearGradient(ax - ar, ay - ar, ax + ar, ay + ar);
-          avg.addColorStop(0, 'hsl(' + hue + ',75%,62%)'); avg.addColorStop(1, 'hsl(' + ((hue + 50) % 360) + ',70%,42%)');
-          g.fillStyle = avg; g.fillRect(ax - ar, ay - ar, ar * 2, ar * 2);
-          g.fillStyle = '#fff'; g.font = font(44, 900); g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(up(s.author.replace(/[^a-zA-Zá-žÁ-Ž0-9]/g, '')).slice(0, 1) || '?', ax, ay + 2);
-        }
-        g.restore();
-        g.strokeStyle = C.yellow; g.lineWidth = 5; g.beginPath(); g.arc(ax, ay, ar + 5, 0, 7); g.stroke();
-        // nick
-        g.textAlign = 'left'; g.textBaseline = 'middle';
-        g.fillStyle = C.ink; g.font = font(fitSize(g, s.author, 520, 44, 800, 26), 800); g.fillText(s.author, ax + ar + 28, ay - 18);
-        g.fillStyle = '#6b7896'; g.font = font(30, 600); g.fillText('nejlajkovanější komentář dne', ax + ar + 28, ay + 26);
-        // text
-        g.fillStyle = C.ink; g.font = font(lines.length > 4 ? 42 : 50, 700); g.textBaseline = 'alphabetic';
-        var reveal = prog(lt, 450, 450 + lines.length * 260);
-        for (var i = 0; i < lines.length; i++) {
-          var lpI = clamp(reveal * lines.length - i, 0, 1);
-          g.globalAlpha = clamp(cp * 3, 0, 1) * (1 - co) * lpI;
-          g.fillText(lines[i], x + pad, y + pad + 104 + 26 + (i + 0.8) * lh + (1 - E.outCubic(lpI)) * 20);
-        }
-        g.globalAlpha = clamp(cp * 3, 0, 1) * (1 - co);
-        // liky
-        var lk = Math.round(lerp(0, s.likes, E.outCubic(prog(lt, 700, 1700))));
-        var by = y + cardH - pad - 14, bump = 1 + Math.max(0, Math.sin(prog(lt, 1600, 1900) * Math.PI)) * 0.35;
-        heart(g, x + pad + 22, by, 40 * bump, C.red);
-        g.fillStyle = C.ink; g.font = font(40, 900); g.textBaseline = 'middle';
-        g.fillText(fmt(lk), x + pad + 60, by);
-        g.fillStyle = '#8a95ad'; g.font = font(32, 600); g.textAlign = 'right';
-        g.fillText('Odpovědět', x + cardW - pad, by);
+        var bw = 860, x = 80; bf(g, 44, 600);
+        var lines = wrap(g, s.text, bw - 68); if (lines.length > 4) { bf(g, 36, 600); lines = wrap(g, s.text, bw - 68); }
+        var y = 470, e = popS(cp), big = lines.length <= 4;
+        s._bh = 68 + 92 + lines.length * (big ? 56 : 46) + 58;
+        var lk = Math.round(lerp(0, s.likes, E.outCubic(prog(lt, 700, 1700)))), bump = 1 + Math.max(0, Math.sin(prog(lt, 1600, 1900) * Math.PI)) * 0.3;
+        g.save(); g.globalAlpha = popA(cp) * (1 - co);
+        g.translate(x, y + 60 - E.inCubic(co) * 120); g.scale(e, e); g.translate(-x, -(y + 60));
+        bubble(g, x, y, bw, lines, {
+          side: 'left', head: '@' + s.author, sub: 'nejlajkovanější komentář dne', avatarImg: s._av, size: big ? 44 : 36, lh: big ? 56 : 46,
+          reveal: prog(lt, 450, 450 + lines.length * 220),
+          foot: function (g2, fx, fy, fw) {
+            heart(g2, fx + 18, fy, 34 * bump, C.white);
+            hf(g2, 36, 800); g2.fillStyle = C.acc; g2.textAlign = 'left'; g2.textBaseline = 'middle'; htext(g2, fmt(lk), fx + 50, fy + 1);
+            bf(g2, 26, 500); g2.fillStyle = 'rgba(255,255,255,0.55)'; g2.textAlign = 'right'; g2.fillText('Odpovědět', fx + fw, fy);
+          }
+        });
         g.restore();
       }
-      // co se postaví
       if (s.building) {
-        var b0 = s._buildAt, bp = prog(lt, b0, b0 + 420), bo = 1 - prog(lt, out, out + 220);
+        var b0 = s._buildAt, bp = prog(lt, b0, b0 + POP), bo = 1 - prog(lt, out, out + 220);
         if (bp > 0) {
-          var yb = 1150;
-          kLine(g, 'TAK JSME POSTAVILI', W / 2, yb, 52, lt, b0, { sticker: C.yellow, color: C.ink, out: out, punch: 1.4 });
-          kLine(g, up(s.building.name), W / 2, yb + 130, 92, lt, b0 + 180, { out: out, maxW: 960 });
-          if (prog(lt, b0 + 380, b0 + 700) > 0) {
-            g.save(); g.globalAlpha = prog(lt, b0 + 380, b0 + 700) * bo; g.fillStyle = C.ice; g.font = font(40, 700); g.textAlign = 'center';
-            g.fillText('v obci ' + s.building.town, W / 2, yb + 205); g.restore();
-          }
+          var yb = Math.min(1110, 470 + (s._bh || 400) + 110), sh = shakeAt(lt, b0, 8);
+          g.save(); g.translate(sh[0], sh[1]);
+          stamp(g, 'TAK JSME POSTAVILI', W / 2 + 60, yb, { size: 40, p: bp, alpha: bo });
+          kLine(g, up(s.building.name), W / 2, yb + 130, 88, lt, b0 + 180, { out: out, maxW: 960, color: C.acc });
+          if (prog(lt, b0 + 380, b0 + 700) > 0) { g.save(); g.globalAlpha = prog(lt, b0 + 380, b0 + 700) * bo; bf(g, 32, 600); g.fillStyle = 'rgba(255,255,255,0.8)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('v obci ' + s.building.town, W / 2, yb + 212); g.restore(); }
+          g.restore();
         }
       }
     }
   };
 
-  // ---- ikonky pro chipy
-  function iconCheck(color) { return function (g, x, y, r) { g.strokeStyle = color; g.lineWidth = r * 0.42; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(x - r * 0.8, y); g.lineTo(x - r * 0.15, y + r * 0.65); g.lineTo(x + r * 0.95, y - r * 0.7); g.stroke(); }; }
-  function iconStar(color) { return function (g, x, y, r) { g.fillStyle = color; g.beginPath(); for (var k = 0; k < 5; k++) { var a = -Math.PI / 2 + k * Math.PI * 2 / 5, b = a + Math.PI / 5; g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); g.lineTo(x + Math.cos(b) * r * 0.42, y + Math.sin(b) * r * 0.42); } g.closePath(); g.fill(); }; }
-  function iconEmoji(e, fb, color) { return function (g, x, y, r) { drawEmoji(g, e, x, y, r * 2.1, fb, color); }; }
-  function iconPin(color) { return function (g, x, y, r) { pin(g, x, y + r, r * 2, color, null); }; }
-  function avatarCircle(g, x, y, r, e, fb, filled) {
-    g.save();
-    if (filled) {
-      var gr = g.createLinearGradient(x - r, y - r, x + r, y + r); gr.addColorStop(0, C.sky); gr.addColorStop(1, C.blue);
-      g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
-      g.strokeStyle = '#fff'; g.lineWidth = 5; g.stroke();
-      drawEmoji(g, e, x, y, r * 1.05, fb, '#fff');
-    }
-    g.restore();
-  }
-
-  // ---------- POVOLÁNÍ: „MUKAŘOVU CHYBÍ 1 HASIČ!“
+  // ---------- POVOLÁNÍ: „MUKAŘOVU CHYBÍ 1 HASIČ!“ (číselná karta + progress + chip)
   SCENES.jobs = {
     enter: function (s) {
       gcall('orbit', 0); camTown(s.town, 1300).then(function () { gcall('orbit', 0.2); });
@@ -1794,55 +1691,42 @@
     },
     draw: function (g, s, lt) {
       var out = s.dur - 300, oa = 1 - prog(lt, out, out + 220);
-      grade(g, 0.62, 0.62, 0.22 * oa);
-      var cp = E.outBack(prog(lt, 40, 360));
-      chip(g, up(jobForm(s.job, 'pl')) + ' · ' + up(s.town), W / 2, 395, { size: 36, bg: 'rgba(11,20,48,0.82)', color: '#fff', border: 'rgba(95,168,232,.7)', weight: 900, spacing: 3, scale: Math.max(0.001, cp), alpha: clamp(cp, 0, 1) * oa, icon: iconEmoji(s.emoji, s.job, C.yellow) });
-      kLine(g, s.line1, W / 2, 565, 116, lt, 120, { out: out, punch: 1.9 });
-      kLine(g, s.line2, W / 2, 692, 100, lt, 300, { color: C.yellow, out: out + 30, punch: 1.8, stagger: 70 });
-      // karta s partou + progress
-      var kp = prog(lt, 420, 900), ko = prog(lt, out, out + 260);
+      backdrop(g, lt, 0.45);
+      var cp = prog(lt, 40, 40 + POP);
+      chip(g, up(jobForm(s.job, 'pl')) + ' · ' + up(s.town), W / 2, 395, { size: 28, scale: popS(cp), alpha: popA(cp) * oa });
+      kLine(g, s.line1, W / 2, 560, 112, lt, 120, { out: out });
+      kLine(g, s.line2, W / 2, 690, 96, lt, 300, { color: C.acc, out: out + 30, stagger: 50 });
+      // číselná karta 4/5 + progress
+      var kp = prog(lt, 420, 420 + POP), ko = prog(lt, out, out + 260);
       if (kp > 0 && ko < 1) {
-        var x0 = 80, y0 = 770, cw = 920, chh = 300, e = E.outBack(kp);
-        g.save(); g.globalAlpha = clamp(kp * 3, 0, 1) * (1 - ko);
-        g.translate(W / 2, y0 + chh / 2 + (1 - E.outCubic(kp)) * 200 - E.inCubic(ko) * 150); g.scale(lerp(0.88, 1, e), lerp(0.88, 1, e)); g.translate(-W / 2, -(y0 + chh / 2));
-        g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 50; g.shadowOffsetY = 20; g.fillStyle = '#fff'; rr(g, x0, y0, cw, chh, 40); g.fill(); g.shadowBlur = 0; g.shadowOffsetY = 0;
-        var n = Math.min(s.need, 8), gap = 22, r = Math.min(56, (cw - 80 - (n - 1) * gap) / (2 * n)), tw = n * r * 2 + (n - 1) * gap, cx0 = W / 2 - tw / 2 + r, cy = y0 + 92;
-        for (var i = 0; i < n; i++) {
-          var x = cx0 + i * (r * 2 + gap);
-          if (i < s.count) {
-            var ip = E.outBack(prog(lt, 750 + i * 120, 1050 + i * 120)); if (ip <= 0) continue;
-            g.save(); g.translate(x, cy); g.scale(ip, ip); avatarCircle(g, 0, 0, r, s.emoji, s.job, true); g.restore();
-          } else {
-            var nextOne = i === s.count, pul = (Math.sin(lt / 160) + 1) / 2, ap = prog(lt, 750 + i * 120, 1000 + i * 120);
-            g.save(); g.globalAlpha *= ap;
-            if (nextOne) { g.fillStyle = 'rgba(255,210,63,' + (0.35 + pul * 0.4) + ')'; g.beginPath(); g.arc(x, cy, r + pul * 6, 0, 7); g.fill(); }
-            g.setLineDash([10, 9]); g.lineWidth = 5; g.strokeStyle = nextOne ? '#e0a400' : '#c3cbe0'; g.beginPath(); g.arc(x, cy, r - 2, 0, 7); g.stroke(); g.setLineDash([]);
-            g.fillStyle = nextOne ? C.ink : '#aab3c8'; g.font = font(nextOne ? r * 0.62 : r * 0.8, 900); g.textAlign = 'center'; g.textBaseline = 'middle';
-            g.fillText(nextOne ? 'TY?' : '?', x, cy + 2);
-            g.restore();
-          }
-        }
-        // popisky + bar
-        var ly = y0 + 196;
-        g.textBaseline = 'middle'; g.textAlign = 'left'; g.font = font(32, 800); g.fillStyle = '#6b7896';
-        var cil = 'CÍL: ', cwid = spacedWidth(g, cil, 2); spacedText(g, cil, x0 + 44, ly, 2, 'left');
-        g.fillStyle = C.ink; g.font = font(fitSize(g, up(s.building), 560, 34, 900, 22), 900); spacedText(g, up(s.building), x0 + 44 + cwid + 4, ly, 2, 'left');
-        var fp = E.outCubic(prog(lt, 900, 900 + 140 * s.count + 400)), shownC = Math.round(lerp(0, s.count, fp));
-        g.textAlign = 'right'; g.font = font(46, 900); g.fillStyle = C.blue; g.fillText(shownC + '/' + s.need, x0 + cw - 44, ly);
-        var bx = x0 + 44, by = y0 + 236, bw = cw - 88, bh = 30;
-        g.fillStyle = '#e6ebf5'; rr(g, bx, by, bw, bh, bh / 2); g.fill();
+        var fp = E.outCubic(prog(lt, 700, 700 + 160 * s.count + 300)), shownC = Math.round(lerp(0, s.count, fp));
+        var cw = 760, chh = 290, cx = W / 2, cy = 920 - E.inCubic(ko) * 120;
+        g.save(); g.globalAlpha = popA(kp) * (1 - ko); g.translate(cx, cy); g.scale(popS(kp), popS(kp));
+        glass(g, -cw / 2, -chh / 2, cw, chh, 20);
+        hf(g, 120, 800); g.textAlign = 'center'; g.textBaseline = 'middle';
+        var wN = hw(g, String(shownC)); hf(g, 64, 800); var wS = hw(g, '/' + s.need); hf(g, 120, 800); var w0 = wN + 8 + wS;
+        g.fillStyle = C.acc; htext(g, String(shownC), -w0 / 2 + wN / 2, -38);
+        hf(g, 64, 800); g.fillStyle = 'rgba(255,255,255,0.8)'; htext(g, '/' + s.need, -w0 / 2 + wN + 8 + wS / 2, -24);
+        bf(g, 28, 600); g.fillStyle = 'rgba(255,255,255,0.8)'; g.fillText(jobForm(s.job, s.need) + ' · cíl: ' + s.building, 0, 46);
+        var bx = -cw / 2 + 40, by = 92, bw = cw - 80, bh = 16;
+        g.fillStyle = 'rgba(255,255,255,0.18)'; rr(g, bx, by, bw, bh, bh / 2); g.fill();
         var fw = bw * (s.count / s.need) * fp;
-        if (fw > 2) { var bg2 = g.createLinearGradient(bx, 0, bx + bw, 0); bg2.addColorStop(0, C.yellow); bg2.addColorStop(1, '#ffb400'); g.fillStyle = bg2; rr(g, bx, by, Math.max(fw, bh), bh, bh / 2); g.fill(); }
-        if (fp >= 1) { var pul2 = (Math.sin(lt / 160) + 1) / 2; g.fillStyle = 'rgba(255,210,63,' + (0.25 + pul2 * 0.35) + ')'; rr(g, bx + fw - bh / 2, by, bw / s.need + bh / 2, bh, bh / 2); g.fill(); }
+        if (fw > 2) { g.fillStyle = C.acc; rr(g, bx, by, Math.max(fw, bh), bh, bh / 2); g.fill(); }
+        if (fp >= 1) { var pul = (Math.sin(lt / 160) + 1) / 2; g.fillStyle = 'rgba(198,255,61,' + (0.2 + pul * 0.35) + ')'; rr(g, bx + fw, by, bw / s.need, bh, bh / 2); g.fill(); }
         g.restore();
       }
-      var ta = wordStart(s, /^Jsi$/i, 2600);
-      kLine(g, s.ask, W / 2, 1135, 62, lt, ta - 80, { color: C.ice, out: out, stagger: 55, maxW: 960 });
-      kLine(g, 'NAPIŠ TO DO KOMENTÁŘŮ', W / 2, 1245, 58, lt, ta + 380, { sticker: C.yellow, color: C.ink, out: out + 40, punch: 1.4, stagger: 45 });
+      var ta = wordStart(s, /^Jsi$/i, 2600), ap = prog(lt, ta - 80, ta - 80 + POP), np = prog(lt, ta + 380, ta + 380 + POP);
+      if (ap > 0) {
+        bf(g, 38, 600); var qw = g.measureText(s.askText).width + 80, qx = W / 2 - qw / 2, qy = 1110;
+        g.save(); g.globalAlpha = popA(ap) * oa; g.translate(W / 2, qy + 40); g.scale(popS(ap), popS(ap)); g.translate(-W / 2, -(qy + 40));
+        bubble(g, qx, qy, qw, [s.askText], { side: 'right', size: 38, lh: 46, pad: 20 });
+        g.restore();
+      }
+      if (np > 0) chip(g, 'napiš to do komentů', W / 2, 1255, { size: 34, solid: true, scale: popS(np), alpha: popA(np) * oa, icon: iconArrow(C.ink) });
     }
   };
 
-  // ---------- POVOLÁNÍ HOTOVO: „HASIČI Z MNICHOVIC POSTAVILI HASIČÁRNU!“
+  // ---------- POVOLÁNÍ HOTOVO: „HASIČI Z MNICHOVIC SI POSTAVILI HASIČÁRNU!“
   SCENES.jobBuilt = {
     enter: function (s) {
       gcall('orbit', 0); camTown(s.town, 1300).then(function () { gcall('orbit', 0.25); });
@@ -1853,43 +1737,18 @@
     },
     draw: function (g, s, lt) {
       var out = s.dur - 300, oa = 1 - prog(lt, out, out + 220);
-      grade(g, 0.62, 0.62, 0.25 * oa);
-      // záblesk + paprsky
-      var bl = prog(lt, 500, 560) * (1 - prog(lt, 560, 900)); if (bl > 0) { g.fillStyle = 'rgba(255,240,180,' + bl * 0.55 + ')'; g.fillRect(0, 0, W, H); }
-      var rp = prog(lt, 480, 900) * oa;
-      if (rp > 0) {
-        g.save(); g.translate(W / 2, 790); g.rotate(lt / 4000); g.globalAlpha = 0.16 * rp;
-        g.fillStyle = C.yellow; for (var r = 0; r < 12; r++) { g.rotate(Math.PI / 6); g.beginPath(); g.moveTo(0, 0); g.lineTo(-60, -900); g.lineTo(60, -900); g.closePath(); g.fill(); }
-        g.restore();
-      }
-      var cp = E.outBack(prog(lt, 40, 360));
-      chip(g, 'NOVÁ BUDOVA', W / 2, 395, { size: 40, bg: C.yellow, color: C.ink, weight: 900, spacing: 5, scale: Math.max(0.001, cp), alpha: clamp(cp, 0, 1) * oa, icon: iconCheck(C.ink) });
-      kLine(g, s.head, W / 2, 530, 92, lt, 120, { out: out, stagger: 60 });
-      kLine(g, 'SI POSTAVILI', W / 2, 640, 74, lt, 300, { out: out + 20, color: C.ice, stagger: 60 });
-      kLine(g, s.acc + '!', W / 2, 790, 150, lt, 500, { color: C.yellow, out: out + 40, punch: 2.3, maxW: 980 });
-      if (s.name && up(s.name) !== up(s.building)) kLine(g, s.name, W / 2, 940, 52, lt, 820, { sticker: '#fff', color: C.ink, out: out + 60, punch: 1.3, stagger: 40 });
-      // rovnice: N lidí = 1 budova
-      var ep = prog(lt, 1500, 1800), eo = 1 - prog(lt, out, out + 200);
-      if (ep > 0) {
-        var n = Math.min(s.need, 8), rr0 = 36, step = 50, rowW = (n - 1) * step + rr0 * 2, bigR = 58, tot = rowW + 90 + bigR * 2, x0 = W / 2 - tot / 2, cy = 1085;
-        g.save(); g.globalAlpha = eo;
-        for (var i = n - 1; i >= 0; i--) {
-          var ip = E.outBack(prog(lt, 1500 + i * 80, 1800 + i * 80)); if (ip <= 0) continue;
-          g.save(); g.translate(x0 + rr0 + i * step, cy); g.scale(ip, ip); avatarCircle(g, 0, 0, rr0, s.emoji, s.job, true); g.restore();
-        }
-        var qp = E.outBack(prog(lt, 1550 + n * 80, 1850 + n * 80));
-        if (qp > 0) {
-          g.fillStyle = '#fff'; g.font = font(72, 900); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('=', x0 + rowW + 45, cy + 2);
-          g.save(); g.translate(x0 + rowW + 90 + bigR, cy); g.scale(qp, qp);
-          g.shadowColor = C.yellow; g.shadowBlur = 30; g.fillStyle = C.yellow; g.beginPath(); g.arc(0, 0, bigR, 0, 7); g.fill(); g.shadowBlur = 0;
-          g.strokeStyle = '#fff'; g.lineWidth = 6; g.stroke();
-          drawEmoji(g, s.buildingEmoji || s.emoji, 0, 0, bigR * 1.1, s.building, C.ink);
-          g.restore();
-        }
-        var tp = prog(lt, 1900 + n * 80, 2200 + n * 80);
-        if (tp > 0) { g.globalAlpha = tp * eo; g.fillStyle = C.ice; g.font = font(fitSize(g, s.eq, 900, 38, 800, 24), 800); g.textAlign = 'center'; g.textBaseline = 'middle'; spacedText(g, s.eq, W / 2, 1185, 3, 'center'); }
-        g.restore();
-      }
+      backdrop(g, lt, 0.45);
+      var sh = shakeAt(lt, 500, 9);
+      g.save(); g.translate(sh[0], sh[1]);
+      stamp(g, 'NOVÁ BUDOVA', 320, 400, { size: 40, p: prog(lt, 40, 40 + POP), alpha: oa, rot: -0.07 });
+      kLine(g, s.head, W / 2, 540, 86, lt, 120, { out: out, stagger: 40 });
+      kLine(g, 'SI POSTAVILI', W / 2, 650, 68, lt, 300, { out: out + 20, color: C.sky, stagger: 40 });
+      kLine(g, s.acc + '!', W / 2, 800, 140, lt, 500, { color: C.acc, out: out + 40, maxW: 980 });
+      if (s.name && up(s.name) !== up(s.building)) { var np = prog(lt, 820, 820 + POP); chip(g, s.name, W / 2, 945, { size: 34, scale: popS(np), alpha: popA(np) * oa }); }
+      g.restore();
+      var ep = prog(lt, 1500, 1500 + POP);
+      if (ep > 0) numCard(g, W / 2, 1120, 620, 200, s.need + ' = 1', s.eqText, { p: ep, alpha: oa, numSize: 96, labelSize: 26 });
+      flash(g, lt, 500, 0.35);
       confetti(g, lt, { t0: 520, x: W / 2, y: 800, n: 90, seed: 'jb', spread: 3.2 });
       confetti(g, lt, { t0: 700, x: 60, y: 1350, n: 40, seed: 'jl', angle: -1.15, spread: 0.7 });
       confetti(g, lt, { t0: 700, x: W - 60, y: 1350, n: 40, seed: 'jr', angle: -1.99, spread: 0.7 });
@@ -1908,23 +1767,23 @@
     },
     draw: function (g, s, lt) {
       var out = s.dur - 300, oa = 1 - prog(lt, out, out + 220), land = this.land;
-      grade(g, 0.62, 0.55, 0.15 * oa);
-      var cp = E.outBack(prog(lt, 40, 360));
-      chip(g, 'MILNÍK HRY', W / 2, 395, { size: 40, bg: C.yellow, color: C.ink, weight: 900, spacing: 5, scale: Math.max(0.001, cp), alpha: clamp(cp, 0, 1) * oa, icon: iconStar(C.ink) });
-      kLine(g, 'OBYVATEL Č.', W / 2, 520, 96, lt, 120, { out: out });
+      backdrop(g, lt, 0.38);
+      stamp(g, 'MILNÍK', 240, 400, { size: 40, p: prog(lt, 40, 40 + POP), alpha: oa, rot: -0.07 });
+      kLine(g, 'OBYVATEL Č.', W / 2, 530, 90, lt, 120, { out: out });
       var p = E.outCubic(prog(lt, 300, land)), val = lerp(0, s.no, p), a = prog(lt, 280, 420) * oa;
       if (a > 0) {
         var cur = Math.floor(val); if (cur !== R.lastCount && lt < land + 30) { if (lt - (R._lastTick || 0) > 45) { AU.tick(0, 1900 + (cur % 7) * 90); R._lastTick = lt; } R.lastCount = cur; }
-        var bump = 1 + Math.sin(prog(lt, land, land + 300) * Math.PI) * 0.16;
-        g.save(); g.globalAlpha = a; g.translate(W / 2, 690); g.scale(bump, bump); g.translate(-W / 2, -690);
-        odometer(g, lt >= land ? s.no : val, W / 2, 690, 240, C.yellow);
+        var bump = 1 + Math.sin(prog(lt, land, land + 300) * Math.PI) * 0.14;
+        g.save(); g.globalAlpha = a; g.translate(W / 2, 700); g.scale(bump, bump);
+        odometer(g, lt >= land ? s.no : val, 0, 0, 230, C.acc);
         g.restore();
       }
-      if (s.house) reticle(g, W / 2, houseY(), lt - 300, C.yellow);
-      var np = E.outBack(prog(lt, land + 100, land + 450));
-      if (np > 0 && s.owner) chip(g, s.owner, W / 2, 1160, { size: 50, bg: '#fff', color: C.ink, weight: 900, spacing: 1, scale: Math.max(0.001, np), alpha: clamp(np, 0, 1) * oa, icon: iconStar(C.yellow) });
+      if (s.house) reticle(g, W / 2, houseY(), lt - 300, C.acc);
+      var np = prog(lt, land + 100, land + 100 + POP);
+      if (np > 0 && s.owner) chip(g, s.owner, W / 2, 1160, { size: 42, solid: true, scale: popS(np), alpha: popA(np) * oa });
       var tp = prog(lt, land + 300, land + 600) * oa;
-      if (tp > 0 && s.town) { g.save(); g.globalAlpha = tp; g.fillStyle = C.ice; g.font = font(40, 700); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('z ' + townGen(s.town), W / 2, 1240); g.restore(); }
+      if (tp > 0 && s.town) { g.save(); g.globalAlpha = tp; bf(g, 34, 600); g.fillStyle = 'rgba(255,255,255,0.8)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('z ' + townGen(s.town), W / 2, 1240); g.restore(); }
+      flash(g, lt, land, 0.3);
       confetti(g, lt, { t0: land, x: W / 2, y: 700, n: 90, seed: 'ms', spread: 3.4 });
     }
   };
@@ -1939,47 +1798,45 @@
     },
     draw: function (g, s, lt) {
       var out = s.dur - 300, oa = 1 - prog(lt, out, out + 220), drop = this.drop, ty = townY();
-      grade(g, 0.62, 0.5, 0);
-      // špendlík dopadne na obec + vlny
+      backdrop(g, lt, 0.36);
       var pp = prog(lt, drop - 420, drop);
       if (pp > 0) {
         for (var k = 0; k < 3 && lt > drop; k++) {
           var q = ((lt - drop) / 1300 + k / 3) % 1;
-          g.save(); g.globalAlpha = (1 - q) * 0.8 * oa; g.strokeStyle = C.yellow; g.lineWidth = 6;
+          g.save(); g.globalAlpha = (1 - q) * 0.8 * oa; g.strokeStyle = C.acc; g.lineWidth = 5;
           g.beginPath(); g.ellipse(W / 2, ty, 40 + q * 260, (40 + q * 260) * 0.42, 0, 0, 7); g.stroke(); g.restore();
         }
         var yy = lerp(-300, ty, E.inCubic(pp)), sq = lt > drop ? 1 - Math.sin(prog(lt, drop, drop + 260) * Math.PI) * 0.18 : 1;
-        g.save(); g.globalAlpha = oa; g.translate(W / 2, yy); g.scale(1 / sq, sq); pin(g, 0, 0, 100, C.yellow, 'house'); g.restore();
+        g.save(); g.globalAlpha = oa; g.translate(W / 2, yy); g.scale(1 / sq, sq); pin(g, 0, 0, 100, C.acc, 'house'); g.restore();
       }
-      var cp = E.outBack(prog(lt, 40, 360));
-      chip(g, 'NOVÁ OBEC NA MAPĚ', W / 2, 390, { size: 40, bg: C.yellow, color: C.ink, weight: 900, spacing: 4, scale: Math.max(0.001, cp), alpha: clamp(cp, 0, 1) * oa, icon: iconPin(C.ink) });
-      // erb
-      var ep = prog(lt, 160, 640), eo = prog(lt, out, out + 260);
+      stamp(g, 'NOVÁ OBEC', 270, 400, { size: 40, p: prog(lt, 40, 40 + POP), alpha: oa, rot: -0.07 });
+      var ep = prog(lt, 160, 160 + POP), eo = prog(lt, out, out + 260);
       if (ep > 0 && eo < 1) {
-        var es = E.outBack(ep) * (1 - E.inCubic(eo)), ew = 150, eh = 180, img = s._img && s._img.erb;
-        g.save(); g.translate(W / 2, 560); g.rotate(Math.sin(lt / 420) * 0.04 + (1 - E.outCubic(ep)) * -0.5); g.scale(es, es);
+        var es = popS(ep) * (1 - E.inCubic(eo)), ew = 150, eh = 180, img = s._img && s._img.erb;
+        g.save(); g.globalAlpha = popA(ep); g.translate(W / 2, 580); g.rotate(Math.sin(lt / 420) * 0.03); g.scale(es, es);
         g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 40; g.shadowOffsetY = 14;
         if (img) g.drawImage(img, -ew / 2, -eh / 2, ew, eh); else shield(g, -ew / 2, -eh / 2, ew, eh, C.blue, up(s.name)[0]);
         g.restore();
       }
-      kLine(g, up(s.name), W / 2, 760, 130, lt, 300, { out: out, punch: 2 });
-      var fp = E.outBack(prog(lt, drop + 100, drop + 420));
-      if (fp > 0) chip(g, s.first ? '1. OBYVATEL ' + s.first : 'MÁ PRVNÍHO OBYVATELE', W / 2, 875, { size: 38, bg: 'rgba(11,20,48,0.85)', color: '#fff', border: 'rgba(95,168,232,.8)', weight: 800, spacing: 2, scale: Math.max(0.001, fp), alpha: clamp(fp, 0, 1) * oa });
+      kLine(g, up(s.name), W / 2, 775, 124, lt, 300, { out: out, color: C.acc });
+      var fp = prog(lt, drop + 100, drop + 100 + POP);
+      if (fp > 0) chip(g, s.first ? '1. obyvatel ' + s.first : 'má prvního obyvatele', W / 2, 880, { size: 32, scale: popS(fp), alpha: popA(fp) * oa });
       if (s.others && s.others.length) {
         var op = prog(lt, drop + 400, drop + 700) * oa;
-        if (op > 0) { g.save(); g.globalAlpha = op; g.fillStyle = C.ice; g.font = font(36, 800); g.textAlign = 'center'; g.textBaseline = 'middle'; spacedText(g, 'A TAKY: ' + s.others.map(up).join(', '), W / 2, ty + 85, 2, 'center'); g.restore(); }
+        if (op > 0) { g.save(); g.globalAlpha = op; bf(g, 30, 600); g.fillStyle = 'rgba(255,255,255,0.8)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('a taky: ' + s.others.join(', '), W / 2, ty + 85); g.restore(); }
       }
+      flash(g, lt, drop, 0.25);
     }
   };
 
-  // ---------- NAJDI SE VE VIDEU (rychlý průlet domky)
+  // ---------- NAJDI SE VE VIDEU (průlet domky, nicky jako glass chipy)
   SCENES.findMe = {
     start: 280,
     enter: function (s) { s._cut = -1; gcall('orbit', 0); AU.ping(0.02, 1320); if (!s.items.some(function (i) { return i.house; })) gcall('overview', 900); },
     draw: function (g, s, lt) {
       var out = s.dur - 260, oa = 1 - prog(lt, out, out + 200), cy = houseY();
       var res = s.items.filter(function (i) { return i.house; });
-      grade(g, 0.6, 0.5, 0);
+      backdrop(g, lt, 0.3);
       if (res.length) {
         var per = Math.max(520, (s.dur - this.start - 300) / res.length), k = clamp(Math.floor((lt - this.start) / per), 0, res.length - 1);
         if (lt >= this.start && k !== s._cut) {
@@ -1988,34 +1845,30 @@
         }
         var loc = lt - this.start - k * per, it = res[k];
         if (lt >= this.start) {
-          var fl = 1 - prog(loc, 0, 130); if (fl > 0) { g.fillStyle = 'rgba(255,255,255,' + fl * 0.35 + ')'; g.fillRect(0, 0, W, H); }
+          flash(g, loc, 0, 0.3);
           var bp = E.outCubic(prog(loc, 0, 300)), hs = lerp(230, 150, bp);
-          g.save(); g.globalAlpha = oa; brackets(g, W / 2, cy, hs, hs, 50, 8, C.yellow); g.restore();
-          var lp = E.outBack(prog(loc, 180, 420));
+          g.save(); g.globalAlpha = oa; brackets(g, W / 2, cy, hs, hs, 50, 7, C.acc); g.restore();
+          var lp = prog(loc, 180, 180 + POP);
           if (lp > 0) {
-            g.save(); g.globalAlpha = clamp(lp, 0, 1) * oa; g.fillStyle = '#fff';
-            g.beginPath(); g.moveTo(W / 2 - 18, cy - 196); g.lineTo(W / 2 + 18, cy - 196); g.lineTo(W / 2, cy - 168); g.closePath(); g.fill(); g.restore();
-            chip(g, it.nick, W / 2, cy - 236, { size: 52, bg: '#fff', color: C.ink, weight: 900, spacing: 1, scale: Math.max(0.001, lp), alpha: clamp(lp, 0, 1) * oa });
-            if (it.town) { g.save(); g.globalAlpha = prog(loc, 300, 500) * oa; g.fillStyle = '#fff'; g.shadowColor = 'rgba(5,10,30,0.85)'; g.shadowBlur = 14; g.font = font(36, 900); g.textAlign = 'center'; g.textBaseline = 'middle'; spacedText(g, up(it.town), W / 2, cy + 212, 3, 'center'); g.restore(); }
+            chip(g, it.nick, W / 2, cy - 236, { size: 44, scale: popS(lp), alpha: popA(lp) * oa });
+            if (it.town) { g.save(); g.globalAlpha = prog(loc, 300, 500) * oa; bf(g, 30, 700); g.fillStyle = C.white; g.shadowColor = 'rgba(5,10,30,0.85)'; g.shadowBlur = 14; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(it.town, W / 2, cy + 212); g.restore(); }
           }
-          // tečky průběhu
           g.save(); g.globalAlpha = oa;
-          for (var d = 0; d < res.length; d++) { g.fillStyle = d === k ? C.yellow : 'rgba(255,255,255,0.45)'; g.beginPath(); g.arc(W / 2 + (d - (res.length - 1) / 2) * 34, cy + 262, d === k ? 10 : 7, 0, 7); g.fill(); }
+          for (var d = 0; d < res.length; d++) { g.fillStyle = d === k ? C.acc : 'rgba(255,255,255,0.4)'; g.beginPath(); g.arc(W / 2 + (d - (res.length - 1) / 2) * 34, cy + 262, d === k ? 9 : 6, 0, 7); g.fill(); }
           g.restore();
         }
       } else {
-        // bez domků: nicky naskakují přes mapu
         s.items.forEach(function (it2, i) {
-          var p = E.outBack(prog(lt, 300 + i * 220, 600 + i * 220)); if (p <= 0) return;
-          chip(g, it2.nick, 200 + rnd('fx' + i) * 680, 700 + i * (560 / Math.max(1, s.items.length)), { size: 44, bg: i % 2 ? '#fff' : C.yellow, color: C.ink, weight: 900, scale: Math.max(0.001, p), alpha: clamp(p, 0, 1) * oa });
+          var p = prog(lt, 300 + i * 220, 300 + i * 220 + POP); if (p <= 0) return;
+          chip(g, it2.nick, 200 + rnd('fx' + i) * 680, 700 + i * (560 / Math.max(1, s.items.length)), { size: 38, solid: i % 2 === 0, scale: popS(p), alpha: popA(p) * oa });
         });
       }
-      kLine(g, 'NAJDI SE', W / 2, 410, 96, lt, 20, { out: out, punch: 1.8 });
-      kLine(g, 'VE VIDEU', W / 2, 520, 60, lt, 180, { sticker: C.yellow, color: C.ink, out: out + 30, punch: 1.4 });
+      kLine(g, 'NAJDI SE', W / 2, 410, 92, lt, 20, { out: out });
+      kLine(g, 'VE VIDEU', W / 2, 520, 56, lt, 180, { solid: true, out: out + 30, stagger: 30 });
     }
   };
 
-  // ---------- KORUNA TÝDNE: „👑 KORUNU TÝDNE MÁ MUKAŘOV (+16) · KDO MU JI VEZME?“
+  // ---------- KORUNA TÝDNE
   SCENES.crown = {
     land: 700,
     enter: function (s) {
@@ -2026,25 +1879,24 @@
     },
     draw: function (g, s, lt) {
       var out = s.dur - 300, oa = 1 - prog(lt, out, out + 220), land = this.land;
-      grade(g, 0.62, 0.6, 0.22 * oa);
-      var cp = E.outBack(prog(lt, 40, 360));
-      chip(g, 'KORUNA TÝDNE', W / 2, 395, { size: 40, bg: C.yellow, color: C.ink, weight: 900, spacing: 5, scale: Math.max(0.001, cp), alpha: clamp(cp, 0, 1) * oa, icon: function (g2, x, y, r) { iconCrown(g2, x, y, r); } });
-      // erb + koruna, která na něj dopadne
-      var ep = prog(lt, 100, 520), eo = prog(lt, out, out + 260), img = s._img && s._img.erb;
+      backdrop(g, lt, 0.42);
+      stamp(g, 'KORUNA TÝDNE', 300, 400, { size: 40, p: prog(lt, 40, 40 + POP), alpha: oa, rot: -0.07 });
+      var ep = prog(lt, 100, 100 + POP), eo = prog(lt, out, out + 260), img = s._img && s._img.erb;
       if (ep > 0 && eo < 1) {
-        var es = E.outBack(ep) * (1 - E.inCubic(eo)), ew = 180, eh = 216, ey = 690;
-        g.save(); g.translate(W / 2, ey); g.rotate(Math.sin(lt / 420) * 0.03); g.scale(es, es);
+        var es = popS(ep) * (1 - E.inCubic(eo)), ew = 170, eh = 204, ey = 700;
+        g.save(); g.globalAlpha = popA(ep); g.translate(W / 2, ey); g.rotate(Math.sin(lt / 420) * 0.03); g.scale(es, es);
         g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 40; g.shadowOffsetY = 14;
         if (img) g.drawImage(img, -ew / 2, -eh / 2, ew, eh); else shield(g, -ew / 2, -eh / 2, ew, eh, C.blue, up(s.name)[0]);
         g.restore();
         var p = prog(lt, 300, land), cy = lerp(200, ey - eh / 2 + 18, E.inCubic(p)), sq = lt > land ? 1 + Math.sin(prog(lt, land, land + 240) * Math.PI) * 0.14 : 1;
-        if (p > 0) { g.save(); g.globalAlpha = 1 - eo; g.translate(W / 2, cy); g.rotate(-0.08 * (1 - p) + Math.sin(lt / 500) * 0.02); g.scale(sq * es, es / sq); drawCrown(g, 0, 0, 190, lt); g.restore(); }
+        if (p > 0) { g.save(); g.globalAlpha = 1 - eo; g.translate(W / 2, cy); g.rotate(-0.08 * (1 - p) + Math.sin(lt / 500) * 0.02); g.scale(sq * es, es / sq); drawCrown(g, 0, 0, 180, lt); g.restore(); }
       }
-      kLine(g, 'KORUNU TÝDNE MÁ', W / 2, 890, 62, lt, land - 150, { out: out, color: C.ice, stagger: 50 });
-      kLine(g, up(s.name), W / 2, 1020, 124, lt, land + 50, { out: out, color: C.yellow, punch: 2.1 });
-      var wp = E.outBack(prog(lt, land + 350, land + 650));
-      if (wp > 0 && s.week) chip(g, '+' + s.week + ' ZA TÝDEN', W / 2, 1095, { size: 40, bg: 'rgba(11,20,48,0.85)', color: '#fff', border: 'rgba(255,210,63,.8)', weight: 900, spacing: 3, scale: Math.max(0.001, wp), alpha: clamp(wp, 0, 1) * oa });
-      kLine(g, 'KDO ' + up(s.pron) + ' JI VEZME?', W / 2, 1235, 66, lt, wordStart(s, /^Kdo$/i, land + 1400) - 100, { sticker: '#fff', color: C.ink, out: out + 40, punch: 1.4, stagger: 50 });
+      kLine(g, 'KORUNU TÝDNE MÁ', W / 2, 890, 58, lt, land - 150, { out: out, color: C.sky, stagger: 40 });
+      kLine(g, up(s.name), W / 2, 1020, 118, lt, land + 50, { out: out, color: C.acc });
+      var wp = prog(lt, land + 350, land + 350 + POP);
+      if (wp > 0 && s.week) chip(g, '+' + s.week + ' za týden', W / 2, 1105, { size: 34, scale: popS(wp), alpha: popA(wp) * oa });
+      kLine(g, 'KDO ' + up(s.pron) + ' JI VEZME?', W / 2, 1240, 60, lt, wordStart(s, /^Kdo$/i, land + 1400) - 100, { box: true, out: out + 40, stagger: 30 });
+      flash(g, lt, land, 0.3);
       confetti(g, lt, { t0: land, x: W / 2, y: 600, n: 60, seed: 'cr', spread: 3 });
     }
   };
@@ -2055,157 +1907,126 @@
       gcall('orbit', 0);
       gcall('overview', 1500).then(function () { gcall('orbit', 0.16); });
       AU.ping(0.1, 1320); AU.pop(0.5, 700);
-      var td = wordStart(s, /^Dej$/i, 2400) / 1000; AU.ping(td, 1760);
+      var td = wordStart(s, /^Dej$/i, 2400) / 1000; AU.ping(td, 1760); AU.pop(td + 0.5, 800); AU.pop(td + 1.0, 900);
     },
     draw: function (g, s, lt) {
-      grade(g, 0.62, 0.65, 0.2);
+      backdrop(g, lt, 0.5);
       var out = s.dur - 260, oa = 1 - prog(lt, out, out + 200);
       var tQ = wordStart(s, /^Co$/i, 1200), tD = wordStart(s, /^Dej$/i, 2400), tN = wordStart(s, /^napiš$/i, tD + 500), tM = wordStart(s, /^máš$/i, tN + 1200);
-      // 1) otevřená smyčka: ZÍTRA STAVÍME TOP KOMENTÁŘ → CO TO BUDE?
-      kLine(g, 'ZÍTRA STAVÍME', W / 2, 640, 112, lt, 60, { out: tQ - 260, punch: 1.8 });
-      kLine(g, 'TOP KOMENTÁŘ', W / 2, 780, 124, lt, 260, { out: tQ - 220, color: C.yellow, punch: 2 });
-      var cp = E.outBack(prog(lt, tQ - 200, tQ + 120));
-      chip(g, 'ZÍTRA STAVÍME TOP KOMENTÁŘ', W / 2, 395, { size: 34, bg: C.yellow, color: C.ink, weight: 900, spacing: 3, scale: Math.max(0.001, cp), alpha: clamp(cp, 0, 1) * oa, icon: iconStar(C.ink) });
-      kLine(g, 'CO TO BUDE?', W / 2, 545, 128, lt, tQ - 120, { out: out, punch: 2 });
-      // vedoucí komentář (pokud je)
+      // 1) otevřená smyčka
+      kLine(g, 'ZÍTRA STAVÍME', W / 2, 640, 106, lt, 60, { out: tQ - 260 });
+      kLine(g, 'TOP KOMENTÁŘ', W / 2, 775, 118, lt, 260, { out: tQ - 220, color: C.acc });
+      var cp = prog(lt, tQ - 200, tQ - 200 + POP);
+      chip(g, 'zítra stavíme top komentář', W / 2, 395, { size: 28, scale: popS(cp), alpha: popA(cp) * oa, icon: iconStar(C.acc) });
+      kLine(g, 'CO TO BUDE?', W / 2, 545, 122, lt, tQ - 120, { out: out });
+      // vedoucí komentář (bublina vlevo)
       if (s.next) {
-        var mp = prog(lt, tQ + 150, tQ + 550), mo = prog(lt, tD - 150, tD + 150);
+        var mp = prog(lt, tQ + 150, tQ + 150 + POP), mo = prog(lt, tD - 150, tD + 150);
         if (mp > 0 && mo < 1) {
-          var cw = 860, cx = (W - cw) / 2, cy = 615; g.font = font(38, 700);
-          var lines = wrap(g, '„' + s.next.text + '“', cw - 150).slice(0, 2), chh = 64 + lines.length * 46;
-          g.save(); g.globalAlpha = clamp(mp * 2, 0, 1) * (1 - mo) * oa;
-          g.translate(0, (1 - E.outCubic(mp)) * 60 - E.inCubic(mo) * 40);
-          g.fillStyle = 'rgba(255,255,255,0.96)'; g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 30; rr(g, cx, cy, cw, chh, 30); g.fill(); g.shadowBlur = 0;
-          var hue = hash(s.next.author) % 360; g.fillStyle = 'hsl(' + hue + ',70%,55%)'; g.beginPath(); g.arc(cx + 62, cy + chh / 2, 34, 0, 7); g.fill();
-          g.fillStyle = '#fff'; g.font = font(32, 900); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(up(s.next.author).slice(0, 1) || '?', cx + 62, cy + chh / 2 + 1);
-          g.textAlign = 'left'; g.fillStyle = '#6b7896'; g.font = font(26, 700); g.fillText('@' + s.next.author + (s.next.likes ? '  ·  ♥ ' + s.next.likes : '') + '  ·  zatím vede', cx + 116, cy + 30);
-          g.fillStyle = C.ink; g.font = font(38, 700); for (var i = 0; i < lines.length; i++) g.fillText(lines[i], cx + 116, cy + 76 + i * 46);
+          var bw = 760, bx = 80; bf(g, 34, 600);
+          var lines = wrap(g, s.next.text, bw - 68).slice(0, 2);
+          g.save(); g.globalAlpha = popA(mp) * (1 - mo) * oa; g.translate(bx, 700); g.scale(popS(mp), popS(mp)); g.translate(-bx, -700);
+          bubble(g, bx, 640, bw, lines, { side: 'left', head: '@' + s.next.author, sub: (s.next.likes ? '♥ ' + s.next.likes + ' · ' : '') + 'zatím vede', size: 34, lh: 44, pad: 28 });
           g.restore();
         }
       }
-      // slib: dej follow + napiš obec a povolání = domek s tvým jménem
-      var fp = E.outBack(prog(lt, tD - 60, tD + 260));
-      if (fp > 0) chip(g, '+ DEJ FOLLOW', W / 2, 655, { size: 44, bg: C.sky, color: C.ink, weight: 900, spacing: 3, scale: Math.max(0.001, fp), alpha: clamp(fp, 0, 1) * oa });
-      kLine(g, 'NAPIŠ OBEC', W / 2, 780, 104, lt, tN - 120, { out: out });
-      kLine(g, 'A POVOLÁNÍ', W / 2, 895, 92, lt, tN + 120, { out: out, color: C.yellow });
-      var tIn = tN + 380, ip = E.outBack(prog(lt, tIn, tIn + 350));
+      // 2) slib: dej follow (chip) + bublina „napiš obec a povolání do komentů ↓“ + = DOMEK S TVÝM JMÉNEM
+      var fp = prog(lt, tD - 60, tD - 60 + POP);
+      if (fp > 0) chip(g, 'dej follow', 300, 660, { size: 40, solid: true, scale: popS(fp), alpha: popA(fp) * oa, icon: iconCheck(C.ink) });
+      var bp2 = prog(lt, tN - 120, tN - 120 + POP);
+      if (bp2 > 0) {
+        var w2 = 720, x2 = W - 80 - w2;
+        g.save(); g.globalAlpha = popA(bp2) * oa; g.translate(x2 + w2, 800); g.scale(popS(bp2), popS(bp2)); g.translate(-(x2 + w2), -800);
+        bubble(g, x2, 740, w2, ['napiš obec a povolání', 'do komentů ↓'], { side: 'right', size: 40, lh: 52, pad: 30 });
+        g.restore();
+      }
+      // psaní komentáře (ukázka)
+      var tIn = tN + 380, ip = prog(lt, tIn, tIn + POP);
       if (ip > 0) {
-        var iw = 820, ih = 112, ix = (W - iw) / 2, iy = 975;
-        g.save(); g.globalAlpha = clamp(ip, 0, 1) * oa;
-        g.translate(W / 2, iy + ih / 2); g.scale(Math.max(0.001, ip), Math.max(0.001, ip)); g.translate(-W / 2, -(iy + ih / 2));
-        g.shadowColor = 'rgba(0,0,0,.4)'; g.shadowBlur = 40; g.shadowOffsetY = 12;
-        g.fillStyle = 'rgba(255,255,255,0.97)'; rr(g, ix, iy, iw, ih, ih / 2); g.fill(); g.shadowBlur = 0; g.shadowOffsetY = 0;
-        var ag = g.createLinearGradient(ix, iy, ix + 100, iy + 100); ag.addColorStop(0, C.sky); ag.addColorStop(1, C.blue);
-        g.fillStyle = ag; g.beginPath(); g.arc(ix + 60, iy + ih / 2, 37, 0, 7); g.fill();
-        g.fillStyle = '#fff'; g.font = font(32, 900); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('TY', ix + 60, iy + ih / 2 + 1);
+        var iw = 820, ih = 104, ix = (W - iw) / 2, iy = 985;
+        g.save(); g.globalAlpha = popA(ip) * oa; g.translate(W / 2, iy + ih / 2); g.scale(popS(ip), popS(ip)); g.translate(-W / 2, -(iy + ih / 2));
+        glass(g, ix, iy, iw, ih, ih / 2, { dark: 0.6 });
+        g.fillStyle = C.blue; g.beginPath(); g.arc(ix + 56, iy + ih / 2, 34, 0, 7); g.fill();
+        hf(g, 26, 800); g.fillStyle = C.white; g.textAlign = 'center'; g.textBaseline = 'middle'; htext(g, 'TY', ix + 56, iy + ih / 2 + 1);
         var tT = tIn + 250, per = 1300, k = Math.floor(Math.max(0, lt - tT) / per), name = s.sample[k % s.sample.length], ph = (Math.max(0, lt - tT) % per) / per;
         var typed = name.slice(0, Math.ceil(clamp(ph / 0.55, 0, 1) * name.length));
         if (ph > 0.85) typed = name.slice(0, Math.ceil((1 - (ph - 0.85) / 0.15) * name.length));
         if (lt < tT) typed = '';
-        g.textAlign = 'left'; g.font = font(46, 700); g.fillStyle = typed ? C.ink : '#9aa4ba';
-        g.fillText(typed || 'Přidej komentář…', ix + 120, iy + ih / 2 + 2);
-        if (typed && Math.floor(lt / 260) % 2 === 0) { var cw2 = g.measureText(typed).width; g.fillStyle = C.blue; g.fillRect(ix + 124 + cw2, iy + 30, 5, ih - 60); }
-        g.fillStyle = typed ? C.blue : '#c3cbe0'; g.font = font(38, 800); g.textAlign = 'right'; g.fillText('Zveřejnit', ix + iw - 42, iy + ih / 2 + 2);
+        g.textAlign = 'left'; bf(g, 40, 600); g.fillStyle = typed ? C.white : 'rgba(255,255,255,0.5)';
+        g.fillText(typed || 'Přidej komentář…', ix + 112, iy + ih / 2 + 2);
+        if (typed && Math.floor(lt / 260) % 2 === 0) { var cw2 = g.measureText(typed).width; g.fillStyle = C.acc; g.fillRect(ix + 116 + cw2, iy + 28, 4, ih - 56); }
+        bf(g, 32, 700); g.fillStyle = typed ? C.acc : 'rgba(255,255,255,0.35)'; g.textAlign = 'right'; g.fillText('Zveřejnit', ix + iw - 40, iy + ih / 2 + 2);
         g.restore();
         if (typed && typed !== s._lastTyped) { if (typed.length > (s._lastTyped || '').length) AU.tick(0, 3000 + typed.length * 40); s._lastTyped = typed; }
         if (!typed) s._lastTyped = '';
       }
-      kLine(g, '= DOMEK S TVÝM JMÉNEM', W / 2, 1180, 60, lt, Math.max(tM - 150, tIn + 300), { sticker: C.yellow, color: C.ink, out: out + 40, punch: 1.4, stagger: 45 });
+      kLine(g, '= DOMEK S TVÝM JMÉNEM', W / 2, 1180, 56, lt, Math.max(tM - 150, tIn + 300), { solid: true, out: out + 40, stagger: 30 });
     }
   };
 
+  // ---------- OUTRO (Noc, logo, zítra den X+1; poslední snímek se vrací k prvnímu)
   SCENES.outro = {
     enter: function (s) {
       gcall('orbit', 0.4);
       AU.boom(0.05); AU.ping(0.12, 1480); AU.stopMusic(s.dur / 1000);
     },
     draw: function (g, s, lt) {
-      var p = E.inOut(prog(lt, 0, 520));
-      // radar takeover z centra
-      var rad = p * Math.hypot(W, H) * 0.62;
-      g.save(); g.beginPath(); g.arc(W / 2, H / 2, Math.max(rad, 0.1), 0, 7); g.clip();
-      var bg = g.createLinearGradient(0, 0, W * 0.4, H); bg.addColorStop(0, C.sky); bg.addColorStop(0.5, C.blue); bg.addColorStop(1, C.navy);
-      g.fillStyle = bg; g.fillRect(0, 0, W, H);
-      drawRadar(g, W / 2, H / 2, 640, -Math.PI / 2 + lt / 380, 0.55, { fill: false, lw: 4 });
-      // pulzující prstence
-      for (var i = 0; i < 3; i++) {
-        var q = ((lt / 1400) + i / 3) % 1;
-        g.strokeStyle = 'rgba(255,255,255,' + (1 - q) * 0.35 + ')'; g.lineWidth = 6;
-        g.beginPath(); g.arc(W / 2, H / 2, 120 + q * 700, 0, 7); g.stroke();
-      }
+      var p = E.inOut(prog(lt, 0, 420)), back = prog(lt, s.dur - 420, s.dur - 60);
+      // plný Noc podklad se rozbalí zespodu (a na konci zase ustoupí – smyčka na hook)
+      var cover = p * (1 - back);
+      g.save(); g.beginPath(); g.rect(0, H * (1 - cover), W, H * cover); g.clip();
+      g.fillStyle = C.night; g.fillRect(0, 0, W, H);
+      backdrop(g, lt + 5000, 0, {});
       g.restore();
-      if (rad > 2) { g.save(); g.strokeStyle = '#fff'; g.lineWidth = 8; g.shadowColor = C.sky; g.shadowBlur = 40; g.beginPath(); g.arc(W / 2, H / 2, rad, 0, 7); g.stroke(); g.restore(); }
-      // wordmark
-      var lp = prog(lt, 300, 760);
+      if (back > 0) backdrop(g, lt, 0.3 * back, { blobs: false });
+      var vis = 1 - back;
+      g.save(); g.globalAlpha = vis;
+      var lp = prog(lt, 260, 260 + POP);
       if (lp > 0) {
-        var s2 = lerp(2.2, 1, E.outBack(lp));
-        g.save(); g.translate(W / 2, H / 2 - 40); g.scale(s2, s2); g.globalAlpha = clamp(lp * 2, 0, 1);
-        g.shadowColor = 'rgba(5,10,30,0.45)'; g.shadowBlur = 50; g.shadowOffsetY = 16;
-        g.fillStyle = '#fff'; g.font = font(220, 900); g.textBaseline = 'middle';
-        spacedText(g, 'RADAR', 0, 0, 18, 'center');
+        g.save(); g.translate(W / 2, H / 2 - 70); g.scale(popS(lp), popS(lp)); g.globalAlpha *= popA(lp);
+        hf(g, 230, 800); try { g.letterSpacing = '0.04em'; } catch (e) {} g.fillStyle = C.white; g.textAlign = 'center'; g.textBaseline = 'middle'; htext(g, 'RADAR', 0, 0);
         g.restore();
       }
-      kLine(g, 'POSTAV SI ŘÍČANSKO', W / 2, H / 2 + 150, 54, lt, 650, { punch: 1.3, stagger: 60 });
-      if (lt > 900) chip(g, 'ZÍTRA DEN ' + (s.day + 1), W / 2, H / 2 + 270, { size: 38, bg: C.yellow, color: C.ink, weight: 900, spacing: 4, scale: Math.max(0.001, E.outBack(prog(lt, 900, 1250))) });
-      if (s.handle && lt > 1100) { g.save(); g.globalAlpha = prog(lt, 1100, 1400); g.fillStyle = '#fff'; g.font = font(42, 700); g.textAlign = 'center'; g.fillText(s.handle, W / 2, H / 2 + 380); g.restore(); }
-      var fo = prog(lt, s.dur - 250, s.dur); if (fo > 0) { g.fillStyle = 'rgba(11,20,48,' + fo + ')'; g.fillRect(0, 0, W, H); }
+      var sp = prog(lt, 520, 520 + POP);
+      if (sp > 0) { g.save(); g.globalAlpha *= popA(sp); bf(g, 40, 600); g.fillStyle = 'rgba(255,255,255,0.85)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('Postav si Říčansko', W / 2, H / 2 + 100); g.restore(); }
+      var dp = prog(lt, 760, 760 + POP);
+      if (dp > 0) chip(g, 'ZÍTRA DEN ' + (s.day + 1), W / 2, H / 2 + 230, { size: 40, solid: true, scale: popS(dp), alpha: popA(dp) });
+      if (s.handle) { var hp = prog(lt, 1000, 1200); if (hp > 0) { g.save(); g.globalAlpha *= hp; bf(g, 34, 600); g.fillStyle = 'rgba(255,255,255,0.7)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(s.handle, W / 2, H / 2 + 340); g.restore(); } }
+      g.restore();
     }
   };
 
   function wordStart(s, re, def) { var w = (s.words || []).filter(function (x) { return re.test(x.w); })[0]; return w ? w.start : def; }
-  // ---- perzistentní UI: badge + spodní lišta
+
+  // ---- perzistentní UI: progress (6 segmentů), logo RADAR vlevo, časový kód vpravo
   function drawChrome(g, t, sc) {
-    var script = R.script, sType = sc && sc.type;
-    if (sType === 'outro') return;
-    var lt = t - sc.t0, appear = sType === 'hook' ? E.outCubic(prog(lt, 500, 900)) : 1;
+    var script = R.script, sType = sc && sc.type, lt = t - sc.t0;
+    var appear = sType === 'hook' ? E.outCubic(prog(lt, 400, 800)) : sType === 'outro' ? 1 - prog(lt, 0, 300) + prog(lt, sc.dur - 420, sc.dur - 60) : 1;
     if (appear <= 0) return;
-    // badge RADAR (vlevo nahoře, těsně pod safe zónou)
-    g.save(); g.globalAlpha = appear; g.translate((1 - appear) * -60, 0);
-    g.font = font(40, 900); var bx = 56, by = SAFE_TOP + 22, bw = 74 + spacedWidth(g, 'RADAR', 4) + 26, bh = 74;
-    var bg = g.createLinearGradient(bx, by, bx + bw, by + bh); bg.addColorStop(0, C.sky); bg.addColorStop(1, '#1d4fa3');
-    g.shadowColor = 'rgba(0,0,0,.3)'; g.shadowBlur = 20; g.shadowOffsetY = 6;
-    g.fillStyle = bg; rr(g, bx, by, bw, bh, 18); g.fill(); g.shadowBlur = 0; g.shadowOffsetY = 0;
-    iconRadar(t)(g, bx + 40, by + bh / 2, 20);
-    g.fillStyle = '#fff'; g.font = font(40, 900); g.textBaseline = 'middle';
-    spacedText(g, 'RADAR', bx + 74, by + bh / 2 + 2, 4, 'left');
-    g.restore();
-    // vpravo nahoře: denní update
+    var n = script.scenes.length, frac = clamp((sc.idx + clamp(lt / sc.dur, 0, 1)) / n, 0, 1);
     g.save(); g.globalAlpha = appear;
-    g.font = font(28, 800);
-    var lab = 'DENNÍ UPDATE', lw = spacedWidth(g, lab, 3) + 76, lx = W - 56 - lw, ly = SAFE_TOP + 22 + 37;
-    g.fillStyle = 'rgba(11,20,48,0.7)'; rr(g, lx, ly - 27, lw, 54, 27); g.fill();
-    g.strokeStyle = 'rgba(255,255,255,0.25)'; g.lineWidth = 2; g.stroke();
-    iconDot(C.yellow, t)(g, lx + 30, ly, 14);
-    g.fillStyle = '#fff'; g.textBaseline = 'middle'; spacedText(g, lab, lx + 52, ly + 1, 3, 'left');
-    g.restore();
-    // spodní lišta (nad spodní safe zónou)
-    var y = H - SAFE_BOTTOM - 62;
-    g.save(); g.globalAlpha = appear; g.translate(0, (1 - appear) * 60);
-    g.font = font(36, 900);
-    var dTxt = 'DEN ' + script.day, rest = 'POSTAV SI ŘÍČANSKO';
-    var w1 = spacedWidth(g, dTxt, 3); g.font = font(34, 800); var w2 = spacedWidth(g, rest, 3);
-    var tot = 64 + w1 + 44 + w2 + 44, x = (W - tot) / 2, h = 72;
-    g.fillStyle = 'rgba(11,20,48,0.78)'; rr(g, x, y - h / 2, tot, h, h / 2); g.fill();
-    g.strokeStyle = 'rgba(95,168,232,0.65)'; g.lineWidth = 2.5; g.stroke();
-    // progress
-    g.save(); rr(g, x, y - h / 2, tot, h, h / 2); g.clip();
-    g.fillStyle = 'rgba(255,210,63,0.9)'; g.fillRect(x, y + h / 2 - 5, tot * clamp(t / script.total, 0, 1), 5); g.restore();
-    iconRadar(t)(g, x + 40, y, 16);
-    g.textBaseline = 'middle'; g.font = font(36, 900); g.fillStyle = C.yellow;
-    spacedText(g, dTxt, x + 66, y + 2, 3, 'left');
-    g.fillStyle = 'rgba(255,255,255,0.55)'; g.beginPath(); g.arc(x + 66 + w1 + 22, y, 5, 0, 7); g.fill();
-    g.font = font(34, 800); g.fillStyle = '#fff';
-    spacedText(g, rest, x + 66 + w1 + 44, y + 2, 3, 'left');
+    // progress bar
+    var segs = 6, gap = 8, x0 = 56, bw = W - 112, sw = (bw - gap * (segs - 1)) / segs, y = 230, fill = frac * segs;
+    for (var i = 0; i < segs; i++) {
+      var x = x0 + i * (sw + gap), f = clamp(fill - i, 0, 1);
+      g.fillStyle = 'rgba(255,255,255,0.22)'; rr(g, x, y, sw, 4, 2); g.fill();
+      if (f > 0) { g.fillStyle = C.acc; rr(g, x, y, sw * f, 4, 2); g.fill(); }
+    }
+    // logo + časový kód
+    hf(g, 40, 800); try { g.letterSpacing = '0.04em'; } catch (e) {}
+    g.fillStyle = C.white; g.textBaseline = 'middle'; g.textAlign = 'left';
+    g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 14; htext(g, 'RADAR', 56, 300);
+    var sec = Math.floor(t / 1000), tc = Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60);
+    bf(g, 30, 600); g.textAlign = 'right'; g.fillStyle = 'rgba(255,255,255,0.85)'; g.fillText(tc, W - 56, 300);
     g.restore();
   }
 
-  // ---- titulky voiceoveru
+  // ---- titulky karaoke: Archivo 700, aktuální slovo na akcentu, odeznělá bílá, budoucí .45
   function drawSubs(g, t, sc) {
     if (!sc || !sc.chunks || !sc.chunks.length || sc.noSubs || sc.type === 'hook' || sc.type === 'outro' || R.opts.subtitles === false) return;
     var lt = t - sc.t0, ws = sc.words, ci = -1, wi = -1;
     var live = R.live && R.live.scene === sc.idx && R.live.started ? R.live : null;
     if (live) {
-      // TTS: aktuální slovo podle onboundary (charIndex) nebo odhad od onstart
       var lw = -1;
       if (live.char != null) { for (var i = 0; i < ws.length; i++) if (ws[i].i <= live.char) lw = i; }
       else { var el = now() - live.startedAt + sc.voStart; for (var j = 0; j < ws.length; j++) if (ws[j].start <= el) lw = j; }
@@ -2221,30 +2042,25 @@
     if (ci < 0) return;
     var ch = sc.chunks[ci];
     if (R._lastChunk !== sc.idx + ':' + ci) { R._lastChunk = sc.idx + ':' + ci; R._chunkAt = t; }
-    var pop = E.outBack(prog(t - R._chunkAt, 0, 160)), sc2 = lerp(0.82, 1, pop);
+    var pop = prog(t - R._chunkAt, 0, 180), sc2 = popS(pop);
     var words = ch.map(function (j) { return subDisplay(ws[j].w); });
-    // spoj „+“ s číslem
     var disp = [], map = [];
     for (var a = 0; a < words.length; a++) {
       if (words[a] === '+' && a + 1 < words.length) { disp.push('+' + words[a + 1]); map.push([ch[a], ch[a + 1]]); a++; }
       else { disp.push(words[a]); map.push([ch[a]]); }
     }
-    var size = 80; g.font = font(size, 900);
-    var sp = size * 0.26, text = disp.join(' ');
-    size = fitSize(g, text, 900, size, 900, 54); g.font = font(size, 900); sp = size * 0.26;
-    var widths = disp.map(function (w) { return g.measureText(w).width; });
-    var tot = widths.reduce(function (x1, y1) { return x1 + y1; }, 0) + sp * (disp.length - 1);
-    var y = H - SAFE_BOTTOM - 190, x = W / 2 - tot / 2;
+    var size = 66, padX = 10, sp = 22;
+    var text = disp.join(' '); size = hfit(g, text, 900 - padX * 2 * disp.length, size, 700, 44); hf(g, size, 700);
+    var widths = disp.map(function (w) { return hw(g, w); });
+    var tot = widths.reduce(function (x1, y1) { return x1 + y1; }, 0) + sp * (disp.length - 1) + padX * 2;
+    var y = H - SAFE_BOTTOM - 160, x = W / 2 - tot / 2 + padX;
     g.save(); g.translate(W / 2, y); g.scale(sc2, sc2); g.translate(-W / 2, -y);
-    g.textBaseline = 'middle'; g.textAlign = 'left'; g.lineJoin = 'round';
+    g.globalAlpha = popA(pop);
+    g.textBaseline = 'middle'; g.textAlign = 'left';
     for (var d = 0; d < disp.length; d++) {
       var active = map[d].indexOf(wi) >= 0, spoken = map[d][0] <= wi;
-      g.lineWidth = size * 0.2; g.strokeStyle = C.navy;
-      g.shadowColor = 'rgba(0,0,0,0.5)'; g.shadowBlur = 16; g.shadowOffsetY = 6;
-      g.strokeText(disp[d], x, y); g.shadowBlur = 0; g.shadowOffsetY = 0;
-      g.fillStyle = active ? C.yellow : (spoken ? '#ffffff' : 'rgba(255,255,255,0.92)');
-      if (active) { g.save(); g.translate(x + widths[d] / 2, y); g.scale(1.06, 1.06); g.fillText(disp[d], -widths[d] / 2, 0); g.restore(); }
-      else g.fillText(disp[d], x, y);
+      if (active) { g.fillStyle = C.acc; rr(g, x - padX, y - size * 0.6, widths[d] + padX * 2, size * 1.2, 8); g.fill(); g.fillStyle = C.ink; hf(g, size, 700); htext(g, disp[d], x, y + 1); }
+      else { g.save(); g.globalAlpha *= spoken ? 1 : 0.45; g.shadowColor = 'rgba(0,0,0,0.5)'; g.shadowBlur = 14; g.shadowOffsetY = 4; g.fillStyle = C.white; hf(g, size, 700); htext(g, disp[d], x, y + 1); g.restore(); }
       x += widths[d] + sp;
     }
     g.restore();
@@ -2263,15 +2079,17 @@
     for (var i = sc.length - 1; i >= 0; i--) if (t >= sc[i].t0) return sc[i];
     return sc[0];
   }
+  // střih: krátký dip do Noci (2 × 90 ms) na hranici scén
+  function dip(g, a) { if (a > 0) { g.fillStyle = 'rgba(10,18,51,' + clamp(a, 0, 1) + ')'; g.fillRect(0, 0, W, H); } }
   function renderFrame(t) {
     var g = R.g, sc = sceneAt(t), lt = t - sc.t0;
+    try { g.fontStretch = 'normal'; g.letterSpacing = '0px'; } catch (e) {}
     drawGame(g);
     var S = SCENES[sc.type];
     if (S && S.draw) { g.save(); S.draw(g, sc, lt); g.restore(); }
-    // přechody: sweep wipe kolem hranice scén (ne do hooku a do outra — ty mají vlastní)
-    var next = R.script.scenes[sc.idx + 1], WIPE = 560;
-    if (next && next.type !== 'outro' && sc.t0 + sc.dur - t < WIPE / 2) sweepWipe(g, 0.5 * (1 - (sc.t0 + sc.dur - t) / (WIPE / 2)));
-    if (sc.type !== 'hook' && sc.type !== 'outro' && lt < WIPE / 2) sweepWipe(g, 0.5 + 0.5 * lt / (WIPE / 2));
+    var next = R.script.scenes[sc.idx + 1], DIP = 90;
+    if (next && next.type !== 'outro' && sc.t0 + sc.dur - t < DIP) dip(g, 1 - (sc.t0 + sc.dur - t) / DIP);
+    if (sc.type !== 'hook' && sc.type !== 'outro' && lt < DIP) dip(g, 1 - lt / DIP);
     drawChrome(g, t, sc);
     drawSubs(g, t, sc);
     if (R.opts.debugSafe) drawSafe(g);
@@ -2282,7 +2100,6 @@
     var S = SCENES[sc.type];
     if (S && S.enter) try { S.enter(sc, R); } catch (e) { console.warn('[REEL] enter', sc.type, e); }
     if (sc.type !== 'hook' && sc.type !== 'outro') AU.whoosh(-0.05, 0.5);
-    // TTS náhled
     if (R.tts && sc.vo) {
       var idx = sc.idx;
       R.live = { scene: idx, started: false, char: null, ended: false };
@@ -2302,8 +2119,7 @@
     if (!R.running) return;
     var tNow = now(), dt = tNow - R.last; R.last = tNow;
     var t = tNow - R.t0;
-    if (R.opts.fixedStep) { R.vt = (R.vt == null ? 0 : R.vt + R.opts.fixedStep); t = R.vt; }   // test/offline: pevný krok na snímek
-    // v náhledu s TTS počkej na doznění hlasu (max 2,5 s navíc na scénu)
+    if (R.opts.fixedStep) { R.vt = (R.vt == null ? 0 : R.vt + R.opts.fixedStep); t = R.vt; }
     var cur = sceneAt(Math.min(t, R.script.total - 1));
     if (R.tts && R.live && R.live.scene === cur.idx && cur.vo && !R.live.ended && t > cur.t0 + cur.dur - 120 && (R._hold || 0) < 2500) {
       R.t0 += dt; R._hold = (R._hold || 0) + dt; t = tNow - R.t0;
@@ -2326,10 +2142,25 @@
     if (r) r();
   }
 
-  function loadFonts() {
-    if (!document.fonts || !document.fonts.load) return Promise.resolve();
-    var ps = ['900', '800', '700', '600'].map(function (w) { return document.fonts.load(w + ' 64px "Space Grotesk"').catch(function () {}); });
-    return Promise.race([Promise.all(ps), sleep(1500)]);
+  // ---- fonty: Archivo (Google Fonts) + Inter; bez sítě fallback na Inter/sans-serif + HX roztažení
+  var FONTS_CSS = 'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;600;700&display=swap';
+  function archivoLoaded() {
+    try { var ok = false; document.fonts.forEach(function (f) { if (/archivo/i.test(f.family) && f.status === 'loaded') ok = true; }); return ok; } catch (e) { return false; }
+  }
+  function loadFonts(opts) {
+    opts = opts || {};
+    if (!document.fonts || !document.fonts.load) { HX = 1.08; return Promise.resolve(false); }
+    if (R.fontsDone) return Promise.resolve(R.archivo);
+    if (!R._fontLink && opts.fonts !== false && !document.querySelector('link[href*="family=Archivo"]')) {
+      var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = FONTS_CSS; document.head.appendChild(l); R._fontLink = l;
+    }
+    var load = Promise.all(['800', '700'].map(function (w) { return document.fonts.load(w + ' 64px Archivo').catch(function () { return []; }); }))
+      .then(function () { return document.fonts.ready; });
+    return Promise.race([load, sleep(opts.fontTimeout || 3500)]).then(function () {
+      R.archivo = archivoLoaded(); R.fontsDone = R.archivo;   // bez Archiva to zkusí při příštím play znovu
+      HX = R.archivo ? 1 : 1.08;
+      return R.archivo;
+    });
   }
 
   function prepare(script, opts) {
@@ -2341,7 +2172,7 @@
       try { R._prevSize = g.canvas ? [g.canvas.clientWidth || g.canvas.width, g.canvas.clientHeight || g.canvas.height] : null; g.setAspect(W, H); } catch (e) {}
     }
     AU.init();
-    var jobs = [loadFonts()];
+    var jobs = [loadFonts(opts)];
     if (AU.ctx && AU.ctx.state === 'suspended') jobs.push(AU.ctx.resume().catch(function () {}));
     script.scenes.forEach(function (s) {
       if (s.type === 'town' && s.img === undefined) jobs.push(svgToImage(s.erbSvg).then(function (im) { s.img = im; }));
