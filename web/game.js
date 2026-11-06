@@ -30,7 +30,7 @@ const $=id=>document.getElementById(id);
 const setMsg=t=>{const e=$("loadMsg");if(e)e.textContent=t};
 
 /* ---------- konstanty ---------- */
-const CENTER={x:-2164,y:-957,name:"Náměstí sjednocení"};const FIXED_MAP=true;
+const CENTER={x:-2353,y:-1346,name:"Náměstí sjednocení",scale:.5};const FIXED_MAP=true;
 const L=0.23;              // měřítko uvnitř obce (jednotek na metr)
 const GAP=5, SPREAD=1.15;  // rozestup obcí při roztahování světa
 const LOT=6.6, MAXR=170, HOUSE_S=3.6;
@@ -288,7 +288,9 @@ function buildRoads(){roadGroup.children.forEach(c=>c.geometry.dispose());roadGr
  const MH=new Hash(12);const mseg=[];all.forEach(rd=>{if(rd.c!=="M")return;const p=rd.d;for(let i=2;i<p.length;i+=2){mseg.push([p[i-2],p[i-1],p[i],p[i+1]]);MH.add((p[i-2]+p[i])/2,(p[i-1]+p[i+1])/2,mseg.length-1)}});
  const segX=(ax,az,bx,bz,cx,cz,dx,dz)=>{const d=(bx-ax)*(dz-cz)-(bz-az)*(dx-cx);if(Math.abs(d)<1e-9)return null;const u=((cx-ax)*(dz-cz)-(cz-az)*(dx-cx))/d,v=((cx-ax)*(bz-az)-(cz-az)*(bx-ax))/d;return u>=0&&u<=1&&v>=0&&v<=1?u:null};
  const BR={P:[],U:[],I:[]};
- all.forEach(rd=>{const pts=rd.d;const cls=CLS[rd.c];const key=rd.c==="M"?"M":rd.c==="Z"?"Z":"T";let H=null;
+ let SQ=null;if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);SQ={x:tmp2[0],z:tmp2[1],h:NAMESTI.H*(CENTER.scale||1)+1.2}}
+ const clipSq=pts=>{if(!SQ)return [pts];const runs=[];let cur=[];for(let i=0;i<pts.length;i+=2){const inside=Math.abs(pts[i]-SQ.x)<SQ.h&&Math.abs(pts[i+1]-SQ.z)<SQ.h;if(inside){if(cur.length>=4)runs.push(new Float32Array(cur));cur=[]}else cur.push(pts[i],pts[i+1])}if(cur.length>=4)runs.push(new Float32Array(cur));return runs};
+ all.forEach(rd0=>clipSq(rd0.d).forEach(pts=>{const rd={c:rd0.c,d:pts};const cls=CLS[rd.c];const key=rd.c==="M"?"M":rd.c==="Z"?"Z":"T";let H=null;
   if(rd.c!=="M"&&rd.c!=="Z"){const n=pts.length/2;const cum=new Float32Array(n);for(let i=1;i<n;i++)cum[i]=cum[i-1]+Math.hypot(pts[i*2]-pts[i*2-2],pts[i*2+1]-pts[i*2-1]);const xs=[];
    for(let i=1;i<n;i++){const ax=pts[i*2-2],az=pts[i*2-1],bx=pts[i*2],bz=pts[i*2+1];let hit=null;MH.near((ax+bx)/2,(az+bz)/2,14,id=>{if(hit!==null)return true;const m=mseg[id];const u=segX(ax,az,bx,bz,m[0],m[1],m[2],m[3]);if(u!==null)hit=u;return true});if(hit!==null)xs.push(cum[i-1]+hit*(cum[i]-cum[i-1]))}
    if(xs.length){H=new Float32Array(n);const W=11;for(let i=0;i<n;i++){let h=0;xs.forEach(x0=>{const u=Math.abs(cum[i]-x0)/W;if(u<1){const k=1-u*u*(3-2*u);h=Math.max(h,1.5*k)}});H[i]=h}
@@ -300,9 +302,9 @@ function buildRoads(){roadGroup.children.forEach(c=>c.geometry.dispose());roadGr
   if(rd.c!=="Z"&&rd.c!=="L"){[0,pts.length-2].forEach(j=>{const n=caps.P.length/3;const r=cls.w/2,y=cls.y-.002;caps.P.push(pts[j],y,pts[j+1]);caps.U.push(.5,.5);for(let a=0;a<=10;a++){const an=a/10*6.283;caps.P.push(pts[j]+Math.cos(an)*r,y,pts[j+1]+Math.sin(an)*r);caps.U.push(.5,.5);if(a)caps.I.push(n,n+a+1,n+a)}})}
   let len=0;for(let i=2;i<pts.length;i+=2)len+=Math.hypot(pts[i]-pts[i-2],pts[i+1]-pts[i-1]);
   if(rd.c==="Z"&&len>lr){lr=len;longestRail=pts}
-  if("MPS".includes(rd.c)&&len>60)carPaths.push({pts,len,c:rd.c})});
+  if("MPS".includes(rd.c)&&len>60)carPaths.push({pts,len,c:rd.c})}));
  // třídy z rohů náměstí k nejbližším silnicím
- if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);const cx=tmp2[0],cz=tmp2[1],Hh=NAMESTI.H+.6;const verts=[];all.forEach(rd=>{if(rd.c==="M"||rd.c==="Z")return;const p=rd.d;for(let i=0;i<p.length;i+=2)verts.push(p[i],p[i+1])});
+ if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);const cx=tmp2[0],cz=tmp2[1],Hh=NAMESTI.H*(CENTER.scale||1)+.6;const verts=[];all.forEach(rd=>{if(rd.c==="M"||rd.c==="Z")return;const p=rd.d;for(let i=0;i<p.length;i+=2)verts.push(p[i],p[i+1])});
   [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>{const ox=cx+sx*Hh,oz=cz+sz*Hh;const dx=sx/1.4142,dz=sz/1.4142;let best=null,bd=1e9;for(let i=0;i<verts.length;i+=2){const vx=verts[i]-ox,vz=verts[i+1]-oz;const d=Math.hypot(vx,vz);if(d<6||d>140)continue;const cos=(vx*dx+vz*dz)/d;if(cos<.6)continue;const score=d*(1.6-cos);if(score<bd){bd=score;best=[verts[i],verts[i+1]]}}
    const ex=best?best[0]:ox+dx*45,ez=best?best[1]:oz+dz*45;const pts=new Float32Array([ox,oz,ex,ez]);ribbonInto(pts,CLS.P.w,CLS.P.y,6,B("T").P,B("T").U,B("T").I);for(let u=0;u<=1;u+=.08)roadHash.add(ox+(ex-ox)*u,oz+(ez-oz)*u,1);carPaths.push({pts,len:Math.hypot(ex-ox,ez-oz),c:"P"})})}
  railPath=longestRail;
@@ -641,6 +643,6 @@ window.GAME={canvas,THREE:T,
  setMsg("krajina, lesy a pole…");await new Promise(r=>setTimeout(r,20));
  buildLandSource();TOWNS.forEach(buildTown);TOWNS.forEach(t=>{setFog(t);setErb(t)});relayout(true);initCars();updateUI();
  const t0=byName["Říčany"];const c=tc(t0);ctr.target.set(c.x,0,c.z);cam.position.set(c.x+260,300,c.z+420);
- $("load").remove();if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);NAMESTI.build({scene,x:tmp2[0],z:tmp2[1],towns:TOWNS.map(t=>t.n),signTex:townSignTex(CENTER.name)});TOWNS.forEach(t=>{t.erbKey=null;setErb(t)});buildRoads()}buildCenterMarks();updCrown();updateUI();ready=true;requestAnimationFrame(loop);window.done=1;
+ $("load").remove();if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);NAMESTI.build({scene,x:tmp2[0],z:tmp2[1],scale:CENTER.scale,cathedralScale:1.25,towns:TOWNS.map(t=>t.n),signTex:townSignTex(CENTER.name)});TOWNS.forEach(t=>{t.erbKey=null;setErb(t)});buildRoads()}buildCenterMarks();updCrown();updateUI();ready=true;requestAnimationFrame(loop);window.done=1;
  setTimeout(()=>focusTown(t0,2600,true),300);if(real)setInterval(pollWorld,CONFIG.POLL_MS)})();
 })();

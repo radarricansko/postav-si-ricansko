@@ -141,7 +141,7 @@ function plaza(opts){const G=new T.Group();const P=window.MODELS&&window.MODELS.
  // obruba náměstí
  [[0,H+.3,H*2+.9,.7],[0,-H-.3,H*2+.9,.7],[H+.3,0,.7,H*2],[-H-.3,0,.7,H*2]].forEach(([x,z,w,d])=>box(G,w,.28,d,x,0,z,M.rim));
  // katedrála na severu (čelem k jihu), socha na jihu (naproti)
- const cat=cathedral();cat.position.set(0,0,-H+9);cat.rotation.y=Math.PI;G.add(cat);
+ const cat=cathedral();cat.scale.setScalar(opts.cathedralScale||1);cat.position.set(0,0,-H+9*(opts.cathedralScale||1));cat.rotation.y=Math.PI;G.add(cat);
  const st=statue(opts.towns);st.position.set(0,0,H-12);G.add(st);
  // renesanční domy po východní a západní straně (čelem do náměstí) + jižní strana s mezerou pro vstup
  let i=0;[-1,1].forEach(s=>{let z=-H+1.5;while(z<H-7){const w=5.5+((i*7)%3)*1.2;if(z+w>H-7)break;const hse=townhouse(i++,w);hse.position.set(s*(H+4.6),0,z+w/2);hse.rotation.y=s>0?Math.PI/2:-Math.PI/2;G.add(hse);z+=w+.3}});
@@ -160,7 +160,7 @@ function plaza(opts){const G=new T.Group();const P=window.MODELS&&window.MODELS.
  if(opts.signTex){[[0,H+.9,Math.PI],[H*.0,-H-.9,0],[H+.9,0,-Math.PI/2],[-H-.9,0,Math.PI/2]].forEach(([x,z,ry])=>{const s=new T.Mesh(new T.PlaneGeometry(5,1.3),new T.MeshBasicMaterial({map:opts.signTex,transparent:true}));s.position.set(x,2.3,z);s.rotation.y=ry;G.add(s);const p=mesh(new T.CylinderGeometry(.08,.08,2.3,6),M.granite,x,1.15,z);G.add(p)})}
  return G}
 
-N.build=function(opts){if(N.group&&N.group.parent)N.group.parent.remove(N.group);N.plaques={};const G=plaza(opts);G.position.set(opts.x||0,0,opts.z||0);opts.scene.add(G);N.group=G;return G};
+N.build=function(opts){if(N.group&&N.group.parent)N.group.parent.remove(N.group);N.plaques={};const G=plaza(opts);G.position.set(opts.x||0,0,opts.z||0);G.scale.setScalar(opts.scale||1);N.scale=opts.scale||1;opts.scene.add(G);N.group=G;return G};
 N.setPlaque=function(name,texture,gray){const pl=N.plaques[name];if(!pl)return;pl.material.map=texture;pl.material.color.set(gray?"#8a8a8a":"#ffffff");pl.material.needsUpdate=true};
 N.update=function(now){if(N.flame)N.flame.scale.setScalar(1+Math.sin(now*.006)*.08)};
 window.NAMESTI=N;
