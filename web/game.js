@@ -271,7 +271,7 @@ function sampleForest(){const r=rng(9);forestPts=[];const sp=7.2/S;
 const GREENS=["#3f7a3a","#4b8a3e","#57943f","#35703a","#6a9a45","#2f6436"].map(c=>new T.Color(c));
 const M4=new T.Matrix4(),Q=new T.Quaternion(),V=new T.Vector3(),SC=new T.Vector3(),UP=new T.Vector3(0,1,0);
 let roadHash=null;
-function placeForest(){const cnt=[0,0,0,0];const tcs=TOWNS.map(t=>[tc(t),t.R+2.5]);if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);tcs.push([{x:tmp2[0],z:tmp2[1]},NAMESTI.H*(CENTER.scale||1)*1.9])}
+function placeForest(){const cnt=[0,0,0,0];const tcs=TOWNS.map(t=>[tc(t),t.R+2.5]);if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);tcs.push([{x:tmp2[0],z:tmp2[1]},(NAMESTI.HZ||NAMESTI.H)*(CENTER.scale||1)*1.45])}
  for(let i=0;i<forestPts.length;i+=4){F(forestPts[i],forestPts[i+1],tmp2);const X=tmp2[0],Z=tmp2[1];let bad=false;
   for(const [c,rad] of tcs){if((c.x-X)**2+(c.z-Z)**2<rad*rad){bad=true;break}}if(bad)continue;if(roadHash&&roadHash.near(X,Z,3.2)!==null)continue;
   const s=forestPts[i+3];const k=forestPts[i+2]*2+(s*997%1<.5?0:1);const m=FOREST[k];if(cnt[k]>=40000)continue;Q.setFromAxisAngle(UP,s*6.28);V.set(X,0,Z);const h=1.25+s*.9;SC.set(h,h*(0.9+s*.3),h);M4.compose(V,Q,SC);m.setMatrixAt(cnt[k],M4);cnt[k]++}
@@ -288,8 +288,8 @@ function buildRoads(){roadGroup.children.forEach(c=>c.geometry.dispose());roadGr
  const MH=new Hash(12);const mseg=[];all.forEach(rd=>{if(rd.c!=="M")return;const p=rd.d;for(let i=2;i<p.length;i+=2){mseg.push([p[i-2],p[i-1],p[i],p[i+1]]);MH.add((p[i-2]+p[i])/2,(p[i-1]+p[i+1])/2,mseg.length-1)}});
  const segX=(ax,az,bx,bz,cx,cz,dx,dz)=>{const d=(bx-ax)*(dz-cz)-(bz-az)*(dx-cx);if(Math.abs(d)<1e-9)return null;const u=((cx-ax)*(dz-cz)-(cz-az)*(dx-cx))/d,v=((cx-ax)*(bz-az)-(cz-az)*(bx-ax))/d;return u>=0&&u<=1&&v>=0&&v<=1?u:null};
  const BR={P:[],U:[],I:[]};
- let SQ=null;if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);SQ={x:tmp2[0],z:tmp2[1],h:NAMESTI.H*(CENTER.scale||1)+1.2}}
- const clipSq=pts=>{if(!SQ)return [pts];const runs=[];let cur=[];for(let i=0;i<pts.length;i+=2){const inside=Math.abs(pts[i]-SQ.x)<SQ.h&&Math.abs(pts[i+1]-SQ.z)<SQ.h;if(inside){if(cur.length>=4)runs.push(new Float32Array(cur));cur=[]}else cur.push(pts[i],pts[i+1])}if(cur.length>=4)runs.push(new Float32Array(cur));return runs};
+ let SQ=null;if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);const sc=CENTER.scale||1;SQ={x:tmp2[0],z:tmp2[1],a:NAMESTI.H*sc*1.5,b:(NAMESTI.HZ||NAMESTI.H)*sc*1.25}}
+ const clipSq=pts=>{if(!SQ)return [pts];const runs=[];let cur=[];for(let i=0;i<pts.length;i+=2){const inside=((pts[i]-SQ.x)/SQ.a)**2+((pts[i+1]-SQ.z)/SQ.b)**2<1;if(inside){if(cur.length>=4)runs.push(new Float32Array(cur));cur=[]}else cur.push(pts[i],pts[i+1])}if(cur.length>=4)runs.push(new Float32Array(cur));return runs};
  all.forEach(rd0=>clipSq(rd0.d).forEach(pts=>{const rd={c:rd0.c,d:pts};const cls=CLS[rd.c];const key=rd.c==="M"?"M":rd.c==="Z"?"Z":"T";let H=null;
   if(rd.c!=="M"&&rd.c!=="Z"){const n=pts.length/2;const cum=new Float32Array(n);for(let i=1;i<n;i++)cum[i]=cum[i-1]+Math.hypot(pts[i*2]-pts[i*2-2],pts[i*2+1]-pts[i*2-1]);const xs=[];
    for(let i=1;i<n;i++){const ax=pts[i*2-2],az=pts[i*2-1],bx=pts[i*2],bz=pts[i*2+1];let hit=null;MH.near((ax+bx)/2,(az+bz)/2,14,id=>{if(hit!==null)return true;const m=mseg[id];const u=segX(ax,az,bx,bz,m[0],m[1],m[2],m[3]);if(u!==null)hit=u;return true});if(hit!==null)xs.push(cum[i-1]+hit*(cum[i]-cum[i-1]))}
@@ -304,10 +304,10 @@ function buildRoads(){roadGroup.children.forEach(c=>c.geometry.dispose());roadGr
   if(rd.c==="Z"&&len>lr){lr=len;longestRail=pts}
   if("MPS".includes(rd.c)&&len>60)carPaths.push({pts,len,c:rd.c})}));
  // okruh kolem náměstí
- if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);const cx=tmp2[0],cz=tmp2[1],rr=NAMESTI.H*(CENTER.scale||1)*1.42;const n=48;const pts=new Float32Array((n+1)*2);for(let i=0;i<=n;i++){const a=i/n*Math.PI*2;pts[i*2]=cx+Math.cos(a)*rr;pts[i*2+1]=cz+Math.sin(a)*rr}ribbonInto(pts,CLS.S.w,CLS.S.y,6,B("T").P,B("T").U,B("T").I);for(let i=0;i<=n;i+=2)roadHash.add(pts[i*2],pts[i*2+1],1);carPaths.push({pts,len:2*Math.PI*rr,c:"S"})}
+ if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);const sc=CENTER.scale||1;const cx=tmp2[0],cz=tmp2[1],ra=NAMESTI.H*sc*1.62,rb=(NAMESTI.HZ||NAMESTI.H)*sc*1.34;const n=72;const pts=new Float32Array((n+1)*2);for(let i=0;i<=n;i++){const a=i/n*Math.PI*2;pts[i*2]=cx+Math.cos(a)*ra;pts[i*2+1]=cz+Math.sin(a)*rb}ribbonInto(pts,CLS.S.w,CLS.S.y+.004,6,B("T").P,B("T").U,B("T").I);for(let i=0;i<=n;i+=2)roadHash.add(pts[i*2],pts[i*2+1],1);carPaths.push({pts,len:Math.PI*(ra+rb),c:"S"})}
  // třídy z rohů náměstí k nejbližším silnicím
- if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);const cx=tmp2[0],cz=tmp2[1],Hh=NAMESTI.H*(CENTER.scale||1)+.6;const verts=[];all.forEach(rd=>{if(rd.c==="M"||rd.c==="Z")return;const p=rd.d;for(let i=0;i<p.length;i+=2)verts.push(p[i],p[i+1])});
-  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>{const ox=cx+sx*Hh,oz=cz+sz*Hh;const dx=sx/1.4142,dz=sz/1.4142;let best=null,bd=1e9;for(let i=0;i<verts.length;i+=2){const vx=verts[i]-ox,vz=verts[i+1]-oz;const d=Math.hypot(vx,vz);if(d<6||d>140)continue;const cos=(vx*dx+vz*dz)/d;if(cos<.6)continue;const score=d*(1.6-cos);if(score<bd){bd=score;best=[verts[i],verts[i+1]]}}
+ if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);const sc=CENTER.scale||1;const cx=tmp2[0],cz=tmp2[1],Ha=NAMESTI.H*sc*1.62,Hb=(NAMESTI.HZ||NAMESTI.H)*sc*1.34;const verts=[];all.forEach(rd=>{if(rd.c==="M"||rd.c==="Z")return;const p=rd.d;for(let i=0;i<p.length;i+=2)verts.push(p[i],p[i+1])});
+  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>{const ox=cx+sx*Ha*.72,oz=cz+sz*Hb*.72;const dx=sx/1.4142,dz=sz/1.4142;let best=null,bd=1e9;for(let i=0;i<verts.length;i+=2){const vx=verts[i]-ox,vz=verts[i+1]-oz;const d=Math.hypot(vx,vz);if(d<6||d>140)continue;const cos=(vx*dx+vz*dz)/d;if(cos<.6)continue;const score=d*(1.6-cos);if(score<bd){bd=score;best=[verts[i],verts[i+1]]}}
    const ex=best?best[0]:ox+dx*45,ez=best?best[1]:oz+dz*45;const pts=new Float32Array([ox,oz,ex,ez]);ribbonInto(pts,CLS.P.w,CLS.P.y,6,B("T").P,B("T").U,B("T").I);for(let u=0;u<=1;u+=.08)roadHash.add(ox+(ex-ox)*u,oz+(ez-oz)*u,1);carPaths.push({pts,len:Math.hypot(ex-ox,ez-oz),c:"P"})})}
  railPath=longestRail;
  Object.entries(buf).forEach(([k,b])=>{const m=new T.Mesh(geoFrom(b.P,b.U,b.I),MAT[k]);m.receiveShadow=true;roadGroup.add(m)});

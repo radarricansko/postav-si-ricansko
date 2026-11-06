@@ -3,8 +3,8 @@
 (function(){
 "use strict";
 const T=window.THREE;
-const H=22;                 // půlka strany náměstí (jednotky scény; domek ≈ 4)
-const N={group:null,plaques:{},figure:null,H};
+const H=20,HZ=36;           // poloosy oválu náměstí (x, z); domek ≈ 4
+const N={group:null,plaques:{},figure:null,H,HZ};
 const lam=(c,o)=>new T.MeshLambertMaterial(Object.assign({color:c},o||{}));
 const M={
  stone:lam("#d6d0c0"),stoneD:lam("#b5ae9d"),stoneL:lam("#ebe6d8"),granite:lam("#4f5363"),
@@ -85,29 +85,29 @@ function cathedral(){const G=new T.Group();const L=22,W=9,HH=13;// loď
  G.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});return G}
 
 /* ---------- renesanční měšťanský dům s podloubím ---------- */
-function townhouse(i,w){const G=new T.Group();const d=7,h=7.5+(i%3)*.8;const col=lam(PASTEL[i%PASTEL.length]);const trim=M.stoneL;
+function townhouse(i,w){const G=new T.Group();const d=5.5,h=4.6+(i%3)*.4;const col=lam(PASTEL[i%PASTEL.length]);const trim=M.stoneL;
  // patra nad podloubím
- box(G,w,h-3,d,0,3,0,col);
+ box(G,w,h-2.2,d,0,2.2,0,col);
  // podloubí: pilíře + stín uvnitř + oblouky
- box(G,w-.4,2.9,d-1.6,0,0,.8,lam("#5b5248"));const na=Math.max(1,Math.round(w/2.6));
- for(let k=0;k<=na;k++){const x=-w/2+k*(w/na);box(G,.7,3,.8,x,0,-d/2+.4,trim);box(G,.9,.25,1,x,2.75,-d/2+.4,M.stoneD)}
- for(let k=0;k<na;k++){const x=-w/2+(k+.5)*(w/na);const arc=new T.Mesh(new T.TorusGeometry((w/na)/2-.35,.14,6,14,Math.PI),trim);arc.position.set(x,2.5,-d/2+.02);G.add(arc)}
- box(G,w,.35,d+.3,0,3,0,trim);
+ box(G,w-.4,2.1,d-1.4,0,0,.7,lam("#5b5248"));const na=Math.max(1,Math.round(w/2.4));
+ for(let k=0;k<=na;k++){const x=-w/2+k*(w/na);box(G,.5,2.2,.6,x,0,-d/2+.3,trim);box(G,.7,.2,.8,x,2,-d/2+.3,M.stoneD)}
+ for(let k=0;k<na;k++){const x=-w/2+(k+.5)*(w/na);const arc=new T.Mesh(new T.TorusGeometry((w/na)/2-.25,.1,6,14,Math.PI),trim);arc.position.set(x,1.75,-d/2+.02);G.add(arc)}
+ box(G,w,.25,d+.25,0,2.2,0,trim);
  // okna
- const rows=Math.floor((h-3)/2.2);for(let r=0;r<rows;r++)for(let k=0;k<na;k++){const x=-w/2+(k+.5)*(w/na);const win=mesh(new T.BoxGeometry(.8,1.3,.1),M.glass,x,3.9+r*2.2,-d/2-.02);G.add(win);box(G,1.1,.14,.25,x,3.9+r*2.2-.75,-d/2-.1,trim);box(G,1.1,.12,.2,x,3.9+r*2.2+.72,-d/2-.08,trim)}
+ const rows=Math.max(1,Math.floor((h-2.2)/1.6));for(let r=0;r<rows;r++)for(let k=0;k<na;k++){const x=-w/2+(k+.5)*(w/na);const win=mesh(new T.BoxGeometry(.6,.9,.1),M.glass,x,3+r*1.6,-d/2-.02);G.add(win);box(G,.85,.1,.2,x,3+r*1.6-.55,-d/2-.08,trim)}
  // sgrafito pás
- box(G,w,.5,d+.1,0,h-.6,0,lam("#c9b48a"));
+ box(G,w,.35,d+.1,0,h-.45,0,lam("#c9b48a"));
  // střecha + štít (renesanční: stupňovitý nebo volutový)
  const kind=i%3;
  if(kind===0){// sedlová střecha s čelním stupňovitým štítem
-  prism(G,w,3.2,d,0,h,0,M.tile);for(let k=0;k<4;k++)box(G,w-k*(w/4.5),.8,.5,0,h+k*.8,-d/2-.2,col)}
+  prism(G,w,2.2,d,0,h,0,M.tile);for(let k=0;k<3;k++)box(G,w-k*(w/3.5),.6,.4,0,h+k*.6,-d/2-.2,col)}
  else if(kind===1){// volutový štít + valba
-  prism(G,w,3,d,0,h,0,M.tile2);box(G,w*.7,1.4,.5,0,h,-d/2-.2,col);box(G,w*.4,1.2,.5,0,h+1.4,-d/2-.2,col);const ball=new T.Mesh(new T.SphereGeometry(.3,8,6),trim);ball.position.set(0,h+2.9,-d/2-.2);G.add(ball)}
+  prism(G,w,2.1,d,0,h,0,M.tile2);box(G,w*.7,1,.4,0,h,-d/2-.2,col);box(G,w*.4,.8,.4,0,h+1,-d/2-.2,col);const ball=new T.Mesh(new T.SphereGeometry(.22,8,6),trim);ball.position.set(0,h+2,-d/2-.2);G.add(ball)}
  else{// atika s cimbuřím (renesanční „lunetová“ atika)
-  box(G,w,1.2,d,0,h,0,col);for(let k=0;k<na*2;k++){const x=-w/2+(k+.5)*(w/(na*2));const lun=new T.Mesh(new T.CylinderGeometry(w/(na*2)/2-.1,w/(na*2)/2-.1,.4,10,1,false,0,Math.PI),trim);lun.rotation.x=Math.PI/2;lun.rotation.z=Math.PI/2;lun.position.set(x,h+1.2,-d/2-.1);G.add(lun)}
-  const rf=mesh(new T.BoxGeometry(w-.6,.6,d-.6),M.tile,0,h+1.5,0);G.add(rf)}
+  box(G,w,.8,d,0,h,0,col);for(let k=0;k<na*2;k++){const x=-w/2+(k+.5)*(w/(na*2));const lun=new T.Mesh(new T.CylinderGeometry(w/(na*2)/2-.1,w/(na*2)/2-.1,.3,10,1,false,0,Math.PI),trim);lun.rotation.x=Math.PI/2;lun.rotation.z=Math.PI/2;lun.position.set(x,h+.8,-d/2-.1);G.add(lun)}
+  const rf=mesh(new T.BoxGeometry(w-.6,.5,d-.6),M.tile,0,h+1,0);G.add(rf)}
  // komín
- box(G,.6,1.6,.6,w/2-1,h+1.5,1.5,M.stoneD);
+ box(G,.45,1.1,.45,w/2-.8,h+.9,1.1,M.stoneD);
  G.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});return G}
 
 /* ---------- socha sjednocení: 52 mečů ---------- */
@@ -139,29 +139,34 @@ function statue(towns){const G=new T.Group();
 const apronTex=(()=>{const c=document.createElement("canvas");c.width=c.height=256;const g=c.getContext("2d");const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.7,"rgba(255,255,255,1)");r.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=r;g.fillRect(0,0,256,256);return new T.CanvasTexture(c)})();
 function plaza(opts){const G=new T.Group();const P=window.MODELS&&window.MODELS.p;
  // kulatý trávníkový podklad s měkkým okrajem (jako u obcí) + dlážděný kruh pod domy
- const apron=new T.Mesh(new T.CircleGeometry(H*1.9,64),new T.MeshLambertMaterial({color:"#93c063",alphaMap:apronTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));apron.rotation.x=-Math.PI/2;apron.position.y=.04;apron.receiveShadow=true;G.add(apron);
- const disc=new T.Mesh(new T.CircleGeometry(H*1.5,64),M.plaza);disc.rotation.x=-Math.PI/2;disc.position.y=.08;disc.receiveShadow=true;G.add(disc);
- const base=new T.Mesh(new T.PlaneGeometry(H*2+1,H*2+1),M.plaza);base.rotation.x=-Math.PI/2;base.position.y=.1;base.receiveShadow=true;G.add(base);
- // obruba náměstí
- [[0,H+.3,H*2+.9,.7],[0,-H-.3,H*2+.9,.7],[H+.3,0,.7,H*2],[-H-.3,0,.7,H*2]].forEach(([x,z,w,d])=>box(G,w,.28,d,x,0,z,M.rim));
+ const ell=(a,b,n=72)=>{const sh=new T.Shape();for(let i=0;i<=n;i++){const t=i/n*Math.PI*2;const x=Math.cos(t)*a,y=Math.sin(t)*b;i?sh.lineTo(x,y):sh.moveTo(x,y)}return sh};
+ const flat=(shape,mat,y)=>{const m=new T.Mesh(new T.ShapeGeometry(shape,1),mat);m.rotation.x=-Math.PI/2;m.position.y=y;m.receiveShadow=true;return m};
+ const apron=flat(ell(H*1.9,HZ*1.55),new T.MeshLambertMaterial({color:"#93c063",alphaMap:apronTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}),.04);G.add(apron);
+ const disc=flat(ell(H*1.45,HZ*1.22),M.plaza,.08);G.add(disc);
+ const base=flat(ell(H+1,HZ+1),M.plaza,.1);G.add(base);
+ // obruba oválu
+ const rimS=ell(H+.9,HZ+.9);rimS.holes.push(ell(H+.1,HZ+.1));const rim=new T.Mesh(new T.ExtrudeGeometry(rimS,{depth:.28,bevelEnabled:false}),M.rim);rim.rotation.x=-Math.PI/2;rim.position.y=0;rim.castShadow=true;G.add(rim);
  // katedrála na severu (čelem k jihu), socha na jihu (naproti)
- const cat=cathedral();cat.scale.setScalar(opts.cathedralScale||1);cat.position.set(0,0,-H+9*(opts.cathedralScale||1));cat.rotation.y=Math.PI;G.add(cat);
- const st=statue(opts.towns);st.position.set(0,0,H-12);G.add(st);
+ const cs=opts.cathedralScale||1;const cat=cathedral();cat.scale.setScalar(cs);cat.position.set(0,0,-HZ+12*cs);cat.rotation.y=Math.PI;G.add(cat);
+ const st=statue(opts.towns);st.position.set(0,0,HZ-14);G.add(st);
  // renesanční domy po východní a západní straně (čelem do náměstí) + jižní strana s mezerou pro vstup
- let i=0;[-1,1].forEach(s=>{let z=-H+1.5;while(z<H-7){const w=5.5+((i*7)%3)*1.2;if(z+w>H-7)break;const hse=townhouse(i++,w);hse.position.set(s*(H+4.6),0,z+w/2);hse.rotation.y=s>0?Math.PI/2:-Math.PI/2;G.add(hse);z+=w+.3}});
- [-1,1].forEach(s=>{let x=s>0?6.5:-H+1.5;const end=s>0?H-7:-6.5;while(x<end){const w=5.5+((i*5)%3)*1.2;if(x+w>end)break;const hse=townhouse(i++,w);hse.position.set(x+w/2,0,H+4.6);hse.rotation.y=0;G.add(hse);x+=w+.3}});
+ // domy po obvodu oválu (mimo severní konec s katedrálou a jižní vstup), čelem do náměstí
+ let i=0;const A=H+3.6,Bz=HZ+3.6;const per=[];const nseg=160;let acc=0,prev=null;for(let k=0;k<=nseg;k++){const t=k/nseg*Math.PI*2;const p=[Math.cos(t)*A,Math.sin(t)*Bz];if(prev)acc+=Math.hypot(p[0]-prev[0],p[1]-prev[1]);per.push({t,x:p[0],z:p[1],s:acc});prev=p}
+ const total=acc;let sPos=0;while(sPos<total){const w=4.2+((i*7)%3)*.9;const sMid=sPos+w/2;const q=per.find(e=>e.s>=sMid)||per[per.length-1];const t=q.t;const ang=Math.atan2(Math.sin(t)*Bz,Math.cos(t)*A);
+  const skipN=q.z<-HZ*.45;const skipS=q.z>HZ*.55&&Math.abs(q.x)<H*.35;const skipE=Math.abs(q.z)<4&&q.x>0; // vstupy: jih a východ
+  if(!skipN&&!skipS&&!skipE){const hse=townhouse(i++,w);hse.position.set(q.x,0,q.z);hse.rotation.y=Math.atan2(-q.x,-q.z)+Math.PI;G.add(hse)}sPos+=w+.35}
  // alej: dvojité řady stromů podél východní a západní strany + lampy
- if(P&&P.tree){for(let z=-H+6;z<=H-9;z+=4.2){[-1,1].forEach(s=>{[H-3,H-6].forEach(off=>{const t=new T.Mesh(P.tree.geo,P.tree.mat);t.scale.setScalar(3.6+((z*7)%3)*.25);t.position.set(s*off,0,z);t.castShadow=true;G.add(t)})})}}
- for(let z=-H+6;z<=H-9;z+=4.2){[-1,1].forEach(s=>{const lawn=new T.Mesh(new T.PlaneGeometry(3.6,4),M.lawn);lawn.rotation.x=-Math.PI/2;lawn.position.set(s*(H-4.5),.14,z);G.add(lawn)})}
- if(P&&P.lamp){for(let z=-H+4;z<=H-6;z+=6){[-1,1].forEach(s=>{const l=new T.Mesh(P.lamp.geo,P.lamp.mat);l.scale.setScalar(3);l.position.set(s*(H-8.5),0,z);l.castShadow=true;G.add(l)})}}
+ if(P&&P.tree){for(let z=-HZ+30;z<=HZ-20;z+=4.2){[-1,1].forEach(s=>{[H-3,H-6].forEach(off=>{const t=new T.Mesh(P.tree.geo,P.tree.mat);t.scale.setScalar(3.6+((z*7)%3)*.25);t.position.set(s*off,0,z);t.castShadow=true;G.add(t)})})}}
+ for(let z=-HZ+30;z<=HZ-20;z+=4.2){[-1,1].forEach(s=>{const lawn=new T.Mesh(new T.PlaneGeometry(3.6,4),M.lawn);lawn.rotation.x=-Math.PI/2;lawn.position.set(s*(H-4.5),.14,z);G.add(lawn)})}
+ if(P&&P.lamp){for(let z=-HZ+28;z<=HZ-20;z+=6){[-1,1].forEach(s=>{const l=new T.Mesh(P.lamp.geo,P.lamp.mat);l.scale.setScalar(3);l.position.set(s*(H-8.5),0,z);l.castShadow=true;G.add(l)})}}
  // lavičky u aleje
- for(let z=-H+8;z<=H-9;z+=8.4){[-1,1].forEach(s=>{box(G,1.8,.12,.5,s*(H-8),.5,z,M.wood);box(G,1.8,.5,.12,s*(H-8),.5,z-.2,M.wood);[-.7,.7].forEach(o=>box(G,.1,.5,.5,s*(H-8)+o,0,z,M.dark))})}
+ for(let z=-HZ+32;z<=HZ-20;z+=8.4){[-1,1].forEach(s=>{box(G,1.8,.12,.5,s*(H-8),.5,z,M.wood);box(G,1.8,.5,.12,s*(H-8),.5,z-.2,M.wood);[-.7,.7].forEach(o=>box(G,.1,.5,.5,s*(H-8)+o,0,z,M.dark))})}
  // fontány mezi sochou a katedrálou
- [[-9,-2],[9,-2]].forEach(([x,z])=>{const b=mesh(new T.CylinderGeometry(2.3,2.5,.55,28),M.stoneD,x,.28,z);G.add(b);const w=new T.Mesh(new T.CircleGeometry(2.05,28),M.water);w.rotation.x=-Math.PI/2;w.position.set(x,.58,z);G.add(w);const j=mesh(new T.CylinderGeometry(.14,.2,1.8,8),M.stoneL,x,1.4,z);G.add(j);const bowl=mesh(new T.CylinderGeometry(.8,.5,.3,12),M.stoneL,x,2.2,z);G.add(bowl)});
+ [[-8,4],[8,4]].forEach(([x,z])=>{const b=mesh(new T.CylinderGeometry(2.3,2.5,.55,28),M.stoneD,x,.28,z);G.add(b);const w=new T.Mesh(new T.CircleGeometry(2.05,28),M.water);w.rotation.x=-Math.PI/2;w.position.set(x,.58,z);G.add(w);const j=mesh(new T.CylinderGeometry(.14,.2,1.8,8),M.stoneL,x,1.4,z);G.add(j);const bowl=mesh(new T.CylinderGeometry(.8,.5,.3,12),M.stoneL,x,2.2,z);G.add(bowl)});
  // květináče u portálu
- if(P&&P.planter){[-4,4].forEach(x=>{const p=new T.Mesh(P.planter.geo,P.planter.mat);p.scale.setScalar(3);p.position.set(x,0,-H+9+14);G.add(p)})}
+ if(P&&P.planter){[-4,4].forEach(x=>{const p=new T.Mesh(P.planter.geo,P.planter.mat);p.scale.setScalar(3);p.position.set(x,0,-HZ+12*cs+12*cs);G.add(p)})}
  // cedule u vstupů
- if(opts.signTex){[[0,H+.9,Math.PI],[H*.0,-H-.9,0],[H+.9,0,-Math.PI/2],[-H-.9,0,Math.PI/2]].forEach(([x,z,ry])=>{const s=new T.Mesh(new T.PlaneGeometry(5,1.3),new T.MeshBasicMaterial({map:opts.signTex,transparent:true}));s.position.set(x,2.3,z);s.rotation.y=ry;G.add(s);const p=mesh(new T.CylinderGeometry(.08,.08,2.3,6),M.granite,x,1.15,z);G.add(p)})}
+ if(opts.signTex){[[0,HZ+1.2,Math.PI],[H+1.2,0,-Math.PI/2]].forEach(([x,z,ry])=>{const s=new T.Mesh(new T.PlaneGeometry(5,1.3),new T.MeshBasicMaterial({map:opts.signTex,transparent:true}));s.position.set(x,2.3,z);s.rotation.y=ry;G.add(s);const p=mesh(new T.CylinderGeometry(.08,.08,2.3,6),M.granite,x,1.15,z);G.add(p)})}
  return G}
 
 N.build=function(opts){if(N.group&&N.group.parent)N.group.parent.remove(N.group);N.plaques={};const G=plaza(opts);G.position.set(opts.x||0,0,opts.z||0);G.scale.setScalar(opts.scale||1);N.scale=opts.scale||1;opts.scene.add(G);N.group=G;return G};
