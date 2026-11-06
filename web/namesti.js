@@ -136,8 +136,12 @@ function statue(towns){const G=new T.Group();
  G.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});return G}
 
 /* ---------- celé náměstí ---------- */
+const apronTex=(()=>{const c=document.createElement("canvas");c.width=c.height=256;const g=c.getContext("2d");const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.7,"rgba(255,255,255,1)");r.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=r;g.fillRect(0,0,256,256);return new T.CanvasTexture(c)})();
 function plaza(opts){const G=new T.Group();const P=window.MODELS&&window.MODELS.p;
- const base=new T.Mesh(new T.PlaneGeometry(H*2+16,H*2+16),M.plaza);base.rotation.x=-Math.PI/2;base.position.y=.1;base.receiveShadow=true;G.add(base);
+ // kulatý trávníkový podklad s měkkým okrajem (jako u obcí) + dlážděný kruh pod domy
+ const apron=new T.Mesh(new T.CircleGeometry(H*1.9,64),new T.MeshLambertMaterial({color:"#93c063",alphaMap:apronTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));apron.rotation.x=-Math.PI/2;apron.position.y=.04;apron.receiveShadow=true;G.add(apron);
+ const disc=new T.Mesh(new T.CircleGeometry(H*1.5,64),M.plaza);disc.rotation.x=-Math.PI/2;disc.position.y=.08;disc.receiveShadow=true;G.add(disc);
+ const base=new T.Mesh(new T.PlaneGeometry(H*2+1,H*2+1),M.plaza);base.rotation.x=-Math.PI/2;base.position.y=.1;base.receiveShadow=true;G.add(base);
  // obruba náměstí
  [[0,H+.3,H*2+.9,.7],[0,-H-.3,H*2+.9,.7],[H+.3,0,.7,H*2],[-H-.3,0,.7,H*2]].forEach(([x,z,w,d])=>box(G,w,.28,d,x,0,z,M.rim));
  // katedrála na severu (čelem k jihu), socha na jihu (naproti)

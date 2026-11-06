@@ -30,7 +30,7 @@ const $=id=>document.getElementById(id);
 const setMsg=t=>{const e=$("loadMsg");if(e)e.textContent=t};
 
 /* ---------- konstanty ---------- */
-const CENTER={x:-2353,y:-1346,name:"Náměstí sjednocení",scale:.5};const FIXED_MAP=true;
+const CENTER={x:-2353,y:-1346,name:"Náměstí sjednocení",scale:.72};const FIXED_MAP=true;
 const L=0.23;              // měřítko uvnitř obce (jednotek na metr)
 const GAP=5, SPREAD=1.15;  // rozestup obcí při roztahování světa
 const LOT=6.6, MAXR=170, HOUSE_S=3.6;
@@ -271,7 +271,7 @@ function sampleForest(){const r=rng(9);forestPts=[];const sp=7.2/S;
 const GREENS=["#3f7a3a","#4b8a3e","#57943f","#35703a","#6a9a45","#2f6436"].map(c=>new T.Color(c));
 const M4=new T.Matrix4(),Q=new T.Quaternion(),V=new T.Vector3(),SC=new T.Vector3(),UP=new T.Vector3(0,1,0);
 let roadHash=null;
-function placeForest(){const cnt=[0,0,0,0];const tcs=TOWNS.map(t=>[tc(t),t.R+2.5]);
+function placeForest(){const cnt=[0,0,0,0];const tcs=TOWNS.map(t=>[tc(t),t.R+2.5]);if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);tcs.push([{x:tmp2[0],z:tmp2[1]},NAMESTI.H*(CENTER.scale||1)*1.9])}
  for(let i=0;i<forestPts.length;i+=4){F(forestPts[i],forestPts[i+1],tmp2);const X=tmp2[0],Z=tmp2[1];let bad=false;
   for(const [c,rad] of tcs){if((c.x-X)**2+(c.z-Z)**2<rad*rad){bad=true;break}}if(bad)continue;if(roadHash&&roadHash.near(X,Z,3.2)!==null)continue;
   const s=forestPts[i+3];const k=forestPts[i+2]*2+(s*997%1<.5?0:1);const m=FOREST[k];if(cnt[k]>=40000)continue;Q.setFromAxisAngle(UP,s*6.28);V.set(X,0,Z);const h=1.25+s*.9;SC.set(h,h*(0.9+s*.3),h);M4.compose(V,Q,SC);m.setMatrixAt(cnt[k],M4);cnt[k]++}
@@ -303,6 +303,8 @@ function buildRoads(){roadGroup.children.forEach(c=>c.geometry.dispose());roadGr
   let len=0;for(let i=2;i<pts.length;i+=2)len+=Math.hypot(pts[i]-pts[i-2],pts[i+1]-pts[i-1]);
   if(rd.c==="Z"&&len>lr){lr=len;longestRail=pts}
   if("MPS".includes(rd.c)&&len>60)carPaths.push({pts,len,c:rd.c})}));
+ // okruh kolem náměstí
+ if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);const cx=tmp2[0],cz=tmp2[1],rr=NAMESTI.H*(CENTER.scale||1)*1.42;const n=48;const pts=new Float32Array((n+1)*2);for(let i=0;i<=n;i++){const a=i/n*Math.PI*2;pts[i*2]=cx+Math.cos(a)*rr;pts[i*2+1]=cz+Math.sin(a)*rr}ribbonInto(pts,CLS.S.w,CLS.S.y,6,B("T").P,B("T").U,B("T").I);for(let i=0;i<=n;i+=2)roadHash.add(pts[i*2],pts[i*2+1],1);carPaths.push({pts,len:2*Math.PI*rr,c:"S"})}
  // třídy z rohů náměstí k nejbližším silnicím
  if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);const cx=tmp2[0],cz=tmp2[1],Hh=NAMESTI.H*(CENTER.scale||1)+.6;const verts=[];all.forEach(rd=>{if(rd.c==="M"||rd.c==="Z")return;const p=rd.d;for(let i=0;i<p.length;i+=2)verts.push(p[i],p[i+1])});
   [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>{const ox=cx+sx*Hh,oz=cz+sz*Hh;const dx=sx/1.4142,dz=sz/1.4142;let best=null,bd=1e9;for(let i=0;i<verts.length;i+=2){const vx=verts[i]-ox,vz=verts[i+1]-oz;const d=Math.hypot(vx,vz);if(d<6||d>140)continue;const cos=(vx*dx+vz*dz)/d;if(cos<.6)continue;const score=d*(1.6-cos);if(score<bd){bd=score;best=[verts[i],verts[i+1]]}}
@@ -643,6 +645,6 @@ window.GAME={canvas,THREE:T,
  setMsg("krajina, lesy a pole…");await new Promise(r=>setTimeout(r,20));
  buildLandSource();TOWNS.forEach(buildTown);TOWNS.forEach(t=>{setFog(t);setErb(t)});relayout(true);initCars();updateUI();
  const t0=byName["Říčany"];const c=tc(t0);ctr.target.set(c.x,0,c.z);cam.position.set(c.x+260,300,c.z+420);
- $("load").remove();if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);NAMESTI.build({scene,x:tmp2[0],z:tmp2[1],scale:CENTER.scale,cathedralScale:1.25,towns:TOWNS.map(t=>t.n),signTex:townSignTex(CENTER.name)});TOWNS.forEach(t=>{t.erbKey=null;setErb(t)});buildRoads()}buildCenterMarks();updCrown();updateUI();ready=true;requestAnimationFrame(loop);window.done=1;
+ $("load").remove();if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);NAMESTI.build({scene,x:tmp2[0],z:tmp2[1],scale:CENTER.scale,cathedralScale:1.5,towns:TOWNS.map(t=>t.n),signTex:townSignTex(CENTER.name)});TOWNS.forEach(t=>{t.erbKey=null;setErb(t)});buildRoads()}buildCenterMarks();updCrown();updateUI();ready=true;requestAnimationFrame(loop);window.done=1;
  setTimeout(()=>focusTown(t0,2600,true),300);if(real)setInterval(pollWorld,CONFIG.POLL_MS)})();
 })();
