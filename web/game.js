@@ -35,7 +35,7 @@ const L=0.23;              // měřítko uvnitř obce (jednotek na metr)
 const GAP=5, SPREAD=1.15;  // rozestup obcí při roztahování světa
 const LOT=6.6, MAXR=170, HOUSE_S=3.6;
 const ROOFS=["#c45c3e","#9c3f2c","#4e5260","#8a6646"],ROOF_W=[.42,.26,.18,.14];
-const CLS={M:{w:4.8,y:.078},L:{w:1.5,y:.066},P:{w:2.7,y:.066},S:{w:2.3,y:.066},T:{w:1.9,y:.066},Z:{w:1.6,y:.05},G:{w:1.9,y:.064}};
+const CLS={M:{w:4.8,y:.078},L:{w:1.5,y:.063},P:{w:2.7,y:.070},S:{w:2.3,y:.068},T:{w:1.9,y:.066},Z:{w:1.6,y:.05},G:{w:1.9,y:.061}};
 let S=0.05,Starget=0.05;
 
 function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -228,7 +228,13 @@ const lawnTex=canvasTex(256,256,(g,w,h)=>{const r=g.createRadialGradient(128,128
 const lawnMats={};function lawnMat(R){const k=Math.round(R);return lawnMats[k]||(lawnMats[k]=new T.MeshLambertMaterial({color:"#93c063",alphaMap:lawnTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}))}
 /* ---------- pás silnice ---------- */
 function ribbonInto(pts,w,y,uvS,P,U,I,H,off=0){const n=pts.length/2;if(n<2)return;const base=P.length/3;let acc=0;
- for(let i=0;i<n;i++){const ax=pts[Math.max(0,i-1)*2],az=pts[Math.max(0,i-1)*2+1],bx=pts[Math.min(n-1,i+1)*2],bz=pts[Math.min(n-1,i+1)*2+1];const dx=bx-ax,dz=bz-az,l=Math.hypot(dx,dz)||1;const nx=-dz/l*w/2,nz=dx/l*w/2;
+ for(let i=0;i<n;i++){const x0=pts[i*2],z0=pts[i*2+1];let nx,nz;
+  // normály sousedních segmentů; v rohu pokos (miter) s omezením, aby se pás nezužoval ani nepřestřeloval
+  const hasP=i>0,hasN=i<n-1;let n1x=0,n1z=0,n2x=0,n2z=0;
+  if(hasP){const dx=x0-pts[i*2-2],dz=z0-pts[i*2-1],l=Math.hypot(dx,dz)||1;n1x=-dz/l;n1z=dx/l}
+  if(hasN){const dx=pts[i*2+2]-x0,dz=pts[i*2+3]-z0,l=Math.hypot(dx,dz)||1;n2x=-dz/l;n2z=dx/l}
+  if(hasP&&hasN){let mx=n1x+n2x,mz=n1z+n2z;const ml=Math.hypot(mx,mz);if(ml<1e-4){mx=n1x;mz=n1z}else{mx/=ml;mz/=ml}const d=mx*n1x+mz*n1z;const k=Math.min(2.2,1/Math.max(.3,d));nx=mx*k*w/2;nz=mz*k*w/2}
+  else if(hasP){nx=n1x*w/2;nz=n1z*w/2}else{nx=n2x*w/2;nz=n2z*w/2}
   if(i)acc+=Math.hypot(pts[i*2]-pts[i*2-2],pts[i*2+1]-pts[i*2-1]);const yy=y+(H?H[i]:0);const ox=off?nx/(w/2)*off:0,oz=off?nz/(w/2)*off:0;const x=pts[i*2]+ox,z=pts[i*2+1]+oz;P.push(x+nx,yy,z+nz,x-nx,yy,z-nz);U.push(0,acc/uvS,1,acc/uvS);
   if(i){const k=base+(i-1)*2;I.push(k,k+2,k+1,k+1,k+2,k+3)}}}
 function geoFrom(P,U,I){const g=new T.BufferGeometry();g.setAttribute("position",new T.Float32BufferAttribute(P,3));g.setAttribute("uv",new T.Float32BufferAttribute(U,2));
@@ -299,6 +305,8 @@ function buildRoads(){roadGroup.children.forEach(c=>c.geometry.dispose());roadGr
     for(let i=0;i<n;i++){if(hb[i]>0)run.push(i);else flush()}flush()}}
   ribbonInto(pts,cls.w,cls.y,key==="M"?8:key==="Z"?2:6,B(key).P,B(key).U,B(key).I,H);
   for(let i=0;i<pts.length;i+=4)roadHash.add(pts[i],pts[i+1],1);
+  // kloub v ostrých zatáčkách: kruhová záplata, aby ve spoji neprosvítala tráva
+  if(rd.c!=="Z"){for(let i=2;i<pts.length-2;i+=2){const ax=pts[i]-pts[i-2],az=pts[i+1]-pts[i-1],bx=pts[i+2]-pts[i],bz=pts[i+3]-pts[i+1];const la=Math.hypot(ax,az)||1,lb=Math.hypot(bx,bz)||1;const cosT=(ax*bx+az*bz)/(la*lb);if(cosT<.86){const nn=caps.P.length/3;const r=cls.w/2,yy=cls.y-.001+(H?H[i/2]:0);caps.P.push(pts[i],yy,pts[i+1]);caps.U.push(.5,.5);for(let a=0;a<=10;a++){const an=a/10*6.283;caps.P.push(pts[i]+Math.cos(an)*r,yy,pts[i+1]+Math.sin(an)*r);caps.U.push(.5,.5);if(a)caps.I.push(nn,nn+a+1,nn+a)}}}}
   if(rd.c!=="Z"&&rd.c!=="L"){[0,pts.length-2].forEach(j=>{const n=caps.P.length/3;const r=cls.w/2,y=cls.y-.002;caps.P.push(pts[j],y,pts[j+1]);caps.U.push(.5,.5);for(let a=0;a<=10;a++){const an=a/10*6.283;caps.P.push(pts[j]+Math.cos(an)*r,y,pts[j+1]+Math.sin(an)*r);caps.U.push(.5,.5);if(a)caps.I.push(n,n+a+1,n+a)}})}
   let len=0;for(let i=2;i<pts.length;i+=2)len+=Math.hypot(pts[i]-pts[i-2],pts[i+1]-pts[i-1]);
   if(rd.c==="Z"&&len>lr){lr=len;longestRail=pts}
