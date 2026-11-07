@@ -1,10 +1,24 @@
 # Postav si Říčansko: příběh, vývoj a retence
 
-Verze 2 (5. 11. 2026). Teaser **čt 12. 11.**, start **po 16. 11.**, finále **čt 24. 12.** Hra běží na hlavním IG Radaru (cca 2 700 sledujících).
+Verze 3 (7. 11. 2026): **Sjednocené Říčansko proti Praze, vypráví Pan Radar.** Teaser **čt 12. 11.**, start **po 16. 11.**, finále **čt 24. 12.** Hra běží na hlavním IG Radaru (cca 2 700 sledujících).
 
-**Pravidla v 1 řádku:** Dej follow a napiš do komentáře svou obec (52 obcí ORP Říčany), klidně i s povoláním („Mukařov hasič“). Dostaneš domek na 3D mapě se svým nickem.
+**Pravidla v 1 řádku:** Dej follow a napiš do komentáře svou obec (52 obcí ORP Říčany), klidně i s povoláním („Mukařov hasič“). Dostaneš domek na 3D mapě se svým nickem a tvoje obec tím přispěje ke sjednocenému městu.
 
-**Změny oproti v1:** mlha už není mechanika (obec je na mapě od 1. obyvatele, pod 5 obyvatel je „opuštěná“ s rozpadlými domy), přibyla putovní **Koruna týdne** (rozhodnuto 5. 11.), přibylo 20 povolání a povolanské budovy, speciální budovy se odemykají jen podle počtu obyvatel (bez týdenního limitu), nicky a vyhledávání na webu, nové prahy lig erbů, souboj obcí je otevřený (sekce 5), svět se sám roztahuje a web se plní automaticky.
+## Linka v3: co se změnilo a proč
+
+**Premisa.** Říčansko má 52 obcí a dohromady víc lidí než leckteré okresní město, jen se to nikdy nespočítalo. Pan Radar (starší, klidný hlas, který „vidí celé Říčansko ze své věže“) vyhlásí sjednocení: uprostřed regionu, na poli mezi Strančicemi, Mnichovicemi a Klokočnou, vzniká **Náměstí sjednocení** s gotickou katedrálou a **sochou 52 mečů**, kolem které stojí 52 erbů. Každý erb svítí podle stavu obce: šedý = opuštěná, dřevo / stříbro / zlato / platina = liga. Cíl do Vánoc: **rozsvítit všech 52**.
+
+**Soupeř: Praha.** Lidé navrhují, co má Praha a sjednocené město ještě ne (metro, zoo s pandami, letiště v Mukařově, stadion, univerzita…). Nejlajkovanější přání se postaví u náměstí, jakmile město dosáhne prahu obyvatel. Ukazatel **Město vs Praha** měří, co už jsme dohnali. Tón je vtipný, ne agresivní: Praha je soupeř, který nemůže odpovědět; nikdy ne nadávání na Pražáky (půlka sledujících tam studuje).
+
+**Obce zůstávají obcemi.** Každá má erb, ceduli, dominantu, domky s nicky, ligy, korunu týdne a povolání. Patriotismus je na dvou úrovních: *moje obec* (žebříček, koruna, hospoda) a *naše město* (socha, přání proti Praze). Mapa je **pevná** (nenafukuje se): když je obec plná, hra řekne, kde je volno. Když se dvě obce dotknou, jejich ulice se propojí.
+
+**Název města** určí anketa v 1. dílu (Říčansko / Velké Říčany / Město R / Radarov / Nové Říčany), nebo Maty.
+
+**Hra je fikce.** Žádné reálné slučování obcí, žádná politika; jedna věta v pravidlech.
+
+**Co platí z v2 beze změny:** opuštěné obce (pod 5 obyvatel šedé domy, při 5 obec ožije), koruna týdne, povolání (5 stejných = budova), katalog staveb podle prahů, názvy staveb z komentářů s filtrem vulgarit, fáze příběhu (Probuzení → Rozmach → Svazky a Mikuláš → Zima → Vánoční trh → Finále), reel denně, Pan Radar jako vypravěč.
+
+**Konec hry s odměnou pro komunitu:** při 52/52 Radar natočí reálný díl „Jeden den ve sjednoceném Říčansku“ nebo udělá sraz na skutečném místě náměstí (pole u Klokočné). Rozhodne Maty.
 
 ---
 
