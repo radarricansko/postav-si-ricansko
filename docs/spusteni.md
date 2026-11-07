@@ -2,27 +2,36 @@
 
 Hotové texty pro teaser a start, pravidla, šablony DM a denní rutina. Fáze a eventy najdeš v `pribeh-hry.md`.
 
-## 1. Teaser (čt 12. 11.)
+## 1. Teaser (čt 12. 11.) – verze 3 „Sjednocené Říčansko“
 
-**Reel:** mapa Říčanska v mlze, uprostřed se rozsvítí Radar a pomalu odkrývá kus mapy. Titulek `RADAR ZACHYTIL SIGNÁL…`. Konec: `16. 11. · POSTAV SI ŘÍČANSKO`.
+**Reel (15–20 s, vypráví Pan Radar – klidný starší hlas, ElevenLabs `kOWmvbNszhdJeaeyEzJB`):**
+
+1. Přelet nad prázdnou mapou Říčanska (jen silnice, pole, lesy). Pan Radar: *„Padesát dva obcí. Každá sama za sebe. A kousek vedle Praha, která nás nevidí.“*
+2. Kamera sjede na pole mezi Strančicemi, Mnichovicemi a Klokočnou, kde stojí jen cedule **Náměstí sjednocení**. *„Co kdyby se Říčansko spojilo v jedno město? Větší než Praha?“*
+3. Zlatá socha 52 mečů, zatím šedá. *„Každá obec dostane svůj erb na soše. Ale jen když v ní někdo bydlí.“*
+4. Titulek `POSTAV SI ŘÍČANSKO · od pondělí 16. 11.` + `👇 napiš svou obec`.
 
 **Popisek:**
 
-> 📡 Celé Říčansko zmizelo v mlze. 52 obcí, ani jeden domek. Od pondělí ho budeme stavět zpátky a každý, kdo se přidá, dostane na mapě vlastní domek se svým jménem.
+> 📡 Pan Radar má plán: spojit všech 52 obcí Říčanska v jedno město. Větší než Praha. S náměstím, katedrálou a sochou, kde bude erb každé obce.
 >
-> 🏡 Obec vyleze z mlhy, až v ní bude bydlet aspoň 5 lidí. Pak roste, staví hospody, hřiště, kebaby. Co přesně, o tom rozhodneš ty v komentářích.
+> 🏡 Jenže město bez lidí nejde. Od pondělí dostane každý, kdo napíše svou obec do komentářů, vlastní domek na 3D mapě. Obec ožije při 5 obyvatelích, roste, staví a bojuje o Korunu týdne.
 >
-> 👇 Napiš do komentářů svou obec. Kdo bude první z mlhy?
+> 👇 Tvoje obec? Napiš ji sem už teď, ať víme, kdo se přidá první.
 >
 > 📸 RADAR Říčansko
 
-## 2. Start (po 16. 11.)
+## 2. Start (po 16. 11.) – díl 1
+
+**Reel (30–40 s):** přelet → náměstí (katedrála, šedá socha) → první obce vylézají z mlhy → Koruna týdne → CTA. Pan Radar vyhlásí **anketu o název města** (Říčansko / Velké Říčany / Město R / Radarov / Nové Říčany) – anketa v IG stories, výsledek v díle 3.
 
 **Popisek:**
 
 > 🗺️ Postav si Říčansko začíná! Dej follow @radar_ricansko a napiš do komentářů jen název své obce. Dostaneš domek s vlastním číslem obyvatele a uvidíš ho v dalším videu.
 >
-> 🔥 Každý den ukážeme, které obce rostou nejrychleji, a nejlajkovanější nápad v komentářích se postaví i s cedulí s tvým jménem. Hrajeme až do Štědrého dne.
+> 👑 Každý týden dostane Korunu obec s největším přírůstkem. Pod videem navíc vybíráme nejlajkovanější nápad: co má mít naše město, co Praha nemá? Metro? Zoo s pandami? Letiště v Mukařově? Postavíme to u náměstí – i s cedulí s tvým jménem.
+>
+> 🏙️ A jak se má nové město jmenovat? Hlasuj ve stories.
 >
 > 👇 Tvoje obec? Napiš ji do komentářů a označ kámoše ze stejné vesnice.
 >
@@ -30,7 +39,7 @@ Hotové texty pro teaser a start, pravidla, šablony DM a denní rutina. Fáze a
 
 **Připnutý komentář (pravidla):**
 
-> 📌 Pravidla: 1) Sleduj @radar_ricansko. 2) Napiš do komentářů jen název obce z ORP Říčany (52 obcí). 3) Jeden člověk = jeden domek, platí první komentář. 4) Obec se objeví, až má 5 obyvatelů. 5) Na mapě se ukazuje tvůj IG nick. Nechceš ve hře být? Napiš nám DM a domek odstraníme. Hra je jen pro zábavu, nejsou v ní žádné ceny.
+> 📌 Pravidla: 1) Sleduj @radar_ricansko. 2) Napiš do komentářů jen název obce z ORP Říčany (52 obcí). 3) Jeden člověk = jeden domek, platí první komentář. 4) Obec se objeví, až má 5 obyvatelů; když je plná, pošli kamarády k sousedům – obce se pak na mapě spojí. 5) Na mapě se ukazuje tvůj IG nick. Nechceš ve hře být? Napiš nám DM a domek odstraníme. 6) Názvy staveb vybíráme z komentářů, sprosté a urážlivé neprojdou. Hra je jen pro zábavu, nejsou v ní žádné ceny a nic se doopravdy neslučuje 😄
 
 ## 3. Šablony DM
 
@@ -41,19 +50,20 @@ Hotové texty pro teaser a start, pravidla, šablony DM a denní rutina. Fáze a
 
 ## 4. Denní rutina (cca 20 min)
 
-1. **Ráno:** otevři hru a zkontroluj, že přibyli noví obyvatelé (Make je zapisuje do `world.json`).
-2. **Top komentář:** pod včerejším reelem vyber nejlajkovanější nápad, který projde moderací (žádná jména lidí mimo hru, nic urážlivého, max. 30 znaků). Zapiš ho jako speciální budovu do data storu `postav_obce`.
-3. **Reel:** ve hře tlačítko 🎬 Reel dne → Nahrát video. Voiceover vlož z Text voiceoveru do CapCut TTS (nebo namluv). Video převeď do H.264, pokud ho IG nevezme.
-4. **Popisek:** formát 2 odstavce + CTA + 📸. V CTA vždy jedna konkrétní otázka (např. „Kdo dotáhne Tehovec na 5/5?“).
-5. **Neděle:** kontrola follow (stránka `tools/follow/`). Domky nesledujících zešednou, nemažou se.
+1. **Ráno:** otevři hru (`?admin=fofrburg96`) a zkontroluj, že přibyli noví obyvatelé (Make je zapisuje do `world.json`).
+2. **Top komentář:** pod včerejším reelem vyber nejlajkovanější nápad, který projde moderací (žádná jména lidí mimo hru, nic urážlivého, max. 30 znaků). Zapiš ho jako speciální budovu do data storu `postav_obce` (hra sprostá slova stejně nahradí výchozím názvem).
+3. **Video – cesta C (cíl):** GitHub → Actions → „Denní reel a klipy“ → `co = klipy`. Za ~25 min je v artefaktu `klipy.zip` 7 klipů 1080×1920 + `brief.md` (co je v klipu, kdo je nový, koruna). Brief + klipy pošli Claudovi: namluví Pana Radara (ElevenLabs) a sestříhá.
+   **Cesta A (záloha):** stejný workflow s `co = reel` → hotový reel s hlasem (potřebuje secret `ELEVENLABS_API_KEY`, jinak hlas prohlížeče).
+4. **Popisek:** 2 odstavce + CTA + 📸. V CTA vždy jedna konkrétní otázka (např. „Kdo dotáhne Tehovec na 5/5?“, „Udrží Mnichovice korunu?“).
+5. **Neděle:** Koruna týdne se vyhlašuje v nedělním díle; kontrola follow (stránka `tools/follow/`). Domky nesledujících zešednou, nemažou se.
 
 ## 5. Před spuštěním
 
-- [ ] Make: webhook, GitHub token, ID herního postu, test (viz `make/README.md`)
-- [ ] Rozhodnout operace na Core: úsporná varianta, nebo dokoupit kredity
-- [ ] Hosting (Cloudflare Pages / Netlify z tohoto repa) a adresa hra.radar-ricansko.cz
+- [ ] Make: připojení *Instagram for Business* (účet radar_ricansko), ID herního postu, test (viz `make/README.md`)
+- [ ] GitHub secret `ELEVENLABS_API_KEY` (hlas Pana Radara); volitelně Telegram pro notifikace
+- [ ] Rozhodnout název města (anketa v díle 1, nebo rovnou)
 - [ ] Rozhodnout zobrazování nicků (`?nicky=0` skryje nicky a nechá jen čísla obyvatel)
-- [ ] Zkušební reel v Chrome s českým hlasem
+- [ ] Zkušební reel/klipy z Actions, test na mobilu (kolegové)
 - [ ] Pravidla do připnutého komentáře a do highlightu
 
 ## Adresy a automatika (5. 11.)
