@@ -16,10 +16,18 @@ function serve(){return new Promise(res=>{const s=http.createServer((rq,rs)=>{le
  rs.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(rs)});s.listen(0,'127.0.0.1',()=>res(s))})}
 
 /* ElevenLabs TTS – jeden segment → mp3 Buffer */
-async function tts(text){const key=process.env.ELEVENLABS_API_KEY,voice=process.env.ELEVENLABS_VOICE_ID||'kOWmvbNszhdJeaeyEzJB';if(!key)return null;
+/* ElevenLabs: hlavní hlas Pana Radara (knihovní hlas kOWmvbNszhdJeaeyEzJB vyžaduje Creator tarif).
+   Na Free/Starter se automaticky použije náhradní předpřipravený hlas (ELEVENLABS_FALLBACK_VOICE, výchozí „Bill“ – starší klidný mužský). */
+let ttsVoice=null;
+async function ttsOnce(text,voice){const key=process.env.ELEVENLABS_API_KEY;
  const r=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`,{method:'POST',headers:{'xi-api-key':key,'content-type':'application/json'},
-  body:JSON.stringify({text,model_id:process.env.ELEVENLABS_MODEL||'eleven_multilingual_v2',voice_settings:{stability:.45,similarity_boost:.8,style:.35,use_speaker_boost:true}})});
- if(!r.ok){console.error('ElevenLabs',r.status,await r.text().catch(()=>''));return null}return Buffer.from(await r.arrayBuffer())}
+  body:JSON.stringify({text,model_id:process.env.ELEVENLABS_MODEL||'eleven_multilingual_v2',voice_settings:{stability:.5,similarity_boost:.8,style:.3,use_speaker_boost:true}})});
+ if(!r.ok){const t=await r.text().catch(()=>'');console.error('ElevenLabs',r.status,t.slice(0,160));return{err:t}}return{buf:Buffer.from(await r.arrayBuffer())}}
+async function tts(text){const key=process.env.ELEVENLABS_API_KEY;if(!key)return null;
+ const main=process.env.ELEVENLABS_VOICE_ID||'kOWmvbNszhdJeaeyEzJB',fb=process.env.ELEVENLABS_FALLBACK_VOICE||'pqHfZKP75CvOlQylNhV4';
+ if(!ttsVoice){const r=await ttsOnce(text,main);if(r.buf){ttsVoice=main;return r.buf}
+  if(/free_users_not_allowed|creator tier|voice_not_found|not found/i.test(r.err||'')){console.log('hlas: hlavní hlas není na tomto tarifu dostupný, používám náhradní',fb);ttsVoice=fb}else return null}
+ const r=await ttsOnce(text,ttsVoice);return r.buf||null}
 
 (async()=>{const srv=await serve();const base=`http://127.0.0.1:${srv.address().port}`;
  const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--autoplay-policy=no-user-gesture-required']});
