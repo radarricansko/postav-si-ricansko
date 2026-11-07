@@ -470,7 +470,10 @@ function applyEvents(ev,anim){const d0=ev.length?Date.parse(ev[0].d)||Date.now()
 async function fetchWorld(){const urls=QS.get("data")?[CONFIG.DATA_URL]:["world.json","../world.json"];for(const u of urls){try{const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});if(!r.ok)continue;const w=await r.json();if(!w||!Array.isArray(w.obce)||w.ukazka)continue;CONFIG.DATA_URL=u;QS.set("data",u);return w}catch(e){}}return null}
 async function pollWorld(){const w=await fetchWorld();if(!w)return;if(w.revize!==undefined&&w.revize===WORLD_REV)return;WORLD_REV=w.revize;const before=POP;const ch=applyEvents(worldEvents(w),true);if(w.den_hry)DAY=w.den_hry;
  if(ch.size){refreshAll([...ch]);if(POP>before)toast(`+${POP-before} nových obyvatel`,[...ch].map(t=>t.n).slice(0,3).join(" · "))}else updateUI()}
-function addItem(t,it){t.items.push(it);return t.items.length-1}
+/* názvy staveb z komentářů: filtr sprostých slov + délka; nevhodné -> výchozí název kategorie */
+const BAD=/(kurv|pi[cč][aeouy]|kokot|[cč]ur[aá]k|mrd|debil|hitler|nac[ií]s|nazi|negr|cig[aá]n|buzn|buzer|porn|fuck|shit|bitch|hovn|prdel|sex|onlyfans|penis|vagin|kund|ho[vw]ad|sra[cč]k|jeb|zasran|smrd|drog|pervit|kokain|hero[ií]n|\bfet(ak|ák|ka|ky)?\b|chc[ií]p|zabij|smrt|nen[aá]vi|rasis|xenof|teror)/i;
+function cleanName(text,id){const t=String(text||"").replace(/\s+/g," ").trim();const d=(SPECIALS.CAT.find(c=>c.id===id)||{}).example||"";if(!t||t.length<2||t.length>40||BAD.test(t)||BAD.test(t.normalize("NFD").replace(/[\u0300-\u036f]/g,"")))return d;return t}
+function addItem(t,it){if(it.k==="s")it.text=cleanName(it.text,it.id);t.items.push(it);return t.items.length-1}
 function jobCounts(t){const c={};t.players.forEach(p=>{if(p.job)c[p.job]=(c[p.job]||0)+1});return c}
 function jobBuild(t,day){const c=jobCounts(t);for(const [j,n] of Object.entries(c)){if(n<CONFIG.JOB_N)continue;const J=JOBS[j];if(t.items.some(x=>x.k==="s"&&(x.job===j||x.id===J.b)))continue;return addItem(t,{k:"s",id:J.b,text:J.t(t.n).slice(0,30),author:"cech "+J.n.toLowerCase()+"ů",job:j,day})}return -1}
 function unlockedCatalog(t){return SPECIALS.CAT.filter(c=>t.players.length>=c.th)}
