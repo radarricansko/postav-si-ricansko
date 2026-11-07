@@ -34,9 +34,9 @@ jobs:
           f=$(ls out/*.mp4 | head -1); n=$(basename "$f" .mp4)
           ffmpeg -v error -y -i "$f" -vf "select='not(mod(n\,100))',scale=270:-1,tile=7x1" -frames:v 1 "out/$n-nahled.jpg"
           git config user.name "RADAR bot"; git config user.email "radar.ricansko@gmail.com"
-          git fetch origin previews:previews 2>/dev/null || git checkout --orphan previews
-          git checkout previews 2>/dev/null || true
-          mkdir -p nahledy && cp "out/$n-nahled.jpg" "out/$n.txt" nahledy/ && git add nahledy && git commit -q -m "náhled $n" && git push -q origin previews || echo "náhled nepushnut"
+          git checkout -q --orphan previews && git rm -rfq --cached . >/dev/null && git clean -fdq -e out -e nahledy
+          # do větve previews jde i samotné video (přehraje se v mobilu přes raw odkaz); větev držíme na jednom commitu, ať neroste
+          mkdir -p nahledy && cp "out/$n-nahled.jpg" "out/$n.txt" "$f" nahledy/ && git add nahledy && git commit -q -m "náhled $n" && git push -q -f origin previews || echo "náhled nepushnut"
           git checkout -q main
       - uses: actions/upload-artifact@v4
         with:
