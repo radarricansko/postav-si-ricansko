@@ -376,6 +376,10 @@ function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.user
  [...lastAt.keys()].forEach(st=>{let c=st,p=st.parent;while(p&&p.kind==="lane"){lastAt.set(p,Math.max(lastAt.get(p)||0,c.at));c=p;p=p.parent}});
  lastAt.forEach((at,st)=>{const n=Math.min(st.pts.length,at+3);const pts=new Float32Array(n*2);for(let i=0;i<n;i++){pts[i*2]=st.pts[i].x;pts[i*2+1]=st.pts[i].z}ribbonInto(pts,st.w,CLS.G.y,6,P,U,I);
   if(n>=st.pts.length-1){const e=st.pts[n-1];const base=cP.length/3;const rr=3.2;cP.push(e.x,CLS.G.y-.001,e.z);cU.push(.5,.5);for(let a=0;a<=16;a++){const an=a/16*6.283;cP.push(e.x+Math.cos(an)*rr,CLS.G.y-.001,e.z+Math.sin(an)*rr);cU.push(.5,.5);if(a)cI.push(base,base+a+1,base+a)}}});
+ // příjezdová cesta k velkým stavbám (k nejbližšímu bodu hlavní silnice nebo postavené uličky)
+ {const pts=[];(t.mains||[]).forEach(st=>st.pts.forEach(q=>pts.push(q)));lastAt.forEach((at,st)=>{for(let i=0;i<Math.min(st.pts.length,at+3);i++)pts.push(st.pts[i])});
+  for(let i=0;i<used;i++){const it=t.items[i];if(it.k!=="s"||!it.pos)continue;const f=fpOf(it.id);const fx=it.pos.x+Math.sin(it.pos.ry)*f*.9,fz=it.pos.z+Math.cos(it.pos.ry)*f*.9;let q=null,bd=1e9;pts.forEach(p=>{const d=Math.hypot(p.x-fx,p.z-fz);if(d<bd){bd=d;q=p}});
+   if(q&&bd>1.5&&bd<60){const seg=new Float32Array([fx,fz,q.x,q.z]);ribbonInto(seg,CLS.G.w,CLS.G.y,6,P,U,I);const base=cP.length/3;cP.push(fx,CLS.G.y-.001,fz);cU.push(.5,.5);for(let a=0;a<=12;a++){const an=a/12*6.283;cP.push(fx+Math.cos(an)*CLS.G.w/2,CLS.G.y-.001,fz+Math.sin(an)*CLS.G.w/2);cU.push(.5,.5);if(a)cI.push(base,base+a+1,base+a)}}}}
  if(P.length){const m=new T.Mesh(geoFrom(P,U,I),MAT.G);m.receiveShadow=true;m.userData.tmp=1;g.add(m)}
  if(cP.length){const m=new T.Mesh(geoFrom(cP,cU,cI),new T.MeshLambertMaterial({color:"#7d828c",polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));m.userData.tmp=1;m.receiveShadow=true;g.add(m)}
  // speciální budovy
@@ -397,10 +401,12 @@ function outskirts(t,g){const r=rng(hashStr(t.n)+7);const tree=MODELS.p.tree;con
   Q.setFromAxisAngle(UP,r()*6.3);V.set(x,0,z);const h=3.6+r()*2.6;SC.set(h,h,h);M4.compose(V,Q,SC);im.setMatrixAt(k++,M4)}im.count=k;im.castShadow=true;im.userData.tmp=0;g.add(im)}
 const fpOf=id=>(SPECIALS.fp?SPECIALS.fp(id):null)||2.4;
 function itemPos(t,i){const it=t.items[i];if(!it)return null;if(it.k!=="s"||fpOf(it.id)<=3.2)return t.slots[i];if(it.pos)return it.pos;const fp=fpOf(it.id);
- const R0=townRadiusCore(t)+fp+3;const h=hashStr(t.n+it.id+i);let best=null;
- for(let k=0;k<16&&!best;k++){const a=(((h%16)+k*7)%16)/16*6.283;for(let rr=R0;rr<R0+60&&!best;rr+=4){const x=Math.cos(a)*rr,z=Math.sin(a)*rr;
-  if(t.SH&&t.SH.near(x,z,fp+1.5)!==null)continue;if(inWater(t.x+x/L,t.y-z/L))continue;
-  if(t.items.some(o=>o.pos&&o!==it&&Math.hypot(o.pos.x-x,o.pos.z-z)<fp+fpOf(o.id)+2))continue;best={x,z,ry:Math.atan2(-x,-z),st:null}}}
+ const R0=Math.max(14,townRadiusCore(t)*.7)+fp;const h=hashStr(t.n+it.id+i);let best=null,bs=1e9;const usedN=Math.min(t.items.length,t.slots.length);
+ for(let k=0;k<24;k++){const a=(((h%24)+k*11)%24)/24*6.283;for(let rr=R0;rr<R0+70;rr+=3){const x=Math.cos(a)*rr,z=Math.sin(a)*rr;
+  if(t.SH&&t.SH.near(x,z,fp+1.2)!==null)continue;if(inWater(t.x+x/L,t.y-z/L))continue;
+  let bad=false;for(let j=0;j<usedN;j++){const q=t.slots[j];if(Math.hypot(q.x-x,q.z-z)<fp+3){bad=true;break}}if(bad)continue;
+  if(t.items.some(o=>o.pos&&o!==it&&Math.hypot(o.pos.x-x,o.pos.z-z)<fp+fpOf(o.id)+2))continue;
+  const nearRoad=t.SH&&t.SH.near(x,z,fp+9)!==null;const score=rr+(nearRoad?0:40);if(score<bs){bs=score;best={x,z,ry:Math.atan2(-x,-z),st:null}}break}}
  it.pos=best||{x:Math.cos(h)*R0,z:Math.sin(h)*R0,ry:0,st:null};return it.pos}
 function townRadiusCore(t){const lm=t.lm;let R=Math.hypot(lm.x,lm.z)+lm.r+4;{const n=Math.min(t.items.length+abandonedN(t),t.slots.length);for(let i=0;i<n;i++){const s=t.slots[i];R=Math.max(R,Math.hypot(s.x,s.z)+5)}}return Math.max(R,14)}
 function townRadius(t){let R=townRadiusCore(t);t.items.forEach(it=>{if(it.pos)R=Math.max(R,Math.hypot(it.pos.x,it.pos.z)+fpOf(it.id)+2)});return R}
@@ -574,12 +580,12 @@ function regionBox(){let a=1e9,b=1e9,c=-1e9,d=-1e9;TOWNS.forEach(t=>{const p=tc(
 let catDone=false;
 let thumbs=null;
 function catalogThumbs(){if(thumbs)return thumbs;const rr=new T.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});rr.setSize(320,240);rr.setPixelRatio(1);const sc=new T.Scene();sc.add(new T.HemisphereLight("#e6f2ff","#7a8a5a",.7));const dl=new T.DirectionalLight("#ffe6c4",.9);dl.position.set(-4,8,6);sc.add(dl);
- const cm=new T.PerspectiveCamera(30,4/3,.1,100);cm.position.set(7.5,7.2,11);cm.lookAt(0,1.2,0);const base=new T.Mesh(new T.CircleGeometry(5.2,40).rotateX(-Math.PI/2),new T.MeshLambertMaterial({color:"#9ccb6a"}));sc.add(base);
- thumbs=SPECIALS.CAT.map(c=>{const o=SPECIALS.build(c.id,c.example);sc.add(o);rr.render(sc,cm);const url=rr.domElement.toDataURL("image/png");sc.remove(o);const job=Object.values(JOBS).find(j=>j.b===c.id);return Object.assign({},c,{img:url,job:job?{n:job.n,e:job.e}:null})});rr.dispose();return thumbs}
+ const cm=new T.PerspectiveCamera(30,4/3,.1,400);const base=new T.Mesh(new T.CircleGeometry(5.2,40).rotateX(-Math.PI/2),new T.MeshLambertMaterial({color:"#9ccb6a"}));sc.add(base);const aim=f=>{const d=Math.max(7.5,f*3.3);cm.position.set(d*.68,d*.66,d);cm.lookAt(0,Math.max(1.2,f*.2),0);base.scale.setScalar(Math.max(1,f/4))};
+ thumbs=SPECIALS.CAT.map(c=>{const o=SPECIALS.build(c.id,c.example);sc.add(o);aim(c.fp||2.6);rr.render(sc,cm);const url=rr.domElement.toDataURL("image/png");sc.remove(o);const job=Object.values(JOBS).find(j=>j.b===c.id);return Object.assign({},c,{img:url,job:job?{n:job.n,e:job.e}:null})});rr.dispose();return thumbs}
 function openCatalog(){$("cat").classList.add("on");if(catDone)return;catDone=true;const grid=$("catGrid");
  const rr=new T.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});rr.setSize(320,240);rr.setPixelRatio(1);const sc=new T.Scene();sc.add(new T.HemisphereLight("#e6f2ff","#7a8a5a",.7));const dl=new T.DirectionalLight("#ffe6c4",.9);dl.position.set(-4,8,6);sc.add(dl);
- const cm=new T.PerspectiveCamera(30,4/3,.1,100);cm.position.set(7.5,7.2,11);cm.lookAt(0,1.2,0);const base=new T.Mesh(new T.CircleGeometry(5.2,40).rotateX(-Math.PI/2),new T.MeshLambertMaterial({color:"#9ccb6a"}));sc.add(base);
- SPECIALS.CAT.forEach(c=>{const o=SPECIALS.build(c.id,c.example);sc.add(o);rr.render(sc,cm);const url=rr.domElement.toDataURL("image/png");sc.remove(o);
+ const cm=new T.PerspectiveCamera(30,4/3,.1,400);const base=new T.Mesh(new T.CircleGeometry(5.2,40).rotateX(-Math.PI/2),new T.MeshLambertMaterial({color:"#9ccb6a"}));sc.add(base);const aim=f=>{const d=Math.max(7.5,f*3.3);cm.position.set(d*.68,d*.66,d);cm.lookAt(0,Math.max(1.2,f*.2),0);base.scale.setScalar(Math.max(1,f/4))};
+ SPECIALS.CAT.forEach(c=>{const o=SPECIALS.build(c.id,c.example);sc.add(o);aim(c.fp||2.6);rr.render(sc,cm);const url=rr.domElement.toDataURL("image/png");sc.remove(o);
   const d=document.createElement("div");d.className="it";d.innerHTML=`<img alt="${c.name}" src="${url}"><div><span class="th">od ${c.th}</span><b>${c.emoji} ${c.name}</b><span>„${c.example}“</span></div>`;grid.appendChild(d)});rr.dispose()}
 
 /* ---------- smyčka ---------- */
@@ -624,7 +630,7 @@ window.GAME={canvas,THREE:T,
  focusHouse:(id,ms)=>{const [n,i]=id.split("#");const t=byName[n];const s=t.slots[+i];return s?flyToLocal(t,s,22):Promise.resolve()},
  overview:ms=>overview(ms),orbit:s=>{orbitSpeed=s||0},
  addPlayers:(n,list)=>{const t=byName[n];if(t)addPlayers(t,(list&&list.length)||1)},
- buildSpecial:n=>buildSpecial(byName[n]),
+ buildSpecial:n=>buildSpecial(byName[n]),dbgItems:n=>byName[n].items.map((it,i)=>({k:it.k,id:it.id,pos:it.pos||null,slot:!!byName[n].slots[i]})),buildSpecialId:(n,id,text)=>{const t=byName[n];if(!t)return;const idx=addItem(t,{k:"s",id,text:text||id,author:"admin",day:DAY});born.set(t.n+"#"+idx,performance.now());refreshAll([t]);const s=itemPos(t,idx);if(s)flyToLocal(t,s,30)},
  dbg:n=>{const t=byName[n];return {lm:[t.lm.x|0,t.lm.z|0,t.lm.type],R:t.R|0,mains:t.mains.length,lanes:t.lanes.length,slots:t.slots.slice(0,Math.min(t.items.length,t.slots.length)).map(s=>Math.round(Math.hypot(s.x,s.z))).join(",")}},select:(n,idx)=>selectItem(byName[n],idx),closeInfo:()=>closeInfo(),
  find:q=>{q=String(q||"").toLowerCase().replace(/^@/,"").trim();if(!q)return [];const out=[];TOWNS.forEach(t=>t.items.forEach((it,i)=>{if(it.k==="h"&&t.slots[i]){const p=it.p;const nk=p.nick.toLowerCase().slice(1);if(nk.includes(q)||String(p.no)===q.replace(/^#|^0+/,""))out.push({town:t.n,idx:i,nick:CONFIG.SHOW_NICKS?p.nick:"Obyvatel č. "+String(p.no).padStart(4,"0"),no:p.no,open:t.open})}}));return out.slice(0,8)},
  townInfo:n=>{const t=byName[n];const _ab=abandonedN(t);const nx=SPECIALS.CAT.find(c=>c.th>t.players.length);return{name:t.n,players:t.players.length,abandoned:_ab,revive:CONFIG.REVIVE,crown:t===crownT,weekGain:weekGain(t),open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl,landmark:t.lm.name,specials:t.items.filter(x=>x.k==="s").map(x=>({text:x.text,id:x.id,author:CONFIG.SHOW_NICKS?x.author:null})),next:nx?{name:nx.name,th:nx.th,emoji:nx.emoji}:null,jobs:Object.entries(jobCounts(t)).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([j,n])=>({n:JOBS[j].n,e:JOBS[j].e,c:n,need:CONFIG.JOB_N,built:t.items.some(x=>x.k==="s"&&(x.job===j||x.id===JOBS[j].b)),b:SPECIALS.CAT.find(c=>c.id===JOBS[j].b).name})),founders:t.players.slice(0,5).map(p=>CONFIG.SHOW_NICKS?p.nick:"#"+String(p.no).padStart(4,"0"))}},

@@ -44,15 +44,7 @@ function lines(w,d,draw){return canvasTex(512,Math.round(512*d/w),draw)}
 
 function beam(G,a,b,r,c){const A=new T.Vector3(...a),Bv=new T.Vector3(...b);const len=A.distanceTo(Bv);const g=new T.CylinderGeometry(r,r,len,6);const m=mesh(g,c);m.position.copy(A).add(Bv).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),Bv.clone().sub(A).normalize());G.add(m);return m}
 const B={};
-B.pomnik=(G)=>{pad(G,4.6,4.2,"#d9cdb4",.08);const s=new T.Group();box(s,1.6,.35,1.6,"#b9b1a3");box(s,1.1,.5,1.1,"#a39b8c",0,.35);box(s,.55,2.6,.55,"#c9c2b5",0,.85);
- const p=new T.ConeGeometry(.42,.6,4);p.rotateY(Math.PI/4);p.translate(0,3.75,0);s.add(mesh(p,"#c9c2b5"));G.add(s);
- [[-1.6,-1.2],[1.6,-1.2]].forEach(([x,z])=>tree(G,x,z,3.6));[[-1.3,1.1],[1.3,1.1]].forEach(([x,z])=>{cyl(G,.35,.3,.3,"#7a6a58",x,0,z,8);const f=new T.SphereGeometry(.32,8,6);f.translate(0,.42,0);G.add(mesh(f,"#d64b6a",x,0,z))});bench(G,0,-1.6,Math.PI)};
 B.kebab=(G)=>{pad(G,6,5.6,"#d8d2c6");kenney(G,"h","#e0572b",0,-.6,3.1);awning(G,3.2,0,1.25,1.15,"#e4352b","#ffffff",.8);umbrella(G,1.9,1.9,"#ffd23f");umbrella(G,.4,2.2,"#e4352b");prop(G,"dumpster",-2.5,-1.7,3)};
-B.lavicka=(G)=>{pad(G,4,3.2,"#c9b99a",.05);bench(G,0,0);bench(G,-1.4,.2,.35);tree(G,1.6,-.8,5);prop(G,"lamp",-2.2,-.6,4)};
-B.zastavka=(G)=>{pad(G,6,3,"#c6c9d0",.12);const s=new T.Group();box(s,3.2,.1,1.4,"#2f72d6",0,2.2,-.2);[-1.55,1.55].forEach(x=>box(s,.08,2.2,1.3,"#5f6b80",x,0,-.2));
- const gl=new T.Mesh(new T.BoxGeometry(3.1,1.8,.04),new T.MeshLambertMaterial({color:"#bfe4ff",transparent:true,opacity:.45}));gl.position.set(0,1.2,-.85);s.add(gl);bench(s,0,-.4);G.add(s);
- cyl(G,.05,.05,2.6,"#4a5266",2.3,0,.9,6);const z=canvasTex(128,128,(g)=>{g.fillStyle="#ffd23f";g.beginPath();g.arc(64,64,60,0,7);g.fill();g.fillStyle="#0d1838";g.font="700 70px Arial";g.textAlign="center";g.textBaseline="middle";g.fillText("BUS",64,68)});
- const zm=new T.Mesh(new T.CircleGeometry(.45,24),new T.MeshBasicMaterial({map:z,side:T.DoubleSide}));zm.position.set(2.3,2.5,.92);G.add(zm);car(G,"van",-1,2.2,Math.PI/2,.5)};
 B.vecerka=(G)=>{pad(G,6,5.6,"#d8d2c6");kenney(G,"c","#3d7bd9",0,-.6,3.3);const gl=canvasTex(256,128,(g,w,h)=>{g.fillStyle="#1d2b44";g.fillRect(0,0,w,h);g.fillStyle="#ffe9a8";for(let i=0;i<5;i++)g.fillRect(10+i*49,18,40,92)});
  const f=new T.Mesh(new T.PlaneGeometry(2.6,1.1),new T.MeshBasicMaterial({map:gl}));f.position.set(0,.65,1.15);G.add(f);awning(G,3,0,1.4,1.3,"#2fa35a","#ffffff",.7);
  box(G,.9,.5,.5,"#f2b134",1.8,0,1.9);box(G,.9,.5,.5,"#e04848",-.2,0,2)};
@@ -70,10 +62,6 @@ B.hasicarna=(G)=>{pad(G,6,5.6,"#c4c7cf");const b=box(G,4.6,2.1,3,"#f0ece4",0,0,-
  const door=canvasTex(256,128,(g,w,h)=>{g.fillStyle="#c33";g.fillRect(0,0,w,h);g.strokeStyle="#8f1f1a";g.lineWidth=6;for(let y=16;y<h;y+=18){g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke()}});
  [-1.15,1.15].forEach(x=>{const d=new T.Mesh(new T.PlaneGeometry(1.7,1.6),new T.MeshLambertMaterial({map:door}));d.position.set(x,.8,.41);G.add(d)});
  box(G,1,3.6,1,"#f0ece4",-2.6,0,-2.1);box(G,1.2,.25,1.2,"#b3302a",-2.6,3.6,-2.1);car(G,"firetruck",1.6,1.9,0,.55)};
-B.fotbal=(G)=>{const t=lines(600,420,(g,w,h)=>{for(let i=0;i<8;i++){g.fillStyle=i%2?"#4c9a3c":"#58a845";g.fillRect(i*w/8,0,w/8,h)}g.strokeStyle="#fff";g.lineWidth=5;g.strokeRect(20,20,w-40,h-40);g.beginPath();g.moveTo(w/2,20);g.lineTo(w/2,h-20);g.stroke();g.beginPath();g.arc(w/2,h/2,48,0,7);g.stroke();g.strokeRect(20,h/2-70,70,140);g.strokeRect(w-90,h/2-70,70,140)});
- const p=pad(G,6.2,4.4,"#fff",.06);p.material=new T.MeshLambertMaterial({map:t});p.position.z=-.5;
- [-2.95,2.95].forEach(x=>{const g=new T.Group();box(g,.06,.7,.06,"#fff",0,0,-.6);box(g,.06,.7,.06,"#fff",0,0,.6);box(g,.06,.06,1.26,"#fff",0,.7,0);g.position.set(x,0,-.5);G.add(g)});
- for(let i=0;i<3;i++)box(G,4.4,.25,.4,"#2f72d6",0,i*.25,2.05+i*.3)};
 B.pizzerie=(G)=>{pad(G,6,5.6,"#e2d6c2");kenney(G,"j","#c0392b",0,-.7,3.2);awning(G,3.2,0,1.3,1.25,"#2fa35a","#ffffff",.8);umbrella(G,1.8,2,"#c0392b");car(G,"hatchback-sports",-1.8,2,Math.PI/2,.45)};
 B.rybnik=(G)=>{const w=new T.Mesh(new T.CircleGeometry(2.6,32),new T.MeshLambertMaterial({color:"#3f8fc4"}));w.rotation.x=-Math.PI/2;w.position.set(0,.07,-.3);w.receiveShadow=true;G.add(w);
  const sh=new T.Mesh(new T.RingGeometry(2.6,3,32),M("#cdbf98"));sh.rotation.x=-Math.PI/2;sh.position.set(0,.065,-.3);G.add(sh);
@@ -90,11 +78,6 @@ B.skatepark=(G)=>{pad(G,6,5.6,"#b8bcc6",.08);
 B.kino=(G)=>{pad(G,6,5.6,"#6f8f4c",.04);const sc=canvasTex(256,128,(g,w,h)=>{const gr=g.createLinearGradient(0,0,w,h);gr.addColorStop(0,"#5fa8e8");gr.addColorStop(1,"#1f3c8f");g.fillStyle=gr;g.fillRect(0,0,w,h);g.fillStyle="#fff";g.font="700 40px Arial";g.textAlign="center";g.fillText("RADAR",w/2,h/2+14)});
  box(G,4.6,.2,.3,"#2a2f3a",0,2.4,-2.2);[-2.25,2.25].forEach(x=>box(G,.2,2.4,.3,"#2a2f3a",x,0,-2.2));const s=new T.Mesh(new T.PlaneGeometry(4.3,2),new T.MeshBasicMaterial({map:sc}));s.position.set(0,1.4,-2.03);G.add(s);
  for(let r=0;r<3;r++)for(let c=0;c<4;c++)box(G,.7,.35,.5,"#c23b3b",-1.4+c*.95,0,-.4+r*.9)};
-B.nadrazi=(G)=>{pad(G,6,5.6,"#c6c9d0",.1);kenney(G,"m","#5a6170",-1,-1,3);box(G,6,.35,1.2,"#d9d4cb",0,0,1.9);const s=canvasTex(256,64,(g,w,h)=>{g.fillStyle="#1f3c8f";g.fillRect(0,0,w,h);g.fillStyle="#fff";g.font="700 34px Arial";g.textAlign="center";g.fillText("P+R  🚆",w/2,44)});
- cyl(G,.05,.05,2.2,"#4a5266",2.3,0,1.4,6);const sm=new T.Mesh(new T.PlaneGeometry(1.2,.3),new T.MeshBasicMaterial({map:s}));sm.position.set(2.3,2.1,1.43);G.add(sm)};
-B.koupaliste=(G)=>{pad(G,6,5.6,"#efe7d4",.06);const w=new T.Mesh(new T.BoxGeometry(4.2,.08,2.8),M("#41b4e6"));w.position.set(-.3,.08,-.6);G.add(w);
- const l=canvasTex(256,128,(g,wd,h)=>{g.fillStyle="#41b4e6";g.fillRect(0,0,wd,h);g.strokeStyle="#ffffff88";g.lineWidth=3;for(let i=1;i<4;i++){g.beginPath();g.moveTo(0,i*h/4);g.lineTo(wd,i*h/4);g.stroke()}});w.material=new T.MeshLambertMaterial({map:l});
- umbrella(G,2.4,-1.6,"#ff7a59");umbrella(G,2.4,.6,"#ffd23f");box(G,1.2,1.2,1,"#2f72d6",2.2,0,2)};
 B.rozhledna=(G)=>{pad(G,4.4,4.4,"#cdbf98",.06);const H=6.4,r0=1.25,r1=.55;const rad=y=>r0+(r1-r0)*y/H;
  for(let i=0;i<4;i++){const a=i*Math.PI/2+Math.PI/4;beam(G,[Math.cos(a)*r0,0,Math.sin(a)*r0],[Math.cos(a)*r1,H,Math.sin(a)*r1],.09,"#7a5636")}
  [1.6,3.2,4.8].forEach(y=>{const w=rad(y)*1.5;box(G,w,.1,w,"#9b6b3f",0,y,0);for(let i=0;i<4;i++){const a=i*Math.PI/2+Math.PI/4,b=a+Math.PI/2;beam(G,[Math.cos(a)*rad(y-1.6),y-1.55,Math.sin(a)*rad(y-1.6)],[Math.cos(b)*rad(y),y,Math.sin(b)*rad(y)],.04,"#6b4a2c")}});
@@ -103,58 +86,128 @@ B.rozhledna=(G)=>{pad(G,4.4,4.4,"#cdbf98",.06);const H=6.4,r0=1.25,r1=.55;const 
  cyl(G,.04,.04,.9,"#e4352b",0,H+2.1,0,4)};
 B.podium=(G)=>{pad(G,6,5.6,"#4b5263",.05);box(G,4.6,.8,2.6,"#2a2f3a",0,0,-1.2);[-2.2,2.2].forEach(x=>{box(G,.15,3.4,.15,"#9aa1ad",x,0,-2.4);box(G,.15,3.4,.15,"#9aa1ad",x,0,0)});box(G,4.6,.2,2.6,"#9aa1ad",0,3.4,-1.2);
  ["#ff3b6b","#ffd23f","#5fa8e8","#7cf29a"].forEach((c,i)=>{const s=new T.SphereGeometry(.16,8,6);s.translate(0,3.25,0);G.add(mesh(s,new T.MeshBasicMaterial({color:c}),-1.6+i*1.05,0,-.1))});box(G,.8,1.4,.6,"#111",-1.9,.8,-1.8);box(G,.8,1.4,.6,"#111",1.9,.8,-1.8)};
-B.kluziste=(G)=>{pad(G,6,5.6,"#d9dde5",.05);const ice=new T.Mesh(new T.BoxGeometry(5,.06,3.6),new T.MeshLambertMaterial({color:"#e8f6ff"}));ice.position.set(0,.08,-.5);G.add(ice);
- [[0,-2.3,5,.12],[0,1.3,5,.12]].forEach(([x,z,w,d])=>box(G,w,.4,d,"#2f72d6",x,0,z));[[-2.5,-.5],[2.5,-.5]].forEach(([x,z])=>box(G,.12,.4,3.6,"#2f72d6",x,0,z));tree(G,2.6,2.1,3.6)};
-B.tvrz=(G)=>{pad(G,6,5.6,"#b6ad9a",.05);box(G,3.6,1.6,2.6,"#c9c2b5",0,0,-1);for(let i=0;i<6;i++)box(G,.4,.4,.4,"#b9b1a3",-1.6+i*.64,1.6,.25);cyl(G,.9,1,3.4,"#c9c2b5",-1.8,0,-1.8,10);const c=new T.ConeGeometry(1.1,1.3,10);c.translate(0,4,0);G.add(mesh(c,"#7a3a22",-1.8,0,-1.8))};
-B.coworking=(G)=>{pad(G,6,5.6,"#d9dde5",.06);const gl=new T.MeshLambertMaterial({color:"#9fd0f2",transparent:true,opacity:.75});
- const a=new T.Mesh(new T.BoxGeometry(4.4,3.2,3),gl);a.position.set(0,1.6,-1);a.castShadow=true;G.add(a);for(let y=1.05;y<3.2;y+=1.05)box(G,4.45,.06,3.05,"#e9edf5",0,y,-1);box(G,4.6,.2,3.2,"#2a2f3a",0,3.2,-1);
- car(G,"suv-luxury",1.6,2,Math.PI/2,.45)};
-B.stadion=(G)=>{const t=lines(600,400,(g,w,h)=>{for(let i=0;i<10;i++){g.fillStyle=i%2?"#4c9a3c":"#58a845";g.fillRect(i*w/10,0,w/10,h)}g.strokeStyle="#fff";g.lineWidth=5;g.strokeRect(30,30,w-60,h-60);g.beginPath();g.moveTo(w/2,30);g.lineTo(w/2,h-30);g.stroke()});
- const p=pad(G,4.4,3,"#fff",.06);p.material=new T.MeshLambertMaterial({map:t});p.position.z=-.4;
- [[0,-2.4,6,.9],[0,1.6,6,.9]].forEach(([x,z,w,d],i)=>{for(let k=0;k<3;k++)box(G,w,.35,.3,"#2f72d6",x,k*.35,z+(i?k*.3:-k*.3))});
- [[-2.75,-.4],[2.75,-.4]].forEach(([x,z])=>{for(let k=0;k<2;k++)box(G,.3,.35,3,"#2f72d6",x+(x<0?-k*.3:k*.3),k*.35,z)});box(G,6.4,.12,1,"#e9edf5",0,1.6,-2.9)};
-B.metro=(G)=>{pad(G,6,5.6,"#c6c9d0",.08);box(G,2.6,.03,3.2,"#1b1e26",0,.08,-.4);for(let i=0;i<5;i++)box(G,2.3,.035,.3,"#7a8190",0,.1,-1.5+i*.55);
- [-1.32,1.32].forEach(x=>{box(G,.08,.9,3.2,"#2f72d6",x,.08,-.4);const r=new T.CylinderGeometry(.04,.04,3.2,6);r.rotateX(Math.PI/2);r.translate(0,1.05,0);G.add(mesh(r,"#9aa1ad",x,0,-.4))});
- box(G,2.8,.1,3.4,"#2f72d6",0,2.2,-.4);[[-1.3,1.1],[1.3,1.1],[-1.3,-1.9],[1.3,-1.9]].forEach(([x,z])=>box(G,.08,2.2,.08,"#9aa1ad",x,0,z));
- const m=canvasTex(128,128,(g)=>{g.fillStyle="#e4352b";g.beginPath();g.arc(64,64,60,0,7);g.fill();g.fillStyle="#fff";g.font="700 80px Arial";g.textAlign="center";g.textBaseline="middle";g.fillText("M",64,70)});
- cyl(G,.06,.06,3,"#4a5266",2.2,0,1.4,6);[1,-1].forEach(sd=>{const mm=new T.Mesh(new T.CircleGeometry(.45,24),new T.MeshBasicMaterial({map:m}));mm.position.set(2.2,3.1,1.4+sd*.07);if(sd<0)mm.rotation.y=Math.PI;G.add(mm)})};
-B.letiste=(G)=>{pad(G,6.2,5.6,"#8fae63",.04);const t=lines(600,300,(g,w,h)=>{g.fillStyle="#555b66";g.fillRect(0,0,w,h);g.fillStyle="#fff";for(let x=20;x<w-20;x+=50)g.fillRect(x,h/2-4,28,8);g.fillRect(10,20,w-20,6);g.fillRect(10,h-26,w-20,6)});
- const p=pad(G,6.2,2,"#fff",.07);p.material=new T.MeshLambertMaterial({map:t});p.position.z=-1.6;
- const pl=new T.Group();const body=new T.CylinderGeometry(.22,.22,2.6,10);body.rotateX(Math.PI/2);pl.add(mesh(body,"#f4f6fa",0,.55,0));pl.add(mesh(new T.SphereGeometry(.22,10,8),"#f4f6fa",0,.55,1.3));
- const tail=new T.ConeGeometry(.22,.6,10);tail.rotateX(-Math.PI/2);pl.add(mesh(tail,"#f4f6fa",0,.55,-1.6));box(pl,2.8,.06,.55,"#e9edf5",0,.5,.1);box(pl,1,.05,.3,"#e9edf5",0,.62,-1.5);box(pl,.06,.6,.4,"#2f72d6",0,.6,-1.55);
- [-0.75,.75].forEach(x=>{const e=new T.CylinderGeometry(.1,.1,.4,8);e.rotateX(Math.PI/2);pl.add(mesh(e,"#9aa1ad",x,.38,.2))});pl.rotation.y=Math.PI/2;pl.position.set(-.6,.08,-1.6);G.add(pl);
- const term=new T.Mesh(new T.BoxGeometry(3,1.2,1.4),new T.MeshLambertMaterial({color:"#9fd0f2",transparent:true,opacity:.85}));term.position.set(.6,.7,1.3);term.castShadow=true;G.add(term);box(G,3.2,.15,1.6,"#e9edf5",.6,1.3,1.3);
- cyl(G,.25,.25,2.8,"#e9edf5",-2.2,.05,1.6,8);box(G,1,.6,1,"#9fd0f2",-2.2,2.85,1.6);box(G,1.2,.1,1.2,"#2a2f3a",-2.2,3.45,1.6)};
 
+
+/* ===== velké stavby (předělané), půdorysy fp v jednotkách scény; domek ≈ poloměr 2.4 ===== */
+const SEATS=["#e0572b","#2f72d6","#2f72d6","#e0572b"];
+function stand(G,x,z,len,ry,rows=5,col="#2f72d6"){// tribuna: stupňovité řady sedaček s betonovou spodní částí
+ const g=new T.Group();for(let k=0;k<rows;k++){box(g,len,.42,.9,"#b8bcc6",0,k*.42,k*.9);for(let sx=-len/2+.5;sx<len/2-.3;sx+=.6)box(g,.5,.22,.5,(Math.floor((sx+len/2)/.6)+k)%3===0?"#d9dde5":col,sx,k*.42+.42,k*.9+.12)}
+ box(g,len,.2,rows*.9,"#9aa1ad",0,-.02,(rows*.9)/2-.45);box(g,len+.4,rows*.42+1.2,.35,"#d9dde5",0,0,rows*.9-.15);// zadní stěna
+ for(let sx=-len/2;sx<=len/2;sx+=len/4)box(g,.3,rows*.42+1.2,.4,"#9aa1ad",sx,0,rows*.9-.15);g.position.set(x,0,z);g.rotation.y=ry;G.add(g);return g}
+function floodlight(G,x,z,h=9){cyl(G,.14,.2,h,"#9aa1ad",x,0,z,8);box(G,1.4,.9,.25,"#2a2f3a",x,h,z);for(let i=0;i<4;i++){const l=mesh(new T.SphereGeometry(.14,8,6),new T.MeshLambertMaterial({color:"#fff7c2",emissive:"#ffe27a",emissiveIntensity:.8}),x-.5+i*.33,h+.45,z+.18);G.add(l)}}
+function parking(G,x,z,w,d,ry=0,n=6){const g=new T.Group();pad(g,w,d,"#7b8190",.05);for(let i=0;i<n;i++){const px=-w/2+1+i*((w-2)/Math.max(1,n-1));box(g,.08,.02,d-.6,"#e9edf5",px,.05,0);if(i%2===0&&window.MODELS)car(g,["sedan","suv","taxi","van","hatchback-sports","delivery"][i%6],px+(w-2)/Math.max(1,n-1)/2,0,Math.PI/2,.5)}
+ g.position.set(x,0,z);g.rotation.y=ry;G.add(g);return g}
+B.stadion=(G)=>{// fp 10: hřiště 11×7, tribuny ze 4 stran, střecha nad hlavní, stožáry, brána, parkoviště
+ const t=lines(600,400,(g,w,h)=>{for(let i=0;i<10;i++){g.fillStyle=i%2?"#4c9a3c":"#58a845";g.fillRect(i*w/10,0,w/10,h)}g.strokeStyle="#fff";g.lineWidth=5;g.strokeRect(30,30,w-60,h-60);g.beginPath();g.moveTo(w/2,30);g.lineTo(w/2,h-30);g.stroke();g.beginPath();g.arc(w/2,h/2,46,0,7);g.stroke();g.strokeRect(30,h/2-80,70,160);g.strokeRect(w-100,h/2-80,70,160)});
+ pad(G,19,15,"#b8bcc6",.06);const p=pad(G,11,7,"#fff",.1);p.material=new T.MeshLambertMaterial({map:t});
+ // branky
+ [-5.4,5.4].forEach(x=>{[-1,1].forEach(sd=>cyl(G,.04,.04,.9,"#fff",x,.1,sd*.9,6));const bar=new T.BoxGeometry(.06,.06,1.8);G.add(mesh(bar,"#fff",x,1,0))});
+ // tribuny: podélné (sever/jih) a čelní (východ/západ)
+ stand(G,0,4.3,11.6,0,7,"#2f72d6");stand(G,0,-4.3,11.6,Math.PI,7,"#e0572b");stand(G,6.4,0,7.6,-Math.PI/2,5,"#e0572b");stand(G,-6.4,0,7.6,Math.PI/2,5,"#2f72d6");
+ // střecha hlavní tribuny (sever) na sloupech
+ for(let x=-5.5;x<=5.5;x+=2.75)cyl(G,.14,.14,6.2,"#9aa1ad",x,0,10.6,8);const roof=box(G,12.6,.25,6.2,"#e9edf5",0,6.1,7.6);roof.rotation.x=.14;const roof2=box(G,8,.22,4.2,"#e9edf5",0,5.1,-7.0);roof2.rotation.x=-.14;for(let x=-3;x<=3;x+=3)cyl(G,.12,.12,5.2,"#9aa1ad",x,0,-9.3,8);
+ // stožáry + zábradlí po obvodu + brána + nápis
+ [[-8.2,-6.2],[8.2,-6.2],[-8.2,6.2],[8.2,6.2]].forEach(([x,z])=>floodlight(G,x,z,9));
+ box(G,19,.9,.12,"#9aa1ad",0,0,-7.4);box(G,.12,.9,15,"#9aa1ad",9.4,0,0);box(G,.12,.9,15,"#9aa1ad",-9.4,0,0);
+ box(G,.5,3.2,.5,"#2a2f3a",-2.2,0,-7.4);box(G,.5,3.2,.5,"#2a2f3a",2.2,0,-7.4);box(G,5,.6,.5,"#2a2f3a",0,3.2,-7.4);
+ parking(G,-13,0,6,12,0,5);parking(G,13,0,6,12,0,5);tree(G,-12,-7.5,4);tree(G,12,7.5,4);
+ [-6,-2,2,6].forEach(x=>prop(G,"lamp",x,-8.3,3));};
+B.nadrazi=(G)=>{// fp 7: nástupiště s přístřeškem, výpravní budova, koleje, P+R
+ pad(G,14,9,"#c6c9d0",.06);
+ // koleje (2) podél osy x
+ for(let z=-3.2;z<=-1.6;z+=1.6){box(G,14,.06,.9,"#8a7a62",0,0,z);for(let x=-6.8;x<=6.8;x+=.45)box(G,.2,.08,.9,"#6b5b45",x,.06,z);[-.3,.3].forEach(o=>box(G,14,.06,.07,"#9aa1ad",0,.14,z+o))}
+ // nástupiště
+ box(G,12,.45,2.4,"#d9d4cb",0,0,.4);box(G,12,.02,.1,"#ffd23f",0,.46,-.7);
+ for(let x=-5;x<=5;x+=2.5)cyl(G,.1,.1,2.8,"#5a6170",x,.45,.6,8);box(G,12.4,.15,2.8,"#1f3c8f",0,3.2,.5);
+ // výpravní budova
+ kenney(G,"m","#5a6170",0,3.6,3.6);box(G,1.2,.08,.6,"#1f3c8f",0,2.9,1.9);
+ // hodiny + lavičky + lampy + cedule
+ const clk=canvasTex(128,128,g=>{g.fillStyle="#fff";g.beginPath();g.arc(64,64,60,0,7);g.fill();g.strokeStyle="#111";g.lineWidth=6;g.stroke();g.beginPath();g.moveTo(64,64);g.lineTo(64,20);g.moveTo(64,64);g.lineTo(96,64);g.stroke()});
+ cyl(G,.06,.06,2.4,"#5a6170",-5.6,.45,1.2,6);[1,-1].forEach(sd=>{const c=new T.Mesh(new T.CircleGeometry(.4,20),new T.MeshBasicMaterial({map:clk}));c.position.set(-5.6,2.9,1.2+sd*.05);if(sd<0)c.rotation.y=Math.PI;G.add(c)});
+ bench(G,-2.5,1.2);bench(G,2.5,1.2);prop(G,"lamp",-6.5,4.2,3);prop(G,"lamp",6.5,4.2,3);
+ // P+R parkoviště za budovou
+ parking(G,5,4.2,7,4,0,5);
+ // vlak na vzdálenější koleji
+ const tr=new T.Group();box(tr,5.2,1.2,.85,"#1f3c8f",0,.3,0);box(tr,5,.5,.8,"#e9edf5",0,1.5,0);for(let x=-2;x<=2;x+=1)box(tr,.6,.4,.02,"#9fd0f2",x,.85,.44);box(tr,.5,.4,.3,"#e4352b",2.6,.4,0);
+ tr.position.set(1.5,.08,-3.2);G.add(tr)};
+B.letiste=(G)=>{// fp 14: ranvej, pojezdová dráha, terminál, věž, hangár, 2 letadla, rukáv
+ pad(G,28,16,"#8fae63",.04);
+ const rw=lines(900,160,(g,w,h)=>{g.fillStyle="#555b66";g.fillRect(0,0,w,h);g.fillStyle="#fff";for(let x=30;x<w-30;x+=60)g.fillRect(x,h/2-4,34,8);g.fillRect(10,16,w-20,5);g.fillRect(10,h-21,w-20,5);for(let i=0;i<8;i++){g.fillRect(20+i*12,30,6,40);g.fillRect(w-26-i*12,h-70,6,40)}});
+ const r=pad(G,26,4.4,"#fff",.08);r.material=new T.MeshLambertMaterial({map:rw});r.position.z=-4.5;
+ pad(G,22,1.6,"#6b717c",.07).position.z=-1.2;box(G,1.6,.07,3.4,"#6b717c",-9,.0,-2.8);box(G,1.6,.07,3.4,"#6b717c",6,0,-2.8);
+ // terminál
+ const term=new T.Mesh(new T.BoxGeometry(9,2.2,3.2),new T.MeshLambertMaterial({color:"#9fd0f2",transparent:true,opacity:.85}));term.position.set(-2,1.1,3.2);term.castShadow=true;G.add(term);
+ for(let x=-6;x<=2;x+=1.6)box(G,.14,2.2,3.3,"#e9edf5",x,0,3.2);box(G,9.4,.25,3.6,"#e9edf5",-2,2.2,3.2);box(G,2.4,.6,.2,"#1f3c8f",-2,2.45,1.5);
+ // věž
+ cyl(G,.5,.6,6,"#e9edf5",6.5,0,3.5,10);const cab=new T.Mesh(new T.CylinderGeometry(1.5,1.1,1.2,10),new T.MeshLambertMaterial({color:"#9fd0f2",transparent:true,opacity:.9}));cab.position.set(6.5,6.6,3.5);G.add(cab);cyl(G,1.6,1.6,.25,"#2a2f3a",6.5,7.2,3.5,10);cyl(G,.04,.04,1.5,"#9aa1ad",6.5,7.4,3.5,6);
+ // hangár
+ const hg=new T.CylinderGeometry(2.6,2.6,5,16,1,false,0,Math.PI);hg.rotateZ(Math.PI/2);hg.rotateY(Math.PI/2);G.add(mesh(hg,"#b8bcc6",-10.5,0,3.4));box(G,5,.1,5.2,"#9aa1ad",-10.5,0,3.4);box(G,4.4,2.2,.2,"#2a2f3a",-10.5,0,.9);
+ // letadla
+ const plane=(x,z,ry,col)=>{const pl=new T.Group();const body=new T.CylinderGeometry(.32,.26,4,12);body.rotateX(Math.PI/2);pl.add(mesh(body,"#f4f6fa",0,.75,0));pl.add(mesh(new T.SphereGeometry(.32,10,8),"#f4f6fa",0,.75,2));
+  const tail=new T.ConeGeometry(.26,.9,10);tail.rotateX(-Math.PI/2);pl.add(mesh(tail,"#f4f6fa",0,.75,-2.4));box(pl,4.6,.08,.8,"#e9edf5",0,.7,.2);box(pl,1.6,.06,.45,"#e9edf5",0,.85,-2.2);box(pl,.08,1,.6,col,0,.8,-2.3);
+  [-1.1,1.1].forEach(w=>{const e=new T.CylinderGeometry(.16,.16,.7,8);e.rotateX(Math.PI/2);pl.add(mesh(e,"#9aa1ad",w,.52,.3))});[[0,1.2],[-.7,-.2],[.7,-.2]].forEach(([wx,wz])=>cyl(pl,.08,.08,.4,"#2a2f3a",wx,.05,wz,6));
+  for(let i=-1.2;i<=1.2;i+=.4)box(pl,.03,.12,.2,"#1f3c8f",.33,.85,i);pl.position.set(x,.08,z);pl.rotation.y=ry;G.add(pl)};
+ plane(-4,-4.5,Math.PI/2,"#e0572b");plane(2.5,-1.2,Math.PI/2+.35,"#2f72d6");
+ // větrný rukáv + ploty + auta
+ cyl(G,.04,.04,2.6,"#9aa1ad",11.5,0,-7.2,6);const sock=new T.ConeGeometry(.22,1.2,8);sock.rotateZ(-Math.PI/2);G.add(mesh(sock,"#e0572b",12.2,2.5,-7.2));
+ parking(G,3,6.4,8,3,0,6);tree(G,-13,-7,4);tree(G,13,7,4);[-12,-4,4,12].forEach(x=>prop(G,"lamp",x,7.6,3))};
+B.tvrz=(G)=>{// fp 5: kamenná tvrz – hradby s cimbuřím, 4 nárožní věže, brána s mostem, vnitřní věž s vlajkou
+ pad(G,10,10,"#8f9f6a",.04);const STONE="#bdb5a6",STONE2="#a69d8d";const W=7,H=2.4;
+ // příkop
+ const moat=new T.Mesh(new T.RingGeometry(4.4,5.6,40),new T.MeshLambertMaterial({color:"#3f8fc4"}));moat.rotation.x=-Math.PI/2;moat.position.y=.05;G.add(moat);
+ // hradby
+ [[0,-W/2,W,0],[0,W/2,W,0],[-W/2,0,W,Math.PI/2],[W/2,0,W,Math.PI/2]].forEach(([x,z,l,ry])=>{const g=new T.Group();box(g,l,H,.7,STONE,0,0,0);for(let k=-l/2+.35;k<l/2;k+=.7)if(Math.round(k*10)%14===0||true){if(Math.floor((k+l/2)/.7)%2===0)box(g,.5,.45,.7,STONE2,k,H,0)}g.position.set(x,0,z);g.rotation.y=ry;G.add(g)});
+ // nárožní věže
+ [[-W/2,-W/2],[W/2,-W/2],[-W/2,W/2],[W/2,W/2]].forEach(([x,z])=>{cyl(G,1,1.05,H+1.4,STONE,x,0,z,12);for(let k=0;k<8;k++)box(G,.4,.4,.35,STONE2,x+Math.cos(k/8*6.283)*.9,H+1.4,z+Math.sin(k/8*6.283)*.9);const c=new T.Mesh(new T.ConeGeometry(1.15,1.4,12),M("#7a3a22"));c.position.set(x,H+1.4+.9,z);c.castShadow=true;G.add(c)});
+ // brána + most
+ box(G,2.2,2.1,.9,"#5a4a3a",0,0,W/2,0);const arch=new T.Mesh(new T.CylinderGeometry(1,1,.95,12,1,false,0,Math.PI),M(STONE2));arch.rotation.z=Math.PI/2;arch.rotation.y=Math.PI/2;arch.position.set(0,2.1,W/2);G.add(arch);
+ box(G,1.4,.1,2.4,"#8b6a3e",0,.5,W/2+1.4);[-.7,.7].forEach(x=>box(G,.08,.5,2.4,"#8b6a3e",x,.5,W/2+1.4));
+ // vnitřní věž (donjon) + vlajka + nádvoří
+ pad(G,W-1.2,W-1.2,"#c9b99a",.08);box(G,2.6,5.2,2.6,STONE,0,0,-.6);box(G,3,.3,3,STONE2,0,5.2,-.6);for(let k=0;k<4;k++){const a=k/4*6.283+.78;box(G,.5,.5,.5,STONE2,Math.cos(a)*1.4,5.5,-.6+Math.sin(a)*1.4)}
+ const r=new T.Mesh(new T.ConeGeometry(1.9,2.2,4),M("#7a3a22"));r.rotation.y=Math.PI/4;r.position.set(0,6.6,-.6);r.castShadow=true;G.add(r);
+ cyl(G,.05,.05,2.4,"#9aa1ad",0,7.6,-.6,6);box(G,1,.6,.05,"#e4352b",.55,9.3,-.6);
+ for(let k=0;k<4;k++)box(G,.5,.9,.1,"#1f3c8f",-1,1.6+k*0,-.6+1.32,0);box(G,.4,.8,.1,"#1f3c8f",0,2.9,.72);box(G,.4,.8,.1,"#1f3c8f",0,4.2,.72);
+ tree(G,2.2,1.6,2.6);prop(G,"lamp",-2.4,2.2,2.6)};
+B.fotbal=(G)=>{// fp 7: hřiště s lajnami, branky, střídačky, malá tribuna, osvětlení
+ const t=lines(600,420,(g,w,h)=>{for(let i=0;i<8;i++){g.fillStyle=i%2?"#4c9a3c":"#58a845";g.fillRect(i*w/8,0,w/8,h)}g.strokeStyle="#fff";g.lineWidth=5;g.strokeRect(30,30,w-60,h-60);g.beginPath();g.moveTo(w/2,30);g.lineTo(w/2,h-30);g.stroke();g.beginPath();g.arc(w/2,h/2,50,0,7);g.stroke();g.strokeRect(30,h/2-90,80,180);g.strokeRect(w-110,h/2-90,80,180)});
+ pad(G,13,10,"#8fae63",.05);const p=pad(G,9.6,6.6,"#fff",.09);p.material=new T.MeshLambertMaterial({map:t});
+ [-4.7,4.7].forEach(x=>{[-1,1].forEach(sd=>cyl(G,.04,.04,.8,"#fff",x,.09,sd*.8,6));G.add(mesh(new T.BoxGeometry(.05,.05,1.6),"#fff",x,.9,0))});
+ stand(G,0,4,8,0,3,"#2f72d6");[-2.6,2.6].forEach(x=>{box(G,2,.9,.8,"#2a2f3a",x,0,-4.2);box(G,2.2,.1,1,"#9fd0f2",x,.95,-4.2)});
+ [[-6,-4.6],[6,-4.6],[-6,4.6],[6,4.6]].forEach(([x,z])=>floodlight(G,x,z,6));box(G,13,.6,.08,"#9aa1ad",0,0,-5);prop(G,"lamp",-6.3,0,3)};
+B.koupaliste=(G)=>{// fp 5: bazén s plavci, skluzavka, lehátka, bufet
+ pad(G,10,8,"#efe7d4",.06);const w=new T.Mesh(new T.BoxGeometry(6.4,.1,3.6),M("#41b4e6"));w.position.set(-.6,.12,-.6);w.receiveShadow=true;G.add(w);
+ const lane=canvasTex(256,128,g=>{g.fillStyle="#41b4e6";g.fillRect(0,0,256,128);g.strokeStyle="#fff";g.lineWidth=3;for(let y=16;y<128;y+=24){g.beginPath();g.moveTo(0,y);g.lineTo(256,y);g.stroke()}});w.material=new T.MeshLambertMaterial({map:lane});
+ box(G,6.8,.14,.3,"#d9d4cb",-.6,.1,-2.55);box(G,6.8,.14,.3,"#d9d4cb",-.6,.1,1.35);box(G,.3,.14,3.9,"#d9d4cb",-3.95,.1,-.6);box(G,.3,.14,3.9,"#d9d4cb",2.75,.1,-.6);
+ // skluzavka
+ cyl(G,.1,.1,2.6,"#9aa1ad",3.6,0,-1.6,6);box(G,.6,.1,2.4,"#ffd23f",3.6,2.2,-.8).rotation.x=.6;
+ // lehátka + slunečníky + bufet
+ [[-3,2.4],[-1.6,2.4],[-.2,2.4],[1.2,2.4]].forEach(([x,z])=>{box(G,.9,.12,.45,"#f4f6fa",x,.3,z);box(G,.3,.4,.45,"#f4f6fa",x-.3,.3,z,0)});umbrella(G,-2.3,2.9,"#e0572b");umbrella(G,.5,2.9,"#2f72d6");
+ box(G,2.4,1.3,1.4,"#fff2cc",3.5,0,2.6);awning(G,2.6,3.5,1.35,1.9,"#e4352b","#ffffff",.8);tree(G,-4.4,3.2,3.6);prop(G,"lamp",4.6,-3.2,3)};
 const CAT=[
- ["pomnik","Pomník na návsi",5,"Tady to celé začalo","🗿","#8e95a8"],
- ["kebab","Kebab / bistro",5,"Kebab u Alenky","🥙","#e0572b"],
- ["lavicka","Lavička s výhledem",5,"Lavička, kde se řeší všechno","🪑","#9b6b3f"],
- ["zastavka","Zastávka busu",8,"Zastávka Poslední 3 minuty","🚌","#2f72d6"],
- ["vecerka","Večerka",8,"Večerka Otevřeno do kdy se mi chce","🛒","#2fa35a"],
- ["hospoda","Hospoda",10,"U Zlatého Radaru","🍺","#7a3a22"],
- ["workout","Hřiště / workout",10,"Workout pro ty, co tam fakt chodí","💪","#d04f3a"],
- ["kavarna","Kavárna",12,"Kafe & drby","☕","#2d2a33"],
- ["hasicarna","Hasičárna",15,"SDH Rychlí jak Wi-Fi","🚒","#c33"],
- ["fotbal","Fotbalové hřiště",15,"Stadion Okresní přebor Arena","⚽","#3f8f3a"],
- ["pizzerie","Pizzerie",18,"Pizza Alla Říčanská","🍕","#c0392b"],
- ["rybnik","Rybník s molem",20,"Rybník, kde nikdo nic nechytil","🎣","#3f8fc4"],
- ["knihovna","Knihovna",25,"Knihovna a Wi-Fi zdarma","📚","#2f72d6"],
- ["skatepark","Skatepark",25,"Skatepark Odřená kolena","🛹","#6b7280"],
- ["kino","Kino pod širákem",30,"Letní kino i v prosinci","🎬","#1f3c8f"],
- ["nadrazi","Nádraží / P+R",30,"Nádraží Vlak má zase zpoždění","🚆","#1f3c8f"],
- ["koupaliste","Koupaliště",40,"Koupko Jen v červenci","🏊","#41b4e6"],
- ["rozhledna","Rozhledna",40,"Rozhledna Vidím až na D1","🔭","#7a5636"],
- ["podium","Festivalové pódium",50,"Stage Celá vesnice na jednom místě","🎤","#7c3aed"],
- ["kluziste","Kluziště",50,"Kluziště Bruslím jako žirafa","⛸️","#2f72d6"],
- ["tvrz","Tvrz",60,"Tvrz Strážce okresu","🏰","#7a3a22"],
- ["coworking","Coworking",75,"Coworking Wi-Fi rychlejší než D1","💻","#0d1838"],
- ["stadion","Stadion",100,"Aréna Říčanský derby","🏟️","#2f72d6"],
- ["metro","Metro (sen)",100,"Stanice metra Konečně!","🚇","#e4352b"],
- ["letiste","Letiště (meme)",150,"Letiště Václava Radara","✈️","#5fa8e8"],
-].map(([id,name,th,example,emoji,color])=>({id,name,th,example,emoji,color}));
-
-function build(id,text){const c=CAT.find(x=>x.id===id);const G=new T.Group();B[id](G);const sx=id==="pomnik"?-1.7:id==="lavicka"?1.4:-1.9;
- sign(G,text||c.example,c.color,c.emoji,sx,id==="pomnik"?1.9:2.5,id==="pomnik"||id==="lavicka"?2.2:2.7);G.userData.special={id,text:text||c.example};return G}
-window.SPECIALS={CAT,build,signTexture,bench,tree:(G,x,z,s)=>tree(G,x,z,s),prop:(G,k,x,z,s,r)=>prop(G,k,x,z,s,r),M};
+ ["kebab","Kebab / bistro",5,"Kebab u Alenky","🥙","#e0572b",2.6],
+ ["vecerka","Večerka",8,"Večerka U Pepy","🛒","#2fa35a",2.6],
+ ["hospoda","Hospoda",10,"Hospoda U Dvorku","🍺","#7a3a22",2.6],
+ ["workout","Hřiště / workout",10,"Hřiště Za školou","💪","#d04f3a",2.8],
+ ["kavarna","Kavárna",12,"Kavárna Na rohu","☕","#2d2a33",2.6],
+ ["hasicarna","Hasičárna",15,"Hasičárna SDH Mukařov","🚒","#c33",3.2],
+ ["fotbal","Fotbalové hřiště",15,"Hřiště Sokol Strančice","⚽","#3f8f3a",7],
+ ["pizzerie","Pizzerie",18,"Pizzerie Da Terka","🍕","#c0392b",2.6],
+ ["rybnik","Rybník s molem",20,"Rybník Mlýnský","🎣","#3f8fc4",4],
+ ["knihovna","Knihovna",25,"Knihovna Jana Nerudy","📚","#2f72d6",2.6],
+ ["skatepark","Skatepark",25,"Skatepark Betonka","🛹","#6b7280",4.2],
+ ["kino","Kino pod širákem",30,"Letní kino Na louce","🎬","#1f3c8f",4.2],
+ ["nadrazi","Nádraží / P+R",30,"Nádraží Mnichovice","🚆","#1f3c8f",7],
+ ["koupaliste","Koupaliště",40,"Koupaliště Jureček","🏊","#41b4e6",5],
+ ["rozhledna","Rozhledna",40,"Rozhledna Na Klokočné","🔭","#7a5636",3.4],
+ ["podium","Festivalové pódium",50,"Stage Letní slavnosti","🎤","#7c3aed",4.2],
+ ["tvrz","Tvrz",60,"Tvrz Popovická","🏰","#7a3a22",5.5],
+ ["stadion","Stadion",100,"Stadion Říčanské derby","🏟️","#2f72d6",10],
+ ["letiste","Letiště",150,"Letiště Mukařov","✈️","#5fa8e8",14],
+].map(([id,name,th,example,emoji,color,fp])=>({id,name,th,example,emoji,color,fp}));
+const fp=id=>{const c=CAT.find(x=>x.id===id);return c?c.fp:2.6};
+function build(id,text){const c=CAT.find(x=>x.id===id)||CAT[0];const G=new T.Group();(B[c.id]||B.hospoda)(G);const f=c.fp;
+ // cedule před vchodem: u malých staveb vlevo u chodníku, u velkých u vjezdu
+ const sx=f<=3.4?-1.9:-(f*.25),sz=f<=3.4?2.5:f*.62,w=f<=3.4?2.7:Math.min(4,2.7+f*.08);
+ sign(G,text||c.example,c.color,c.emoji,sx,sz,w);G.userData.special={id:c.id,text:text||c.example};return G}
+window.SPECIALS={CAT,build,fp,signTexture,bench,tree:(G,x,z,s)=>tree(G,x,z,s),prop:(G,k,x,z,s,r)=>prop(G,k,x,z,s,r),M};
 })();
