@@ -626,7 +626,7 @@ window.GAME={canvas,THREE:T,
   houses:t.items.map((it,i)=>{const s=t.slots[i];return s&&it.k==="h"?{id:t.n+"#"+i,owner:it.p.nick,no:it.p.no,x:c.x+s.x,y:0,z:c.z+s.z}:null}).filter(Boolean)}})}),
  setAspect:(w,h)=>{aspectLock=!!w;if(w){const k=Math.min(1,+QS.get("render")||1);R.setPixelRatio(1);R.setSize(Math.round(w*k),Math.round(h*k),false);cam.aspect=w/h}else{R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight}cam.updateProjectionMatrix();POST.resize()},
  flyTo:(o,ms)=>flyTo(new T.Vector3(o.target.x,o.target.y,o.target.z),new T.Vector3(o.pos.x,o.pos.y,o.pos.z),ms),
- focusTown:(n,ms)=>focusTown(byName[n],ms),
+ focusTown:(n,ms,quiet)=>focusTown(byName[n],ms,quiet),
  focusHouse:(id,ms)=>{const [n,i]=id.split("#");const t=byName[n];const s=t.slots[+i];return s?flyToLocal(t,s,22):Promise.resolve()},
  overview:ms=>overview(ms),orbit:s=>{orbitSpeed=s||0},
  addPlayers:(n,list)=>{const t=byName[n];if(t)addPlayers(t,(list&&list.length)||1)},
@@ -640,9 +640,9 @@ window.GAME={canvas,THREE:T,
   const built=TOWNS.flatMap(t=>t.items.filter(x=>x.k==="s"&&x.day===d).map(x=>({town:t.n,text:x.text,job:x.job?JOBS[x.job].n:null,emoji:SPECIALS.CAT.find(c=>c.id===x.id).emoji})));
   const firsts=TOWNS.filter(t=>t.players.length&&t.players[0].day===d).map(t=>t.n);const revived=TOWNS.filter(t=>t.players.length>=CONFIG.REVIVE&&t.players[CONFIG.REVIVE-1].day===d).map(t=>t.n);
   return{day:d,count:np.length,total:ALLP.filter(p=>p.day<=d).length,top,built,firsts,revived}},
- catalogThumbs:()=>catalogThumbs(),revive:()=>CONFIG.REVIVE,crown:()=>crownT?{name:crownT.n,week:weekGain(crownT),players:crownT.players.length}:null,center:()=>{F(CENTER.x,CENTER.y,tmp2);return{x:tmp2[0],z:tmp2[1],name:CENTER.name}},focusCenter:(ms)=>{F(CENTER.x,CENTER.y,tmp2);return flyTo(new T.Vector3(tmp2[0],2,tmp2[1]),new T.Vector3(tmp2[0]+26,30,tmp2[1]+44),ms||1400)},
+ catalogThumbs:()=>catalogThumbs(),revive:()=>CONFIG.REVIVE,crown:()=>crownT?{name:crownT.n,week:weekGain(crownT),players:crownT.players.length}:null,center:()=>{F(CENTER.x,CENTER.y,tmp2);return{x:tmp2[0],z:tmp2[1],name:CENTER.name}},focusCenter:(ms)=>{F(CENTER.x,CENTER.y,tmp2);return flyTo(new T.Vector3(tmp2[0],3,tmp2[1]+2),new T.Vector3(tmp2[0]+34,44,tmp2[1]+66),ms||1400)},
  info:()=>({day:DAY,pop:POP,open:TOWNS.filter(t=>t.open).length,total:TOWNS.length}),reload:()=>pollWorld(),get S(){return S},pairs:()=>{const o=[];for(let i=0;i<TOWNS.length;i++)for(let j=i+1;j<TOWNS.length;j++){const a=TOWNS[i],b=TOWNS[j];const d=Math.hypot(a.x-b.x,a.y-b.y);o.push([((SPREAD*(a.R+b.R)+GAP)/d).toFixed(4),a.n,b.n,Math.round(d),a.R.toFixed(0),b.R.toFixed(0)])}return o.sort((x,y)=>y[0]-x[0]).slice(0,6)},onFrame:cb=>frameCbs.push(cb),towns:()=>TOWNS.map(t=>t.n),
- dayData:()=>{const np=ALLP.filter(p=>p.day===DAY).map(p=>({town:p.town,owner:p.nick.slice(1),no:p.no}));
+ dayData:()=>{const np=ALLP.filter(p=>p.day===DAY).map(p=>{const t=byName[p.town];const idx=t?t.items.findIndex(it=>it.k==="h"&&it.p===p):-1;return{town:p.town,owner:p.nick.slice(1),no:p.no,id:idx>=0?p.town+"#"+idx:null}});
   const sp=TOWNS.flatMap(t=>t.items.filter(x=>x.k==="s"&&x.day===DAY&&!x.job).map(x=>({town:t.n,name:x.text,type:x.id})));
   const jb=TOWNS.flatMap(t=>t.items.filter(x=>x.k==="s"&&x.day===DAY&&x.job).map(x=>({town:t.n,job:JOBS[x.job].n,emoji:JOBS[x.job].e,building:SPECIALS.CAT.find(c=>c.id===x.id).name,name:x.text})));
   const jobs=TOWNS.flatMap(t=>Object.entries(jobCounts(t)).filter(([j,n])=>n<CONFIG.JOB_N&&n>=CONFIG.JOB_N-2&&!t.items.some(x=>x.k==="s"&&(x.job===j||x.id===JOBS[j].b))).map(([j,n])=>({town:t.n,job:JOBS[j].n,emoji:JOBS[j].e,count:n,need:CONFIG.JOB_N,building:SPECIALS.CAT.find(c=>c.id===JOBS[j].b).name}))).sort((a,b)=>(b.count/b.need)-(a.count/a.need)).slice(0,2);

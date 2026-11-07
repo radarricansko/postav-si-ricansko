@@ -17,3 +17,9 @@ Každý den v 5:30 (nebo ručně v GitHubu: Actions → „Denní reel“ → Ru
 npm i playwright && npx playwright install chromium
 node tools/video/render.js --out out --day 7
 ```
+
+## Klipy pro střih jinde (cesta C)
+
+Druhý job „klipy“ vyrenderuje surové záběry dne (9:16, bez grafiky, `klip-NN-*.mp4`) a `brief.md` / `brief.json`
+s kontextem (co klip ukazuje, čísla, návrh voiceoveru, pořadí). Artefakt běhu „klipy“. Lokálně:
+`node tools/video/clips.js --out out/klipy --day 7 --max 7`.

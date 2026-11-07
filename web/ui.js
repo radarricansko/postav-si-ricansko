@@ -15,17 +15,18 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const plural=(n,a,b,c)=>n===1?a:n>=2&&n<=4?b:c;
 /* příběh po dnech (scénář), doplněný o automatické hlášení z dat */
 const STORY={
- 1:{t:"Radar zapnul mapu",x:"52 obcí, všechny opuštěné. Každý nový obyvatel opraví jeden dům. Když v obci bydlí 5 lidí, obec ožije a erb se rozsvítí.",ph:"Fáze 1 · Probuzení"},
+ 1:{t:"Říčansko se sjednocuje",x:"Pan Radar vyhlásil sjednocení. Uprostřed regionu vzniklo Náměstí sjednocení se sochou 52 mečů a 52 erby. Všechny jsou zatím šedé: 52 obcí, všechny opuštěné. Každý nový obyvatel opraví jeden dům, při 5 lidech obec ožije a její erb na soše se rozsvítí.",ph:"Fáze 1 · Probuzení"},
+ 2:{t:"Praha má metro. My?",x:"Napiš do komentářů, co má Praha a sjednocené město ještě ne. Nejlajkovanější přání se postaví u náměstí, až na něj bude dost lidí."},
  3:{t:"První povolání",x:"K obci můžeš napsat i povolání. Když se sejde 5 hasičů, postaví si hasičárnu. 5 skejťáků skatepark."},
  5:{t:"Koruna týdne",x:"Nad obcí s největším přírůstkem za 7 dní se objevila zlatá koruna. Je putovní: kdo roste rychleji, ten ji vezme."},
- 8:{t:"Rozmach",x:"Odemykají se ligy erbů a povolanské budovy. Kdo bude první stříbrná obec?",ph:"Fáze 2 · Rozmach"},
+ 8:{t:"Rozmach",x:"Odemykají se ligy erbů a povolanské budovy. Kdo bude první stříbrná obec? A které přání proti Praze se splní jako první?",ph:"Fáze 2 · Rozmach"},
  15:{t:"Svazky obcí",x:"Sousední obce se můžou spojit do svazku (max. 3) a postavit společnou stavbu.",ph:"Fáze 3 · Svazky a Mikuláš"},
- 17:{t:"Výpadek radaru",x:"Na pár sekund zmizel signál. Co se mezitím na mapě objevilo?"},
+ 17:{t:"Výpadek radaru",x:"Pan Radar na pár sekund ztratil signál. Co se mezitím na mapě objevilo?"},
  20:{t:"Mikuláš",x:"Anděl nadělil nejaktivnější obci, čert nasypal uhlí obci, která tři dny nevyrostla."},
- 22:{t:"Zima",x:"Na Říčansko napadl sníh. Hokejisté odemykají kluziště a na okraji mapy se objevila tajemná budova.",ph:"Fáze 4 · Zima"},
- 29:{t:"Vánoční trh",x:"Každá obydlená obec dostane stánek na říčanském náměstí. Název vybere top komentář.",ph:"Fáze 5 · Vánoční trh"},
- 36:{t:"Finále",x:"Poslední týden. Cíl komunity: žádná opuštěná obec. Plné Říčansko 52/52.",ph:"Fáze 6 · Finále"},
- 39:{t:"Rozsvícení",x:"Celé Říčansko se rozsvítí."}
+ 22:{t:"Zima",x:"Na Říčansko napadl sníh a na okraji mapy se objevila tajemná budova.",ph:"Fáze 4 · Zima"},
+ 29:{t:"Vánoční trh",x:"Každá obydlená obec dostane stánek na Náměstí sjednocení. Název vybere top komentář.",ph:"Fáze 5 · Vánoční trh"},
+ 36:{t:"Finále",x:"Poslední týden. Cíl: rozsvítit všech 52 erbů na soše.",ph:"Fáze 6 · Finále"},
+ 39:{t:"Rozsvícení",x:"Socha svítí celá. Pan Radar končí hlášení."}
 };
 const TABN={rank:"Obce",story:"Příběh",build:"Stavby",stats:"Čísla",info:"Jak hrát"};
 const TABI={rank:"🏆",story:"📅",build:"🏗️",stats:"📈",info:"❓"};
@@ -117,7 +118,7 @@ let infoDone=false;
 function renderInfo(){if(infoDone)return;infoDone=true;const rv=GAME.revive();const jn=GAME.jobN();
  const frames=["wood","silver","gold","plat"].map(t=>{const d=ERB.E.find(e=>e[0]==="Říčany");return`<div class="lg"><img src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(ERB.erb(d,t))}" alt=""><b>${TIERN[t]}</b><small>${{wood:"5–19",silver:"20–49",gold:"50–99",plat:"100+"}[t]} obyvatel</small></div>`}).join("");
  $("pane-info").innerHTML=`<div class="paneHead"><b>Jak hrát</b></div>
- <p class="lead">Na mapě je 52 obcí Říčanska. <b>Kdo se přidá, dostane domek se svým nickem.</b></p>
+ <p class="lead">Říčansko se sjednocuje v jedno město a chce být lepší než Praha. Na mapě je 52 obcí, uprostřed Náměstí sjednocení se sochou 52 erbů. <b>Kdo se přidá, dostane domek se svým nickem</b> a rozsvěcí erb své obce.</p>
  <ol class="steps"><li><b>Sleduj @radar_ricansko</b><span>Hra běží na Instagramu Radaru.</span></li>
  <li><b>Napiš do komentářů svou obec</b><span>Pod herní příspěvek, klidně i s povoláním: „Mukařov hasič“.</span></li>
  <li><b>Najdi svůj domek</b><span>Do 2 hodin vyroste na mapě. Hledej podle nicku.</span></li></ol>
@@ -125,9 +126,9 @@ function renderInfo(){if(infoDone)return;infoDone=true;const rv=GAME.revive();co
  <h5>🛡️ Ligy obcí</h5><p>Rámeček erbu roste s počtem obyvatel.</p><div class="lgs">${frames}</div>
  <h5>👑 Koruna týdne</h5><p>Vznáší se nad obcí s <b>největším přírůstkem za 7 dní</b>. Kdo roste rychleji, ten ji vezme.</p>
  <h5>🧑‍🚒 Povolání</h5><p>${jn} lidí se stejným povoláním v jedné obci = vlastní budova.</p><div class="jobsG">${GAME.jobs().map(j=>`<span>${j.e} ${esc(j.n)} <small>→ ${esc(j.b)}</small></span>`).join("")}</div>
- <h5>🏗️ Nápad dne</h5><p>Napiš pod reel, co má obec postavit. Nejlajkovanější nápad se postaví i s cedulí a tvým nickem.</p>
+ <h5>🏗️ Nápad dne</h5><p>Napiš pod reel, co má obec postavit, nebo co má Praha a my ne (metro, zoo…). Nejlajkovanější nápad se postaví i s cedulí a tvým nickem.</p>
  <a class="cta" href="${IG}" target="_blank" rel="noopener">Hrát na Instagramu</a>
- <p class="fine">Nechceš být ve hře? Napiš nám DM a domek odstraníme. Hra je jen pro zábavu, bez cen. Mapa © OpenStreetMap.</p>`}
+ <p class="fine">Nechceš být ve hře? Napiš nám DM a domek odstraníme. Hra je fikce a zábava, žádné reálné slučování obcí, bez cen. Mapa © OpenStreetMap.</p>`}
 
 /* ---------- karta obce ---------- */
 let curTown=null;
