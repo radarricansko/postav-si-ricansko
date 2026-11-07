@@ -139,7 +139,7 @@ function renderTown(){document.body.classList.toggle("card-open",!!curTown||info
  <div class="tStats"><div><b>${t.players}</b><span>obyvatel</span></div><div><b>${t.specials.length}</b><span>staveb</span></div><div><b>${alive?(nt?nt.to-t.players:"✓"):rv-t.players}</b><span>${alive?(nt?nt.lab:"max. liga"):"do oživení"}</span></div></div>
  ${t.crown?`<p class="note gold">👑 <b>Koruna týdne!</b> Největší přírůstek za 7 dní (+${t.weekGain}). Udrží ji do neděle?</p>`:""}
  ${alive?"":`<p class="note">🏚️ V obci stojí ${t.abandoned} ${plural(t.abandoned,"opuštěný dům","opuštěné domy","opuštěných domů")}. Každý nový obyvatel jeden opraví. Při ${rv} obyvatelích obec ožije!</p>`}
- ${t.full?`<p class="note">🏘️ Obec je plná – všech ${t.cap} parcel je zastavěných. Nové obyvatele pošlete k sousedům, ať se obce spojí.</p>`:""}
+ ${t.full?`<p class="note">🏘️ Obec je nabitá k prasknutí (${t.cap} parcel) – další domky se vejdou jen po zahuštění.</p>`:""}
  ${t.linked&&t.linked.length?`<p class="note">🤝 Spojeno s: <b>${t.linked.map(esc).join(", ")}</b></p>`:""}
  ${ser.length>1&&t.players?`<canvas id="tSpark" height="54"></canvas>`:""}
  ${t.jobs&&t.jobs.length?`<div class="jobs">${t.jobs.map(j=>`<div class="job"><span>${j.e} ${esc(j.n)}</span><span class="jb"><i style="width:${Math.min(100,j.c/j.need*100)}%"></i></span><small>${j.built?"✓ "+esc(j.b):j.c+"/"+j.need+" → "+esc(j.b)}</small></div>`).join("")}</div>`:""}

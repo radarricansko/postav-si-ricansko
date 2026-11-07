@@ -39,7 +39,7 @@ Hotové texty pro teaser a start, pravidla, šablony DM a denní rutina. Fáze a
 
 **Připnutý komentář (pravidla):**
 
-> 📌 Pravidla: 1) Sleduj @radar_ricansko. 2) Napiš do komentářů jen název obce z ORP Říčany (52 obcí). 3) Jeden člověk = jeden domek, platí první komentář. 4) Obec se objeví, až má 5 obyvatelů; když je plná, pošli kamarády k sousedům – obce se pak na mapě spojí. 5) Na mapě se ukazuje tvůj IG nick. Nechceš ve hře být? Napiš nám DM a domek odstraníme. 6) Názvy staveb vybíráme z komentářů, sprosté a urážlivé neprojdou. Hra je jen pro zábavu, nejsou v ní žádné ceny a nic se doopravdy neslučuje 😄
+> 📌 Pravidla: 1) Sleduj @radar_ricansko. 2) Napiš do komentářů jen název obce z ORP Říčany (52 obcí). 3) Jeden člověk = jeden domek, platí první komentář. 4) Obec se objeví, až má 5 obyvatelů. Čím víc lidí, tím hustší zástavba – a když se dvě obce dotknou, spojí se ulicemi. 5) Na mapě se ukazuje tvůj IG nick. Nechceš ve hře být? Napiš nám DM a domek odstraníme. 6) Názvy staveb vybíráme z komentářů, sprosté a urážlivé neprojdou. Hra je jen pro zábavu, nejsou v ní žádné ceny a nic se doopravdy neslučuje 😄
 
 ## 3. Šablony DM
 
