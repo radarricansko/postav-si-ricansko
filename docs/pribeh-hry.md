@@ -1,24 +1,46 @@
-# Postav si Říčansko: příběh, vývoj a retence
+# Postav si Říčansko: stav projektu, příběh, vývoj a retence
 
-Verze 3 (7. 11. 2026): **Sjednocené Říčansko proti Praze, vypráví Pan Radar.** Teaser **čt 12. 11.**, start **po 16. 11.**, finále **čt 24. 12.** Hra běží na hlavním IG Radaru (cca 2 700 sledujících).
+Verze 3 (aktualizace 7. 11. 2026 odpoledne): **Sjednocené Říčansko, vypráví Pan Radar.** Teaser **čt 12. 11.**, start **po 16. 11.** Konec neplánujeme: hra může mít 10 dílů i 40, každý díl stojí sám za sebe. Hra běží na hlavním IG Radaru (cca 2 700 sledujících).
 
 **Pravidla v 1 řádku:** Dej follow a napiš do komentáře svou obec (52 obcí ORP Říčany), klidně i s povoláním („Mukařov hasič“). Dostaneš domek na 3D mapě se svým nickem a tvoje obec tím přispěje ke sjednocenému městu.
 
+---
+
+## Stav projektu (7. 11., 5 dní do teaseru)
+
+Hotovo = funguje a je otestované. Procenta jsou odhad, jak daleko je část k „můžeme spustit“.
+
+| # | Část | Stav | Hotovo | Zbývá | Blokuje |
+|---|---|---|---|---|---|
+| 1 | **Hra (web, 3D mapa)** | 🟢 90 % | Mapa z OSM, 52 obcí s erby a dominantami, domky s nicky, Náměstí sjednocení (katedrála, socha 52 mečů, renesanční domy, alej), Koruna týdne, povolání a stavby (stadion, nádraží, letiště, tvrz…), zahušťování obcí bez stropu, spojování ulic sousedů, filtr názvů, glass UI, mobil (1 prst pan, 2 prsty zoom), kompas, vyhledávání, Příběh/Jak hrát, admin režim, GitHub Pages | Test na mobilech kolegů; drobná kosmetika (velký trávník u řídkých obcí); vypnout zmínky o Vánocích; jméno města po anketě | – |
+| 2 | **Příběh a texty** | 🟡 70 % | Linka v3, Pan Radar, teaser + díl 1 (popisky, připnutý komentář, DM šablony), pravidla | Vyhodit finále z textů; scénáře dílů 2–7 (vrchol každého dílu, popichování obcí); 10 vět Pana Radara „do zásoby“; story anketa o název | Rozhodnutí o Praze jako soupeři (jen vtip, nebo osa) |
+| 3 | **Video** | 🟢 80 % | Cesta A: reel dne z hry automaticky v GitHub Actions (RADAR grafika, 1080×1920). Cesta C: 7 klipů + brief pro střih v Claudovi (24 min v CI). ElevenLabs klíč vložen | Ověřit hlas Pana Radara v reelu (test běží); šablona briefu → hotový reel; kontrola grafiky na mobilu | – |
+| 4 | **Komentáře → data** | 🔴 30 % | Make scénář (komentář → hráč + obec, aliasy 52 obcí, povolání, dedup, filtr nicků), scénář publikace world.json každé 2 h | **Propojení Instagramu**: Make nevidí FB stránku RADAR. Plán A: číst komentáře přímo z Instagram API v GitHub Actions (bez Make, bez FB stránky). Plán B: bookmarklet v prohlížeči | Meta oprávnění (Maty u počítače, 10–15 min) |
+| 5 | **Provoz a spuštění** | 🟡 50 % | Web na GitHub Pages, admin klíč, docs/spusteni.md (rutina 20 min denně), checklist | Vlastní adresa hra.radar-ricansko.cz (volitelné); zkušební post + test celé linky komentář → domek → reel; pravidla do highlightu; zaučení týmu | Část 4 |
+| 6 | **Komunita a růst** | 🟡 40 % | Plán aktivace (zakladatelé obcí, výzva s hodinami, pozvi souseda, partneři, obecní FB skupiny, hall of fame, story ankety) | Seznam FB skupin obcí (3 denně), oslovení partnerů (hasiči, fotbal, hospody), story šablony | – |
+
+**Co potřebuju od Matyho:** (a) Meta/Instagram oprávnění u počítače, (b) rozhodnutí: Praha jako soupeř jen vtip?, (c) kolegové na test mobilu.
+
+**Nejbližší milníky:** ne 9. 11. celá linka komentář → domek → reel otestovaná na zkušebním postu · út 11. 11. teaser hotový a schválený · čt 12. 11. teaser ven · po 16. 11. díl 1.
+
+---
+
 ## Linka v3: co se změnilo a proč
 
-**Premisa.** Říčansko má 52 obcí a dohromady víc lidí než leckteré okresní město, jen se to nikdy nespočítalo. Pan Radar (starší, klidný hlas, který „vidí celé Říčansko ze své věže“) vyhlásí sjednocení: uprostřed regionu, na poli mezi Strančicemi, Mnichovicemi a Klokočnou, vzniká **Náměstí sjednocení** s gotickou katedrálou a **sochou 52 mečů**, kolem které stojí 52 erbů. Každý erb svítí podle stavu obce: šedý = opuštěná, dřevo / stříbro / zlato / platina = liga. Cíl do Vánoc: **rozsvítit všech 52**.
+
+**Premisa.** Říčansko má 52 obcí a dohromady víc lidí než leckteré okresní město, jen se to nikdy nespočítalo. Pan Radar (starší, klidný hlas, který „vidí celé Říčansko ze své věže“) vyhlásí sjednocení: uprostřed regionu, na poli mezi Strančicemi, Mnichovicemi a Klokočnou, vzniká **Náměstí sjednocení** s gotickou katedrálou a **sochou 52 mečů**, kolem které stojí 52 erbů. Každý erb svítí podle stavu obce: šedý = opuštěná, dřevo / stříbro / zlato / platina = liga. Dlouhodobý cíl: **rozsvítit všech 52**, ale hra nemá pevný konec.
 
 **Soupeř: Praha.** Lidé navrhují, co má Praha a sjednocené město ještě ne (metro, zoo s pandami, letiště v Mukařově, stadion, univerzita…). Nejlajkovanější přání se postaví u náměstí, jakmile město dosáhne prahu obyvatel. Ukazatel **Město vs Praha** měří, co už jsme dohnali. Tón je vtipný, ne agresivní: Praha je soupeř, který nemůže odpovědět; nikdy ne nadávání na Pražáky (půlka sledujících tam studuje).
 
-**Obce zůstávají obcemi.** Každá má erb, ceduli, dominantu, domky s nicky, ligy, korunu týdne a povolání. Patriotismus je na dvou úrovních: *moje obec* (žebříček, koruna, hospoda) a *naše město* (socha, přání proti Praze). Mapa je **pevná** (nenafukuje se): když je obec plná, hra řekne, kde je volno. Když se dvě obce dotknou, jejich ulice se propojí.
+**Obce zůstávají obcemi.** Každá má erb, ceduli, dominantu, domky s nicky, ligy, korunu týdne a povolání. Patriotismus je na dvou úrovních: *moje obec* (žebříček, koruna, hospoda) a *naše město* (socha, přání proti Praze). Mapa je **pevná** (nenafukuje se): když obci dojde místo, zahustí se (užší parcely, nové uličky), takže každý vždy dostane domek. Když se dvě obce dotknou, jejich ulice se propojí.
 
-**Název města** určí anketa v 1. dílu (Říčansko / Velké Říčany / Město R / Radarov / Nové Říčany), nebo Maty.
+**Název města** určí anketa v 1. dílu (Říčansko / Velké Říčany / Město R / Radarov / Nové Říčany).
 
 **Hra je fikce.** Žádné reálné slučování obcí, žádná politika; jedna věta v pravidlech.
 
 **Co platí z v2 beze změny:** opuštěné obce (pod 5 obyvatel šedé domy, při 5 obec ožije), koruna týdne, povolání (5 stejných = budova), katalog staveb podle prahů, názvy staveb z komentářů s filtrem vulgarit, fáze příběhu (Probuzení → Rozmach → Svazky a Mikuláš → Zima → Vánoční trh → Finále), reel denně, Pan Radar jako vypravěč.
 
-**Konec hry s odměnou pro komunitu:** při 52/52 Radar natočí reálný díl „Jeden den ve sjednoceném Říčansku“ nebo udělá sraz na skutečném místě náměstí (pole u Klokočné). Rozhodne Maty.
+**Konec hry:** neplánujeme. Každý díl má vlastní vrchol (nová obec, koruna, stavba), socha s erby je jediná přesahová linka. Až hra skončí, poslední díl ukáže sochu a Pan Radar řekne „zatím končíme“. Odměna pro komunitu (reálný díl / sraz na poli u Klokočné) jen pokud to poběží dlouho. Fáze a finále v sekcích 2–3 níže jsou původní plán z v1 a berou se jako zásobník nápadů, ne harmonogram.
 
 ---
 
