@@ -1675,6 +1675,10 @@
           var tw = g.measureText(u.text).width + 56; g.fillStyle = C.acc; rr(g, -tw / 2, -40, tw, 80, 40); g.fill();
           g.beginPath(); g.moveTo(-16, 38); g.lineTo(16, 38); g.lineTo(0, 62); g.closePath(); g.fill();
           g.fillStyle = C.ink; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(u.text, 0, 2); g.restore();
+        } else if (u.k === 'flag') {         // státní vlajka (world.stat)
+          var fi = s._img && s._img.flag; if (fi) { var fw = u.w || 560, fh = fw * 2 / 3, fs2 = popS(p);
+            g.save(); g.globalAlpha = popA(p) * oa; g.translate(x, y); g.rotate(Math.sin(lt / 500) * 0.025); g.scale(fs2, fs2); g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 40; g.shadowOffsetY = 16;
+            g.fillStyle = '#fff'; rr(g, -fw / 2 - 8, -fh / 2 - 8, fw + 16, fh + 16, 18); g.fill(); g.shadowColor = 'transparent'; g.save(); rr(g, -fw / 2, -fh / 2, fw, fh, 12); g.clip(); g.drawImage(fi, -fw / 2, -fh / 2, fw, fh); g.restore(); g.restore(); }
         } else if (u.k === 'bubble') {       // komentář
           g.save(); bf(g, 46, 600); var lines = wrap(g, u.text, (u.w || 700) - 68);
           g.translate(x, y); g.scale(popS(p), popS(p)); g.translate(-x, -y);
@@ -1697,7 +1701,7 @@
     var scenes = (def.shots || []).map(function (sh, i, all) {
       var s = { type: 'shot', role: 'content', vo: sh.vo || '', cam: sh.cam, ui: sh.ui || [], add: sh.add || null, voStart: sh.voStart == null ? 60 : sh.voStart, noSubs: !!sh.noSubs, last: i === all.length - 1 };
       if (sh.dur) s.durFixed = sh.dur;
-      (s.ui || []).forEach(function (u) { if (u.k === 'end' && !u.handle) u.handle = opts.handle || ''; });
+      (s.ui || []).forEach(function (u) { if (u.k === 'end' && !u.handle) u.handle = opts.handle || ''; if (u.k === 'flag' && G() && G().stat && G().stat().svg) s.assets = { flag: G().stat().svg }; });
       return s;
     });
     var script = { version: 2, day: def.dil || 1, hook: 'dil', title: def.title || ('Postav si Říčansko · Díl ' + (def.dil || 1)), opts: opts, scenes: scenes };

@@ -1,0 +1,43 @@
+{
+ "den": "2026-11-16",
+ "uzaverka": "2026-11-16T16:00:00Z",
+ "dil": {
+  "id": "1",
+  "odkaz": ""
+ },
+ "hlasovani": {
+  "nazev": [
+   {
+    "text": "Radarie",
+    "body": 41,
+    "komentaru": 9,
+    "lajku": 32,
+    "autori": [
+     "kuba_ric3",
+     "bara_muk1"
+    ]
+   },
+   {
+    "text": "Říčanská republika",
+    "body": 28,
+    "komentaru": 6,
+    "lajku": 22,
+    "autori": [
+     "dan_mni2"
+    ]
+   }
+  ],
+  "vlajka": [
+   {
+    "text": "jelen, modrá, bílá a zelená",
+    "body": 33,
+    "komentaru": 4,
+    "lajku": 29,
+    "autori": [
+     "eliska_muk2"
+    ]
+   }
+  ]
+ },
+ "navrhy": []
+}

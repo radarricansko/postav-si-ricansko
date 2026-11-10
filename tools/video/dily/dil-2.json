@@ -1,0 +1,317 @@
+{
+ "dil": 2,
+ "title": "Postav si Říčansko · Díl 2: Máme jméno a vlajku",
+ "shots": [
+  {
+   "vo": "Den dva. Náš stát má jméno:",
+   "noSubs": true,
+   "cam": {
+    "at": "center",
+    "from": [
+     1500,
+     0.8,
+     0.3
+    ],
+    "to": [
+     900,
+     0.62,
+     0.55
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "DEN 2",
+     "y": 470,
+     "at": 80,
+     "solid": true
+    },
+    {
+     "k": "title",
+     "text": "Náš stát má jméno",
+     "y": 640,
+     "size": 86,
+     "at": 250
+    }
+   ]
+  },
+  {
+   "vo": "{{stat}}!",
+   "kdyz": "stat",
+   "noSubs": true,
+   "dur": 1900,
+   "cam": {
+    "at": "center",
+    "from": [
+     150,
+     0.5,
+     0.3
+    ],
+    "to": [
+     100,
+     0.4,
+     0.6
+    ]
+   },
+   "ui": [
+    {
+     "k": "title",
+     "text": "{{stat}}",
+     "y": 620,
+     "size": 170,
+     "at": 60,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "vo": "A vlajku. Navrhl ji {{hlas_vlajka_autor_hlas}}.",
+   "kdyz": "stat,hlas_vlajka_autor",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     60,
+     0.3,
+     -0.7
+    ],
+    "to": [
+     40,
+     0.22,
+     -0.2
+    ]
+   },
+   "ui": [
+    {
+     "k": "flag",
+     "y": 600,
+     "w": 600,
+     "at": 150
+    },
+    {
+     "k": "chip",
+     "text": "navrhl {{hlas_vlajka_autor}}",
+     "y": 870,
+     "at": 900,
+     "size": 40
+    }
+   ],
+   "noSubs": true
+  },
+  {
+   "vo": "Za jediný den se nastěhovalo {{pocet}} lidí.",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     260,
+     0.7,
+     0.6
+    ],
+    "to": [
+     170,
+     0.5,
+     1.1
+    ]
+   },
+   "ui": [
+    {
+     "k": "num",
+     "num": "{{pocet}}",
+     "label": "obyvatel za první den",
+     "y": 560,
+     "w": 620,
+     "at": 200
+    }
+   ]
+  },
+  {
+   "vo": "{{zakl_obec}} založili {{zakl_1_hlas}}, {{zakl_2_hlas}} a {{zakl_3_hlas}}.",
+   "kdyz": "zakl_obec,zakl_3",
+   "cam": {
+    "at": "slot:{{zakl_obec}}:1",
+    "from": [
+     40,
+     0.42,
+     0.4
+    ],
+    "to": [
+     26,
+     0.3,
+     1.0
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "ZAKLADATELÉ · {{zakl_obec}}",
+     "y": 440,
+     "at": 100,
+     "solid": true,
+     "size": 40
+    },
+    {
+     "k": "tag",
+     "text": "{{zakl_1}}",
+     "x": 330,
+     "y": 640,
+     "at": 900
+    },
+    {
+     "k": "tag",
+     "text": "{{zakl_2}}",
+     "x": 760,
+     "y": 760,
+     "at": 1500
+    },
+    {
+     "k": "tag",
+     "text": "{{zakl_3}}",
+     "x": 420,
+     "y": 900,
+     "at": 2100
+    }
+   ],
+   "noSubs": true
+  },
+  {
+   "vo": "Největší obec? {{top1}}. Bere korunu.",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     90,
+     0.45,
+     2.2
+    ],
+    "to": [
+     62,
+     0.34,
+     2.8
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "KORUNA · {{top1}} · {{top1_n}} obyvatel",
+     "y": 470,
+     "at": 200,
+     "size": 46,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "vo": "Jenže stát, kde nic není, je jenom pole.",
+   "cam": {
+    "at": "lm:{{prazdna}}",
+    "from": [
+     220,
+     0.3,
+     0.4
+    ],
+    "to": [
+     150,
+     0.24,
+     0.9
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "{{prazdna}}: 0 obyvatel",
+     "y": 480,
+     "at": 300,
+     "size": 40
+    }
+   ]
+  },
+  {
+   "vo": "Co postavíme první? Metro? Stadion? Obří hrad?",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     330,
+     0.75,
+     -0.4
+    ],
+    "to": [
+     240,
+     0.6,
+     0.1
+    ]
+   },
+   "ui": [
+    {
+     "k": "stamp",
+     "text": "METRO?",
+     "x": 330,
+     "y": 520,
+     "size": 78,
+     "at": 900,
+     "rot": -0.08
+    },
+    {
+     "k": "stamp",
+     "text": "STADION?",
+     "x": 740,
+     "y": 690,
+     "size": 78,
+     "at": 1600,
+     "rot": 0.06
+    },
+    {
+     "k": "stamp",
+     "text": "OBŘÍ HRAD?",
+     "x": 480,
+     "y": 870,
+     "size": 78,
+     "at": 2300,
+     "rot": -0.04
+    }
+   ]
+  },
+  {
+   "vo": "Napiš nápad. Ten s nejvíc lajky zítra stojí.",
+   "noSubs": true,
+   "dur": 3600,
+   "cam": {
+    "at": "center",
+    "from": [
+     700,
+     0.8,
+     1.2
+    ],
+    "to": [
+     900,
+     0.85,
+     1.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "end",
+     "at": 0,
+     "lines": [
+      {
+       "text": "nápad - …",
+       "big": true,
+       "size": 110
+      },
+      {
+       "text": "Nejvíc lajků = zítra stojí",
+       "big": true,
+       "size": 64,
+       "solid": true
+      },
+      {
+       "text": "Hlasuj do 17:00",
+       "size": 46
+      },
+      {
+       "text": "#PostavSiŘíčansko",
+       "size": 40
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

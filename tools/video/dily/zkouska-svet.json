@@ -1,0 +1,553 @@
+{
+ "verze": 1,
+ "revize": 2,
+ "den_hry": 2,
+ "aktualizovano": "2026-11-07T18:42:00Z",
+ "obce": [
+  {
+   "id": "ricany",
+   "nazev": "Říčany",
+   "pocet_hracu": 17,
+   "hraci": [
+    {
+     "ig": "petr_ric5",
+     "cislo_obyvatele": 1,
+     "datum": "2026-11-16T08:27:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "verca_ric3",
+     "cislo_obyvatele": 2,
+     "datum": "2026-11-16T08:34:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "adam_ric4",
+     "cislo_obyvatele": 3,
+     "datum": "2026-11-16T08:44:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "klara_ric10",
+     "cislo_obyvatele": 4,
+     "datum": "2026-11-16T08:58:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "tomas_ric6",
+     "cislo_obyvatele": 5,
+     "datum": "2026-11-16T09:40:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "verca_ric8",
+     "cislo_obyvatele": 6,
+     "datum": "2026-11-16T09:53:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "vojta_ric16",
+     "cislo_obyvatele": 7,
+     "datum": "2026-11-16T10:16:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "vojta_ric1",
+     "cislo_obyvatele": 8,
+     "datum": "2026-11-16T10:32:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "kuba_ric2",
+     "cislo_obyvatele": 9,
+     "datum": "2026-11-16T11:05:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "adam_ric9",
+     "cislo_obyvatele": 10,
+     "datum": "2026-11-16T11:19:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "tomas_ric7",
+     "cislo_obyvatele": 11,
+     "datum": "2026-11-16T11:23:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "adam_ric17",
+     "cislo_obyvatele": 12,
+     "datum": "2026-11-16T12:14:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "vojta_ric15",
+     "cislo_obyvatele": 13,
+     "datum": "2026-11-16T12:21:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "kuba_ric13",
+     "cislo_obyvatele": 14,
+     "datum": "2026-11-16T12:35:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "adam_ric11",
+     "cislo_obyvatele": 15,
+     "datum": "2026-11-16T12:56:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "adam_ric12",
+     "cislo_obyvatele": 16,
+     "datum": "2026-11-16T15:25:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "kuba_ric14",
+     "cislo_obyvatele": 17,
+     "datum": "2026-11-16T15:38:00Z",
+     "odznaky": []
+    }
+   ],
+   "specialni_budovy": []
+  },
+  {
+   "id": "mukarov",
+   "nazev": "Mukařov",
+   "pocet_hracu": 12,
+   "hraci": [
+    {
+     "ig": "niki_muk11",
+     "cislo_obyvatele": 1,
+     "datum": "2026-11-16T08:38:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "tomas_muk4",
+     "cislo_obyvatele": 2,
+     "datum": "2026-11-16T08:45:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "adam_muk2",
+     "cislo_obyvatele": 3,
+     "datum": "2026-11-16T08:48:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "verca_muk6",
+     "cislo_obyvatele": 4,
+     "datum": "2026-11-16T09:36:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "anet_muk1",
+     "cislo_obyvatele": 5,
+     "datum": "2026-11-16T10:24:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "klara_muk9",
+     "cislo_obyvatele": 6,
+     "datum": "2026-11-16T10:49:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "filip_muk7",
+     "cislo_obyvatele": 7,
+     "datum": "2026-11-16T11:20:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "honza_muk8",
+     "cislo_obyvatele": 8,
+     "datum": "2026-11-16T11:38:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "filip_muk12",
+     "cislo_obyvatele": 9,
+     "datum": "2026-11-16T12:06:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "sara_muk5",
+     "cislo_obyvatele": 10,
+     "datum": "2026-11-16T12:25:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "terka_muk3",
+     "cislo_obyvatele": 11,
+     "datum": "2026-11-16T13:00:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "klara_muk10",
+     "cislo_obyvatele": 12,
+     "datum": "2026-11-16T14:13:00Z",
+     "odznaky": []
+    }
+   ],
+   "specialni_budovy": []
+  },
+  {
+   "id": "mnichovice",
+   "nazev": "Mnichovice",
+   "pocet_hracu": 9,
+   "hraci": [
+    {
+     "ig": "lucka_mni3",
+     "cislo_obyvatele": 1,
+     "datum": "2026-11-16T08:55:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "misa_mni5",
+     "cislo_obyvatele": 2,
+     "datum": "2026-11-16T09:11:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "filip_mni4",
+     "cislo_obyvatele": 3,
+     "datum": "2026-11-16T09:17:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "terka_mni9",
+     "cislo_obyvatele": 4,
+     "datum": "2026-11-16T10:39:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "tomas_mni6",
+     "cislo_obyvatele": 5,
+     "datum": "2026-11-16T11:18:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "tomas_mni2",
+     "cislo_obyvatele": 6,
+     "datum": "2026-11-16T12:46:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "niki_mni1",
+     "cislo_obyvatele": 7,
+     "datum": "2026-11-16T13:42:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "adam_mni7",
+     "cislo_obyvatele": 8,
+     "datum": "2026-11-16T13:59:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "filip_mni8",
+     "cislo_obyvatele": 9,
+     "datum": "2026-11-16T14:10:00Z",
+     "odznaky": []
+    }
+   ],
+   "specialni_budovy": []
+  },
+  {
+   "id": "strancice",
+   "nazev": "Strančice",
+   "pocet_hracu": 8,
+   "hraci": [
+    {
+     "ig": "niki_str5",
+     "cislo_obyvatele": 1,
+     "datum": "2026-11-16T08:28:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "dan_str7",
+     "cislo_obyvatele": 2,
+     "datum": "2026-11-16T10:13:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "tomas_str4",
+     "cislo_obyvatele": 3,
+     "datum": "2026-11-16T11:42:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "adam_str1",
+     "cislo_obyvatele": 4,
+     "datum": "2026-11-16T12:39:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "honza_str6",
+     "cislo_obyvatele": 5,
+     "datum": "2026-11-16T13:04:00Z",
+     "odznaky": []
+    },
+    {
+     "ig": "tomas_str2",
+     "cislo_obyvatele": 6,
+     "datum": "2026-11-16T14:14:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "ondra_str3",
+     "cislo_obyvatele": 7,
+     "datum": "2026-11-16T14:34:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "terka_str8",
+     "cislo_obyvatele": 8,
+     "datum": "2026-11-16T14:56:00Z",
+     "odznaky": []
+    }
+   ],
+   "specialni_budovy": []
+  },
+  {
+   "id": "svetice",
+   "nazev": "Světice",
+   "pocet_hracu": 6,
+   "hraci": [
+    {
+     "ig": "honza_sve1",
+     "cislo_obyvatele": 1,
+     "datum": "2026-11-16T08:10:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "kuba_sve3",
+     "cislo_obyvatele": 2,
+     "datum": "2026-11-16T08:55:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "klara_sve5",
+     "cislo_obyvatele": 3,
+     "datum": "2026-11-16T09:00:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "niki_sve4",
+     "cislo_obyvatele": 4,
+     "datum": "2026-11-16T09:42:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "sara_sve2",
+     "cislo_obyvatele": 5,
+     "datum": "2026-11-16T10:47:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "misa_sve6",
+     "cislo_obyvatele": 6,
+     "datum": "2026-11-16T11:07:00Z",
+     "odznaky": []
+    }
+   ],
+   "specialni_budovy": []
+  },
+  {
+   "id": "tehov",
+   "nazev": "Tehov",
+   "pocet_hracu": 5,
+   "hraci": [
+    {
+     "ig": "honza_teh1",
+     "cislo_obyvatele": 1,
+     "datum": "2026-11-16T08:37:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "ondra_teh2",
+     "cislo_obyvatele": 2,
+     "datum": "2026-11-16T11:08:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "terka_teh5",
+     "cislo_obyvatele": 3,
+     "datum": "2026-11-16T13:32:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "ondra_teh4",
+     "cislo_obyvatele": 4,
+     "datum": "2026-11-16T14:46:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "lucka_teh3",
+     "cislo_obyvatele": 5,
+     "datum": "2026-11-16T14:55:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    }
+   ],
+   "specialni_budovy": []
+  },
+  {
+   "id": "kamenice",
+   "nazev": "Kamenice",
+   "pocet_hracu": 4,
+   "hraci": [
+    {
+     "ig": "vojta_kam3",
+     "cislo_obyvatele": 1,
+     "datum": "2026-11-16T08:39:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "klara_kam4",
+     "cislo_obyvatele": 2,
+     "datum": "2026-11-16T09:49:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "dan_kam1",
+     "cislo_obyvatele": 3,
+     "datum": "2026-11-16T13:20:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "vojta_kam2",
+     "cislo_obyvatele": 4,
+     "datum": "2026-11-16T15:30:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    }
+   ],
+   "specialni_budovy": []
+  },
+  {
+   "id": "ondrejov",
+   "nazev": "Ondřejov",
+   "pocet_hracu": 2,
+   "hraci": [
+    {
+     "ig": "adam_ond1",
+     "cislo_obyvatele": 1,
+     "datum": "2026-11-16T08:05:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    },
+    {
+     "ig": "niki_ond2",
+     "cislo_obyvatele": 2,
+     "datum": "2026-11-16T09:25:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    }
+   ],
+   "specialni_budovy": []
+  },
+  {
+   "id": "senohraby",
+   "nazev": "Senohraby",
+   "pocet_hracu": 1,
+   "hraci": [
+    {
+     "ig": "lucka_sen1",
+     "cislo_obyvatele": 1,
+     "datum": "2026-11-16T08:01:00Z",
+     "odznaky": [
+      "zakladatel"
+     ]
+    }
+   ],
+   "specialni_budovy": []
+  }
+ ],
+ "navrhy_dne": [],
+ "log_udalosti": [],
+ "stat": {
+  "nazev": "Radarie",
+  "datum": "2026-11-16T18:30:00Z",
+  "vlajka": {
+   "pruhy": [
+    "#2F4AA8",
+    "#ffffff",
+    "#C6FF3D"
+   ],
+   "smer": "h",
+   "symbol": "🦌"
+  }
+ }
+}
