@@ -2446,7 +2446,15 @@
       // nech hru přejít na virtuální rAF (její aktuální callback ještě čeká na skutečný snímek)
       return vc.waitReal(2).then(function () {
         // průchod scénami před `start` (enter efekty kamery), bez vykreslování
-        if (t0 > 0) for (var tt = 0; tt < t0; tt += step) { vc.t = tt; var s0 = sceneAt(tt); if (s0.idx !== R.idx) { R.idx = s0.idx; enterScene(s0); } vc.fire(); vc.tick(); }
+        // hrubě (po ~0,4 s), ale každá scéna se spustí přesně na svém prvním snímku, takže stav je stejný jako při souvislém renderu
+        if (t0 > 0) {
+          var skipN = Math.max(1, Math.round((o.skipStep || 400) / step)), nf = Math.round(t0 / step), enterAt = {};
+          script.scenes.forEach(function (sx) { enterAt[Math.ceil(sx.t0 / step - 1e-6)] = 1; });
+          for (var kf = 0; kf < nf; kf++) {
+            if (kf % skipN && !enterAt[kf] && kf < nf - 2) continue;
+            var tt = kf * step; vc.t = tt; var s0 = sceneAt(tt); if (s0.idx !== R.idx) { R.idx = s0.idx; enterScene(s0); } vc.fire(); vc.tick();
+          }
+        }
         function next() {
           if (i >= n) return Promise.resolve(i);
           var t = t0 + i * step; vc.t = t;

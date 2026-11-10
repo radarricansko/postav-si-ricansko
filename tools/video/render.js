@@ -1,4 +1,5 @@
 /* Noční render reelu „Postav si Říčansko“ (headless Chromium + ffmpeg).
+ *   Rychlý render po částech (dil.yml): --voice-out soubor (jen hlas) · --voice-in soubor --part k/P (jen snímky části k z P) · --voice-in soubor --mux (zvuk + složení)
  *   node tools/video/render.js --dil N [--sheet]     díl podle scénáře tools/video/dily/dil-N.json (--sheet = jen náhledové snímky po 0,5 s)
  *   node tools/video/render.js [--out out/] [--day N] [--data world.json] [--handle @radar_ricansko] [--scale 0.5] [--fps 30] [--frames N]
  * Env: ELEVENLABS_API_KEY (volitelně, hlas), ELEVENLABS_VOICE_ID (ID hlasu z Voice Library), ELEVENLABS_MODEL (default eleven_multilingual_v2)
@@ -61,19 +62,30 @@ function splitTake(mp3,texts){const tmp=path.join(OUT,'take.mp3');fs.writeFileSy
  const tag=def?`dil-${DIL}`:`reel-den-${info.day}`;fs.writeFileSync(path.join(OUT,tag+'.srt'),script.vo.srt);fs.writeFileSync(path.join(OUT,tag+'.txt'),script.vo.text);
  console.log('hook:',script.hook,'scény:',script.scenes.join(' › '));
  /* hlas po segmentech */
- const segs=script.vo.segments||[];let voiced=0;if((process.env.ELEVENLABS_API_KEY||process.env.GEMINI_API_KEY)&&segs.length&&!SHEET){let clips=[];
+ const VIN=arg('voice-in'),VOUT=arg('voice-out'),PART=arg('part'),MUX=process.argv.includes('--mux');const vin=VIN&&fs.existsSync(VIN)?JSON.parse(fs.readFileSync(VIN,'utf8')):null;
+ const segs=script.vo.segments||[];let voiced=0;if((vin||process.env.ELEVENLABS_API_KEY||process.env.GEMINI_API_KEY)&&segs.length&&!SHEET){let clips=vin?vin.clips||[]:[];if(vin){voiced=clips.filter(Boolean).length;ttsVia=vin.via||''}
+  if(!vin){
   if(def&&process.env.GEMINI_API_KEY&&GEM){const take=await GEM.tts(segs.map(s=>s.text).join(' '),{zive:true,tempo:+process.env.GEMINI_TEMPO||1.06});const parts=take?splitTake(take,segs.map(s=>s.text)):null;if(parts){clips=parts.map(b=>b.toString('base64'));voiced=parts.length;ttsVia='Gemini (jeden zátah)'}}
-  if(!clips.length)for(const s of segs){const buf=await tts(s.text);clips.push(buf?buf.toString('base64'):null);if(buf)voiced++}
-  await p.evaluate(async clips=>{const blobs=clips.map(c=>c?new Blob([Uint8Array.from(atob(c),ch=>ch.charCodeAt(0))],{type:'audio/mpeg'}):null);await REEL.setVoiceSegments(window.__script,blobs,{padMs:window.__script.hook==='dil'?0:80})},clips);
-  console.log('hlas: segmentů',voiced,'/',segs.length)}else console.log('hlas: bez ElevenLabs (chybí ELEVENLABS_API_KEY) – video bude jen s hudbou, text je v .txt/.srt');
+  if(!clips.length)for(const s of segs){const buf=await tts(s.text);clips.push(buf?buf.toString('base64'):null);if(buf)voiced++}}
+  if(VOUT){fs.writeFileSync(VOUT,JSON.stringify({clips,via:ttsVia}));console.log('hlas uložen:',VOUT,'segmentů',voiced,'/',segs.length,ttsVia);await b.close();srv.close();return}
+  if(clips.some(Boolean))  await p.evaluate(async clips=>{const blobs=clips.map(c=>c?new Blob([Uint8Array.from(atob(c),ch=>ch.charCodeAt(0))],{type:'audio/mpeg'}):null);await REEL.setVoiceSegments(window.__script,blobs,{padMs:window.__script.hook==='dil'?0:80})},clips);
+  console.log('hlas: segmentů',voiced,'/',segs.length)}else if(VOUT){fs.writeFileSync(VOUT,JSON.stringify({clips:[],via:''}));console.log('hlas: žádný klíč, video bude bez hlasu');await b.close();srv.close();return}else console.log('hlas: bez ElevenLabs (chybí ELEVENLABS_API_KEY) – video bude jen s hudbou, text je v .txt/.srt');
  fs.writeFileSync(path.join(OUT,tag+'.json'),JSON.stringify(await p.evaluate(()=>window.__script),null,1));
  /* snímky */
  if(SHEET){const sd=path.join(OUT,'sheet');fs.rmSync(sd,{recursive:true,force:true});fs.mkdirSync(sd);await p.exposeFunction('__sheet',(i,b64)=>fs.writeFileSync(path.join(sd,String(i).padStart(3,'0')+'.jpg'),Buffer.from(b64,'base64')));
   const n=await p.evaluate(()=>REEL.frames(window.__script,{fps:2,each:async(cv,t,i)=>{await window.__sheet(i,cv.toDataURL('image/jpeg',.8).slice(23))}}));console.log('náhledů:',n,'délka',(script.total/1000).toFixed(1),'s');await b.close();srv.close();return}
- const fdir=path.join(OUT,'frames');fs.rmSync(fdir,{recursive:true,force:true});fs.mkdirSync(fdir);
- await p.exposeFunction('__frame',(i,b64)=>fs.writeFileSync(path.join(fdir,String(i).padStart(5,'0')+'.jpg'),Buffer.from(b64,'base64')));
- const t0=Date.now();const n=await p.evaluate(async([fps,maxf])=>REEL.frames(window.__script,{fps,end:maxf?maxf*1000/fps:undefined,each:async(cv,t,i)=>{const d=cv.toDataURL('image/jpeg',.92).slice(23);await window.__frame(i,d);if(i%30===0)console.log('frame',i,t|0)}}),[FPS,MAXF]);console.log('render',((Date.now()-t0)/1000).toFixed(0),'s');
- console.log('snímků:',n);
+ const fdir=path.join(OUT,'frames');if(!MUX){fs.rmSync(fdir,{recursive:true,force:true});fs.mkdirSync(fdir)}
+ let n=0;const t0=Date.now();
+ if(PART){ /* jen část k z P: hranice na začátcích záběrů, čísla snímků průběžná přes celé video */
+  const [k,P]=PART.split('/').map(Number);const sc=await p.evaluate(()=>({total:window.__script.total,t0:window.__script.scenes.map(s=>s.t0)}));const step=1000/FPS;
+  const B=[0];for(let j=1;j<P;j++){const T=sc.total*j/P;const c=sc.t0.filter(t=>t>B[B.length-1]).sort((a,b)=>Math.abs(a-T)-Math.abs(b-T))[0];B.push(c==null?sc.total:c)}B.push(sc.total);
+  const i0=Math.max(0,Math.ceil(B[k]/step-1e-6)),i1=Math.ceil(B[k+1]/step-1e-6);console.log('část',k,'/',P,'snímky',i0,'–',i1-1,'z',Math.ceil(sc.total/step));
+  await p.exposeFunction('__frame',(i,b64)=>fs.writeFileSync(path.join(fdir,String(i).padStart(5,'0')+'.jpg'),Buffer.from(b64,'base64')));
+  if(i1>i0)n=await p.evaluate(async([fps,i0,i1])=>REEL.frames(window.__script,{fps,start:i0*1000/fps,end:i1*1000/fps,each:async(cv,t,i)=>{await window.__frame(i0+i,cv.toDataURL('image/jpeg',.92).slice(23));if(i%30===0)console.log('frame',i0+i,t|0)}}),[FPS,i0,i1]);
+  console.log('snímků:',n,'za',((Date.now()-t0)/1000).toFixed(0),'s');await b.close();srv.close();return}
+ if(!MUX){await p.exposeFunction('__frame',(i,b64)=>fs.writeFileSync(path.join(fdir,String(i).padStart(5,'0')+'.jpg'),Buffer.from(b64,'base64')));
+ n=await p.evaluate(async([fps,maxf])=>REEL.frames(window.__script,{fps,end:maxf?maxf*1000/fps:undefined,each:async(cv,t,i)=>{const d=cv.toDataURL('image/jpeg',.92).slice(23);await window.__frame(i,d);if(i%30===0)console.log('frame',i,t|0)}}),[FPS,MAXF]);console.log('render',((Date.now()-t0)/1000).toFixed(0),'s');
+ console.log('snímků:',n)}else console.log('skládám snímky z',fdir,'(',fs.readdirSync(fdir).length,')');
  /* audio (OfflineAudioContext) */
  const wav=await p.evaluate(async()=>{const bl=await REEL.renderAudio(window.__script);const ab=await bl.arrayBuffer();let s='';const u=new Uint8Array(ab);for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)});
  const wavPath=path.join(OUT,tag+'.wav');fs.writeFileSync(wavPath,Buffer.from(wav,'base64'));

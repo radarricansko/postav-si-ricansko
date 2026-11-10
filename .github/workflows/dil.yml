@@ -1,0 +1,101 @@
+name: Díl (rychlý render po částech)
+# Hlas → 6 strojů zároveň kreslí každý svou část snímků → složení. Místo ~45 minut zhruba čtvrt hodiny.
+on:
+  workflow_dispatch:
+    inputs:
+      dil:
+        description: "Číslo dílu (tools/video/dily/dil-N.json), např. 2 nebo 7b"
+        required: true
+      zkouska:
+        description: "Nanečisto: vymyšlená data místo skutečných komentářů"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+env:
+  DIL: ${{ inputs.dil }}
+  ZK: ${{ inputs.zkouska && '--data tools/video/dily/zkouska-svet.json --navrhy tools/video/dily/zkouska-navrhy.json' || '' }}
+jobs:
+  hlas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: npm i --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
+      - name: Čerstvé komentáře a stav k uzávěrce (world-dil.json)
+        if: ${{ !inputs.zkouska }}
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ vars.IG_USER_ID }}
+          POSTY_OD: ${{ vars.POSTY_OD }}
+          START_DATE: ${{ vars.START_DATE }}
+          UZAVERKA_HODINA: ${{ vars.UZAVERKA_HODINA }}
+        run: node tools/ig/komentare.js || echo "komentáře se nepodařilo načíst, renderuji z toho, co je v repu"
+      - name: Hlas (jeden zátah)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_VOICE: ${{ vars.GEMINI_VOICE || 'Sadaltager' }}
+          GEMINI_TEMPO: "1.06"
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: |
+          DATA="$([ -f world-dil.json ] && echo world-dil.json || echo world.json)"
+          node tools/video/render.js --dil "$DIL" --data "$DATA" $ZK --voice-out out/hlas.json --out out
+          # podklady, ze kterých kreslí všechny části stejně
+          mkdir -p podklady && cp out/hlas.json podklady/ && cp world.json podklady/ && (cp world-dil.json podklady/ 2>/dev/null || true) && (cp -r tools/ig/navrhy podklady/navrhy 2>/dev/null || true)
+      - uses: actions/upload-artifact@v4
+        with: { name: podklady, path: podklady/, retention-days: 3 }
+  snimky:
+    needs: hlas
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        cast: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm i --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
+      - uses: actions/download-artifact@v4
+        with: { name: podklady, path: podklady }
+      - name: Snímky části ${{ matrix.cast }}
+        run: |
+          cp podklady/world.json world.json; [ -f podklady/world-dil.json ] && cp podklady/world-dil.json world-dil.json; [ -d podklady/navrhy ] && mkdir -p tools/ig/navrhy && cp -r podklady/navrhy/. tools/ig/navrhy/
+          DATA="$([ -f world-dil.json ] && echo world-dil.json || echo world.json)"
+          node tools/video/render.js --dil "$DIL" --data "$DATA" $ZK --voice-in podklady/hlas.json --part "${{ matrix.cast }}/6" --out out
+      - uses: actions/upload-artifact@v4
+        with: { name: "snimky-${{ matrix.cast }}", path: out/frames/, retention-days: 1 }
+  slozit:
+    needs: snimky
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: npm i --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
+      - uses: actions/download-artifact@v4
+        with: { name: podklady, path: podklady }
+      - uses: actions/download-artifact@v4
+        with: { pattern: "snimky-*", path: out/frames, merge-multiple: true }
+      - name: Zvuk a složení
+        run: |
+          cp podklady/world.json world.json; [ -f podklady/world-dil.json ] && cp podklady/world-dil.json world-dil.json; [ -d podklady/navrhy ] && mkdir -p tools/ig/navrhy && cp -r podklady/navrhy/. tools/ig/navrhy/
+          DATA="$([ -f world-dil.json ] && echo world-dil.json || echo world.json)"
+          ls out/frames | wc -l
+          node tools/video/render.js --dil "$DIL" --data "$DATA" $ZK --voice-in podklady/hlas.json --mux --out out
+      - name: Video do větve previews
+        run: |
+          f=$(ls out/*.mp4 | head -1); n=$(basename "$f" .mp4)
+          ffmpeg -v error -y -i "$f" -vf "select='not(mod(n\,100))',scale=270:-1,tile=7x1" -frames:v 1 "out/$n-nahled.jpg"
+          git config user.name "RADAR bot"; git config user.email "radar.ricansko@gmail.com"
+          git checkout -q -- . ; git clean -fdq -e out -e nahledy -e node_modules
+          git fetch -q origin previews && git checkout -q -f previews
+          mkdir -p nahledy && cp "out/$n-nahled.jpg" "out/$n.txt" "$f" nahledy/ && git add nahledy && git commit -q -m "díl $n" && git push -q origin previews || echo "video nepushnuto"
+      - uses: actions/upload-artifact@v4
+        with: { name: dil, path: "out/*.mp4", retention-days: 14 }
