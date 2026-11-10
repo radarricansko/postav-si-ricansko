@@ -34,7 +34,13 @@ async function tts(text,opt={}){if(!KEY)return null;const voice=opt.voice||proce
     console.error('gemini',m,r.status,String(r.t).slice(0,200));break}}
   if(opt.model)break;if(pass===0&&!MODEL){list=(await findModels()).filter(x=>!MODELS.includes(x));if(!list.length)break;console.log('gemini: zkouším modely',list.join(', '))}}
  return null}
-module.exports={tts,ZIVE,model:()=>MODEL};
+/* Přepis krátkého zvuku zpět na text (kontrola, že střih hlasu sedí na věty). Vrací text nebo null. */
+const PREPIS_MODELY=(process.env.GEMINI_ASR_MODEL?[process.env.GEMINI_ASR_MODEL]:[]).concat(['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-2.0-flash']);let PREPIS_MODEL=null;
+async function prepis(mp3){if(!KEY||!mp3)return null;for(const m of(PREPIS_MODEL?[PREPIS_MODEL]:PREPIS_MODELY)){for(let a=0;a<4;a++){let r;try{r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`,{method:'POST',headers:{'x-goog-api-key':KEY,'content-type':'application/json'},
+   body:JSON.stringify({contents:[{parts:[{text:'Přepiš přesně, slovo od slova, co je v nahrávce řečeno česky. Vrať jen přepis, nic dalšího. Když v nahrávce nic nezazní, vrať prázdný řádek.'},{inlineData:{mimeType:'audio/mpeg',data:mp3.toString('base64')}}]}],generationConfig:{temperature:0}})})}catch(e){console.error('prepis: síť',e.message);await new Promise(z=>setTimeout(z,3000));continue}
+   const t=await r.text();if(r.ok){let j=null;try{j=JSON.parse(t)}catch(e){}PREPIS_MODEL=m;const p=((((j||{}).candidates||[])[0]||{}).content||{}).parts||[];return p.map(x=>x.text||'').join(' ').trim()}
+   if(r.status===429||r.status>=500){await new Promise(z=>setTimeout(z,6000*(a+1)));continue}console.error('prepis',m,r.status,t.slice(0,160).replace(/\s+/g,' '));break}}return null}
+module.exports={tts,prepis,ZIVE,model:()=>MODEL};
 if(require.main===module){(async()=>{if(!KEY){console.error('chybí GEMINI_API_KEY');process.exit(1)}
  const i=process.argv.indexOf('--out');const out=i>0?process.argv[i+1]:'out';fs.mkdirSync(out,{recursive:true});
  if(process.argv[2]==='zive'){ // ukázky „živě“: text dílu 1, režijní prompt, víc hlasů a modelů
