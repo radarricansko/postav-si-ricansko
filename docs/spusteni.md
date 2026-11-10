@@ -21,7 +21,7 @@ Scénář, hlas a popisek dílu 1 i dalších šesti dílů jsou v `pribeh-hry.m
 
 1. **9:00** vyjde naplánovaný reel. Popisek musí obsahovat `#PostavSiŘíčansko`, podle něj se díl pozná. Do půl hodiny se mapa na webu překlopí sama.
 2. **17:00** uzávěrka. Výsledky jsou v `tools/ig/navrhy/DATUM.json`, stačí napsat Claudovi „co vyhrálo“.
-3. **17:00–20:00** výběr vítěze (Maty schvaluje), stavba do mapy, kontrola náhledu `…/postav-si-ricansko/?data=world-dil.json`. Scénář dílu je `tools/video/dily/dil-N.json`, čísla a jména se do něj dosadí sama; render: Actions → „Denní reel a klipy“ → `dil` = číslo.
+3. **17:00–20:00** výběr vítěze (Maty schvaluje), stavba do mapy, kontrola náhledu `…/postav-si-ricansko/?data=world-dil.json`. Scénář dílu je `tools/video/dily/dil-N.json`, čísla a jména se do něj dosadí sama; render: Actions → „Díl (rychlý render po částech)“ → `dil` = číslo, hotovo zhruba za 20 minut.
 4. **Do 20:00** reel naplánovat v Instagramu na 9:00.
 
 ## 5. Před spuštěním
@@ -36,4 +36,5 @@ Scénář, hlas a popisek dílu 1 i dalších šesti dílů jsou v `pribeh-hry.m
 
 - **Web hry:** https://radarricansko.github.io/postav-si-ricansko/ Nasazuje se sám z repa při změně ve `web/`, `world-live.json` nebo `world-dil.json`.
 - **Komentáře:** Actions → „Komentáře → world.json“, běží každých 30 minut (ráno po 9:00 každých 10). Popis v `tools/ig/README.md`.
-- **Reel:** Actions → „Denní reel a klipy“, běží v 17:20 po uzávěrce, ručně přes Run workflow.
+- **Díl:** Actions → „Díl (rychlý render po částech)“, `dil` = číslo. Scénáře a návod: `tools/video/dily/`.
+- **Starý denní reel z dat:** Actions → „Denní reel a klipy“, běží sám v 17:20.

@@ -127,11 +127,11 @@ Drak a podobná fantasy ne.
 | Mapa | měřítko 1:1, obce rostou do skutečné krajiny, původní silnice zůstávají, čtvrti napojené spojkami, bez stropu na domky | případně postupné ulice v načatých blocích; rychlost renderu (les po dlaždicích) |
 | Hra | osada → ves → městys → město, Náměstí sjednocení, pravidla podle denního rytmu; název státu a vlajka připravené (`world.stat`, náhled `?stat=Název`), stožáry u návsí; mobil prošel základní kontrolou | funkce stupňů obce (čeká na rozhodnutí), doména |
 | Instagram → data | komentáře pod všemi díly, hlasy (název, vlajka, nápad, měna, jídlo), uzávěrka 17:00, web se mění jen s novým dílem; čtení ověřeno na ostrém účtu | první ostrý zápis pohlídat; platnost tokenu jde zjistit jen v Meta Business (systémový uživatel) |
-| Video | díly podle scénáře: `tools/video/dily/dil-N.json`, jedna věta = jeden záběr, hlas na jeden zátah (Sadaltager, živá režie); díl 1 první verze | výběr hlasu, doladění záběrů podle připomínek, render trvá v cloudu ~45 min |
+| Video | díly podle scénáře: `tools/video/dily/dil-N.json`, jedna věta = jeden záběr, hlas na jeden zátah (Sadaltager, živá režie); díl 1 hotový jako první verze, šablony dílů 2–7 se plní samy z dat; render po částech ~20 min | výběr hlasu, doladění záběrů podle připomínek |
 | Texty | příběh v4, 7 dílů, popisek dílu 1 | popisky dílů 2–7 den předem podle výsledků |
 | Provoz | web na GitHub Pages, admin | večer 17–20 nanečisto s vymyšlenými komentáři |
 
-Jak vyrobit díl: Actions → „Denní reel a klipy“ → Run workflow → `dil` = číslo. Video je pak ve větvi `previews`, soubor `nahledy/dil-N.mp4`.
+Jak vyrobit díl: Actions → „Díl (rychlý render po částech)“ → Run workflow → `dil` = číslo (se zaškrtnutým `zkouska` nanečisto na vymyšlených datech). Video je pak ve větvi `previews`, soubor `nahledy/dil-N.mp4`. Návod ke scénářům: `tools/video/dily/README.md`.
 
 ---
 

@@ -25,7 +25,8 @@ Co se dosadí, vypíše: `node tools/video/dil-data.js --dil 3`.
 
 ## Výroba
 
-- **Večer:** Actions → „Denní reel a klipy“ → Run workflow → `dil` = číslo. Video je pak ve větvi `previews`: `nahledy/dil-N.mp4`.
+- **Večer:** Actions → „Díl (rychlý render po částech)“ → Run workflow → `dil` = číslo. Šest strojů kreslí zároveň, hotovo je zhruba za 20 minut. Video je pak ve větvi `previews`: `nahledy/dil-N.mp4`.
+- **Zkouška nanečisto:** totéž se zaškrtnutým `zkouska` (vymyšlená data, žádný Instagram).
 - **Náhled bez hlasu (snímky po půl vteřině):** `node tools/video/render.js --dil 3 --sheet`.
 - **Nanečisto bez Instagramu:** `--data tools/video/dily/zkouska-svet.json --navrhy tools/video/dily/zkouska-navrhy.json` (64 vymyšlených lidí, stát „Radarie“, stavba, měna, jídlo).
 - Díl 7 má dva konce: `dil-7.json` (konec) a `dil-7b.json` (pokračování), spouští se jako `dil` = `7` nebo `7b`.
