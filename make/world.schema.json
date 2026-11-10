@@ -1,260 +1,302 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/radarricansko/postav-si-ricansko/world.schema.json",
-  "title": "Postav si Říčansko – world.json",
-  "description": "Stav herního světa. Generuje Make (scénář [NÁVRH] Postav si Říčansko) z data storu postav_obce; den_hry a navrhy_dne přebírá z předchozí verze souboru, log_udalosti doplňuje (max. 200 záznamů). Obce bez hráčů v poli obce chybět mohou – hra je doplní z obce.json. Úsporná varianta: world.json publikuje samostatný scénář každé 2 h; události novy_hrac do log_udalosti už automaticky nepřibývají – hra je odvodí z hraci[].datum.",
-  "type": "object",
-  "required": [
-    "verze",
-    "revize",
-    "den_hry",
-    "aktualizovano",
-    "obce",
-    "navrhy_dne",
-    "log_udalosti"
-  ],
-  "properties": {
-    "verze": {
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://github.com/radarricansko/postav-si-ricansko/world.schema.json",
+ "title": "Postav si Říčansko – world.json",
+ "description": "Stav herního světa. Generuje Make (scénář [NÁVRH] Postav si Říčansko) z data storu postav_obce; den_hry a navrhy_dne přebírá z předchozí verze souboru, log_udalosti doplňuje (max. 200 záznamů). Obce bez hráčů v poli obce chybět mohou – hra je doplní z obce.json. Úsporná varianta: world.json publikuje samostatný scénář každé 2 h; události novy_hrac do log_udalosti už automaticky nepřibývají – hra je odvodí z hraci[].datum.",
+ "type": "object",
+ "required": [
+  "verze",
+  "revize",
+  "den_hry",
+  "aktualizovano",
+  "obce",
+  "navrhy_dne",
+  "log_udalosti"
+ ],
+ "properties": {
+  "verze": {
+   "type": "integer",
+   "const": 1,
+   "description": "Verze schématu."
+  },
+  "revize": {
+   "type": "integer",
+   "minimum": 0,
+   "description": "Roste o 1 s každým zápisem z Make."
+  },
+  "den_hry": {
+   "type": "integer",
+   "minimum": 1,
+   "description": "Herní den – mění se ručně (nebo jiným scénářem)."
+  },
+  "aktualizovano": {
+   "type": "string",
+   "format": "date-time"
+  },
+  "podpis": {
+   "type": "string",
+   "description": "Otisk obsahu obcí (počet hráčů, budov, odznaků + md5 seznamu hráčů, cedulí a povolání). Scénář publikace podle něj pozná, že se nic nezměnilo, a nic necommituje. Smazání pole vynutí novou publikaci."
+  },
+  "obce": {
+   "type": "array",
+   "maxItems": 52,
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "nazev",
+     "pocet_hracu",
+     "hraci",
+     "specialni_budovy"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Slug z obce.json, např. kostelec-nad-cernymi-lesy."
+     },
+     "nazev": {
+      "type": "string"
+     },
+     "pocet_hracu": {
       "type": "integer",
-      "const": 1,
-      "description": "Verze schématu."
+      "minimum": 0
+     },
+     "hraci": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "ig",
+        "cislo_obyvatele",
+        "datum"
+       ],
+       "properties": {
+        "ig": {
+         "type": "string",
+         "pattern": "^[A-Za-z0-9._]{1,30}$",
+         "description": "IG username (bez @)."
+        },
+        "cislo_obyvatele": {
+         "type": "integer",
+         "minimum": 1,
+         "description": "Pořadí hráče v obci (1 = první obyvatel)."
+        },
+        "datum": {
+         "type": "string",
+         "format": "date-time"
+        },
+        "odznaky": {
+         "type": "array",
+         "items": {
+          "type": "string",
+          "enum": [
+           "prvni_v_obci",
+           "novacek",
+           "follow_overen",
+           "zakladatel",
+           "aktivni_tipar",
+           "vitez_dne"
+          ]
+         },
+         "uniqueItems": true
+        },
+        "povolani": {
+         "type": [
+          "string",
+          "null"
+         ],
+         "enum": [
+          "hasic",
+          "kuchar",
+          "hospodsky",
+          "prodavac",
+          "barista",
+          "fotbalista",
+          "sportovec",
+          "skejtak",
+          "ridic",
+          "strojvedouci",
+          "rybar",
+          "plavcik",
+          "ucitel",
+          "muzikant",
+          "hokejista",
+          "programator",
+          "filmar",
+          "turista",
+          "rytir",
+          "pilot",
+          "",
+          null
+         ],
+         "description": "Kanonický klíč povolání z komentáře (např. „Mukařov hasič“ → hasic). Nepovinné; chybí, \"\" nebo null = bez povolání (Make může prázdnou hodnotu propsat jako \"\" či null)."
+        }
+       },
+       "additionalProperties": false
+      }
+     },
+     "specialni_budovy": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "typ",
+        "nazev_cedule",
+        "datum"
+       ],
+       "properties": {
+        "typ": {
+         "type": "string",
+         "enum": [
+          "hospoda",
+          "hriste",
+          "kostel",
+          "skola",
+          "obchod",
+          "radnice",
+          "pamatka",
+          "sportoviste",
+          "jine"
+         ]
+        },
+        "nazev_cedule": {
+         "type": "string",
+         "maxLength": 40,
+         "description": "Text cedule – prochází stejným filtrem nevhodných slov jako jména."
+        },
+        "autor": {
+         "type": "string",
+         "description": "IG username autora návrhu nebo 'radar'."
+        },
+        "datum": {
+         "type": "string",
+         "format": "date-time"
+        }
+       },
+       "additionalProperties": false
+      }
+     }
     },
-    "revize": {
+    "additionalProperties": false
+   }
+  },
+  "navrhy_dne": {
+   "type": "array",
+   "description": "Návrhy (např. jakou speciální budovu postavit). Spravuje Radar ručně.",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "text"
+    ],
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "obec_id": {
+      "type": "string"
+     },
+     "text": {
+      "type": "string",
+      "maxLength": 140
+     },
+     "autor": {
+      "type": "string"
+     },
+     "hlasy": {
       "type": "integer",
-      "minimum": 0,
-      "description": "Roste o 1 s každým zápisem z Make."
-    },
-    "den_hry": {
-      "type": "integer",
-      "minimum": 1,
-      "description": "Herní den – mění se ručně (nebo jiným scénářem)."
-    },
-    "aktualizovano": {
+      "minimum": 0
+     },
+     "datum": {
       "type": "string",
       "format": "date-time"
-    },
-    "podpis": {
-      "type": "string",
-      "description": "Otisk obsahu obcí (počet hráčů, budov, odznaků + md5 seznamu hráčů, cedulí a povolání). Scénář publikace podle něj pozná, že se nic nezměnilo, a nic necommituje. Smazání pole vynutí novou publikaci."
-    },
-    "obce": {
-      "type": "array",
-      "maxItems": 52,
-      "items": {
-        "type": "object",
-        "required": [
-          "id",
-          "nazev",
-          "pocet_hracu",
-          "hraci",
-          "specialni_budovy"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[a-z0-9-]+$",
-            "description": "Slug z obce.json, např. kostelec-nad-cernymi-lesy."
-          },
-          "nazev": {
-            "type": "string"
-          },
-          "pocet_hracu": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "hraci": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "ig",
-                "cislo_obyvatele",
-                "datum"
-              ],
-              "properties": {
-                "ig": {
-                  "type": "string",
-                  "pattern": "^[A-Za-z0-9._]{1,30}$",
-                  "description": "IG username (bez @)."
-                },
-                "cislo_obyvatele": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "description": "Pořadí hráče v obci (1 = první obyvatel)."
-                },
-                "datum": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "odznaky": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "prvni_v_obci",
-                      "novacek",
-                      "follow_overen",
-                      "zakladatel",
-                      "aktivni_tipar",
-                      "vitez_dne"
-                    ]
-                  },
-                  "uniqueItems": true
-                },
-                "povolani": {
-                  "type": [
-                    "string",
-                    "null"
-                  ],
-                  "enum": [
-                    "hasic",
-                    "kuchar",
-                    "hospodsky",
-                    "prodavac",
-                    "barista",
-                    "fotbalista",
-                    "sportovec",
-                    "skejtak",
-                    "ridic",
-                    "strojvedouci",
-                    "rybar",
-                    "plavcik",
-                    "ucitel",
-                    "muzikant",
-                    "hokejista",
-                    "programator",
-                    "filmar",
-                    "turista",
-                    "rytir",
-                    "pilot",
-                    "",
-                    null
-                  ],
-                  "description": "Kanonický klíč povolání z komentáře (např. „Mukařov hasič“ → hasic). Nepovinné; chybí, \"\" nebo null = bez povolání (Make může prázdnou hodnotu propsat jako \"\" či null)."
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "specialni_budovy": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "typ",
-                "nazev_cedule",
-                "datum"
-              ],
-              "properties": {
-                "typ": {
-                  "type": "string",
-                  "enum": [
-                    "hospoda",
-                    "hriste",
-                    "kostel",
-                    "skola",
-                    "obchod",
-                    "radnice",
-                    "pamatka",
-                    "sportoviste",
-                    "jine"
-                  ]
-                },
-                "nazev_cedule": {
-                  "type": "string",
-                  "maxLength": 40,
-                  "description": "Text cedule – prochází stejným filtrem nevhodných slov jako jména."
-                },
-                "autor": {
-                  "type": "string",
-                  "description": "IG username autora návrhu nebo 'radar'."
-                },
-                "datum": {
-                  "type": "string",
-                  "format": "date-time"
-                }
-              },
-              "additionalProperties": false
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "navrhy_dne": {
-      "type": "array",
-      "description": "Návrhy (např. jakou speciální budovu postavit). Spravuje Radar ručně.",
-      "items": {
-        "type": "object",
-        "required": [
-          "id",
-          "text"
-        ],
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "obec_id": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string",
-            "maxLength": 140
-          },
-          "autor": {
-            "type": "string"
-          },
-          "hlasy": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "datum": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      }
-    },
-    "log_udalosti": {
-      "type": "array",
-      "maxItems": 200,
-      "items": {
-        "type": "object",
-        "required": [
-          "typ",
-          "datum"
-        ],
-        "properties": {
-          "typ": {
-            "type": "string",
-            "enum": [
-              "novy_hrac",
-              "nova_budova",
-              "zmena_obce",
-              "odebran_hrac",
-              "novy_den",
-              "vyhra_dne"
-            ]
-          },
-          "ig": {
-            "type": "string"
-          },
-          "obec_id": {
-            "type": "string"
-          },
-          "cislo_obyvatele": {
-            "type": "integer"
-          },
-          "text": {
-            "type": "string"
-          },
-          "datum": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      }
+     }
     }
+   }
   },
-  "additionalProperties": false
+  "log_udalosti": {
+   "type": "array",
+   "maxItems": 200,
+   "items": {
+    "type": "object",
+    "required": [
+     "typ",
+     "datum"
+    ],
+    "properties": {
+     "typ": {
+      "type": "string",
+      "enum": [
+       "novy_hrac",
+       "nova_budova",
+       "zmena_obce",
+       "odebran_hrac",
+       "novy_den",
+       "vyhra_dne"
+      ]
+     },
+     "ig": {
+      "type": "string"
+     },
+     "obec_id": {
+      "type": "string"
+     },
+     "cislo_obyvatele": {
+      "type": "integer"
+     },
+     "text": {
+      "type": "string"
+     },
+     "datum": {
+      "type": "string",
+      "format": "date-time"
+     }
+    }
+   }
+  },
+  "stat": {
+   "type": "object",
+   "description": "Nový stát: název a vlajka (vyplní se po dílu 1). datum = od kdy platí; na web se dostane až s dílem vydaným po tomto čase.",
+   "properties": {
+    "nazev": {
+     "type": "string",
+     "maxLength": 40
+    },
+    "datum": {
+     "type": "string"
+    },
+    "vlajka": {
+     "type": "object",
+     "properties": {
+      "svg": {
+       "type": "string",
+       "maxLength": 20000
+      },
+      "pruhy": {
+       "type": "array",
+       "maxItems": 6,
+       "items": {
+        "type": "string",
+        "pattern": "^#[0-9a-fA-F]{6}$"
+       }
+      },
+      "smer": {
+       "enum": [
+        "h",
+        "v"
+       ]
+      },
+      "symbol": {
+       "type": "string",
+       "maxLength": 8
+      }
+     },
+     "additionalProperties": false
+    }
+   },
+   "additionalProperties": false
+  }
+ },
+ "additionalProperties": false
 }

@@ -1,0 +1,293 @@
+{
+ "dil": 1,
+ "title": "Postav si Říčansko · Díl 1: Říčansko vyhlásilo nezávislost",
+ "data": "tools/video/dily/prazdny-svet.json",
+ "shots": [
+  {
+   "vo": "Co kdyby se Říčansko osamostatnilo?",
+   "cam": {
+    "at": "center",
+    "from": [
+     2300,
+     0.95,
+     0.2
+    ],
+    "to": [
+     1300,
+     0.7,
+     0.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "CO KDYBY…",
+     "y": 470,
+     "at": 80,
+     "solid": true
+    },
+    {
+     "k": "title",
+     "text": "Říčansko",
+     "y": 640,
+     "size": 150,
+     "at": 300
+    },
+    {
+     "k": "title",
+     "text": "se osamostatnilo?",
+     "y": 790,
+     "size": 84,
+     "at": 650
+    }
+   ]
+  },
+  {
+   "vo": "Tak jo. Od dneška jsme stát!",
+   "cam": {
+    "at": "center",
+    "from": [
+     150,
+     0.32,
+     0.9
+    ],
+    "to": [
+     95,
+     0.26,
+     1.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "stamp",
+     "text": "NOVÝ STÁT",
+     "y": 620,
+     "size": 92,
+     "at": 700
+    }
+   ]
+  },
+  {
+   "vo": "Dvaapadesát obcí, nula obyvatel,",
+   "cam": {
+    "at": "lm:Mukařov",
+    "from": [
+     130,
+     0.3,
+     -0.9
+    ],
+    "to": [
+     80,
+     0.2,
+     -0.3
+    ]
+   },
+   "ui": [
+    {
+     "k": "num",
+     "num": "52",
+     "label": "obcí",
+     "x": 300,
+     "y": 560,
+     "at": 150
+    },
+    {
+     "k": "num",
+     "num": "0",
+     "label": "obyvatel",
+     "x": 780,
+     "y": 560,
+     "at": 1000
+    }
+   ]
+  },
+  {
+   "vo": "žádný název a žádná vlajka. To je trochu málo.",
+   "cam": {
+    "at": "lm:Říčany",
+    "from": [
+     110,
+     0.36,
+     2.4
+    ],
+    "to": [
+     70,
+     0.24,
+     3.0
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "NÁZEV: ???",
+     "y": 500,
+     "at": 150,
+     "size": 54
+    },
+    {
+     "k": "chip",
+     "text": "VLAJKA: ???",
+     "y": 640,
+     "at": 1100,
+     "size": 54
+    }
+   ]
+  },
+  {
+   "vo": "Napiš do komentáře svou obec a máš tu domek se svým jménem.",
+   "cam": {
+    "at": "slot:Mukařov:0",
+    "from": [
+     34,
+     0.4,
+     0.5
+    ],
+    "to": [
+     20,
+     0.3,
+     1.0
+    ]
+   },
+   "add": {
+    "town": "Mukařov",
+    "n": 1,
+    "at": 1500
+   },
+   "ui": [
+    {
+     "k": "bubble",
+     "author": "ty",
+     "text": "Mukařov",
+     "y": 420,
+     "w": 560,
+     "at": 250
+    },
+    {
+     "k": "tag",
+     "text": "@tvoje_jmeno",
+     "y": 860,
+     "at": 2100
+    }
+   ]
+  },
+  {
+   "vo": "Prvních pět v každé obci jsou zakladatelé. Napořád.",
+   "cam": {
+    "at": "slot:Mukařov:2",
+    "from": [
+     44,
+     0.5,
+     1.0
+    ],
+    "to": [
+     60,
+     0.42,
+     1.7
+    ]
+   },
+   "add": {
+    "town": "Mukařov",
+    "n": 4,
+    "at": 300,
+    "every": 330
+   },
+   "ui": [
+    {
+     "k": "num",
+     "num": "5",
+     "label": "zakladatelů v každé obci",
+     "y": 520,
+     "w": 640,
+     "at": 200
+    },
+    {
+     "k": "stamp",
+     "text": "NAPOŘÁD",
+     "y": 760,
+     "size": 84,
+     "at": 2500
+    }
+   ]
+  },
+  {
+   "vo": "A rovnou rozhodni: jak se náš stát jmenuje? A co bude na vlajce?",
+   "cam": {
+    "at": "lm:Říčany",
+    "from": [
+     420,
+     0.75,
+     -0.4
+    ],
+    "to": [
+     300,
+     0.6,
+     0.1
+    ]
+   },
+   "ui": [
+    {
+     "k": "bubble",
+     "author": "ty",
+     "text": "název - …",
+     "y": 420,
+     "w": 640,
+     "at": 900
+    },
+    {
+     "k": "bubble",
+     "author": "ty",
+     "text": "vlajka - symbol, barvy",
+     "y": 720,
+     "w": 760,
+     "at": 2600,
+     "side": "right"
+    }
+   ]
+  },
+  {
+   "vo": "Hlasuje se do pěti.",
+   "noSubs": true,
+   "dur": 3400,
+   "cam": {
+    "at": "center",
+    "from": [
+     900,
+     0.8,
+     1.2
+    ],
+    "to": [
+     1100,
+     0.85,
+     1.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "end",
+     "at": 0,
+     "lines": [
+      {
+       "text": "Napiš svou obec",
+       "big": true,
+       "size": 104
+      },
+      {
+       "text": "Hlasuj do 17:00",
+       "big": true,
+       "size": 88,
+       "solid": true
+      },
+      {
+       "text": "Výsledek zítra v 9:00",
+       "size": 46
+      },
+      {
+       "text": "#PostavSiŘíčansko",
+       "size": 40
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -427,6 +427,8 @@ function buildTown(t){if(t.group){scene.remove(t.group)}const g=new T.Group();t.
 function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.userData.lbl.remove()});const g=t.dyn;g.children.forEach(c=>{c.traverse(m=>{if(m.geometry&&m.userData.tmp)m.geometry.dispose()})});g.clear();t.specialObjs=[];
  const used=Math.min(t.items.length,t.slots.length);
  // lawn pod obcí (zakryje pole)
+ // stožár se státní vlajkou u návsi každé živé obce
+ if(t.players.length>=CONFIG.REVIVE){const lm=t.lm;const fp=flagpole(lm.x+Math.cos(lm.ry+.9)*(lm.r+.6),lm.z+Math.sin(lm.ry+.9)*(lm.r+.6),lm.type==="kaple"||lm.type==="pomnik"?8:10.5);fp.traverse(m=>{m.userData.tmp=1});g.add(fp)}
  // trávník jen pod zastavěnými bloky (ne velký kruh): čtverec kolem každého bloku + kruh kolem návsi
  {const lp=[],li=[];const fan=(pts)=>{const b=lp.length/3;let cx=0,cz=0;pts.forEach(q=>{cx+=q.x;cz+=q.z});cx/=pts.length;cz/=pts.length;lp.push(cx,.044,cz);pts.forEach(q=>lp.push(q.x,.044,q.z));for(let i=0;i<pts.length;i++)li.push(b,b+1+(i+1)%pts.length,b+1+i)};
   const circ=(x,z,r)=>{const a=[];for(let i=0;i<28;i++){const an=i/28*6.283;a.push({x:x+Math.cos(an)*r,z:z+Math.sin(an)*r})}fan(a)};
@@ -559,7 +561,22 @@ function applyEvents(ev,anim){const d0=ev.length?Date.parse(ev[0].d)||Date.now()
   else{const id=SPECIALS.CAT.find(c=>c.id===(TYPE_MAP[norm(e.b.typ).replace(/ /g,"")]||"hospoda"))?(TYPE_MAP[norm(e.b.typ).replace(/ /g,"")]||"hospoda"):"hospoda";const idx=addItem(t,{k:"s",id,text:e.b.nazev_cedule||SPECIALS.CAT.find(c=>c.id===id).example,author:e.b.autor?"@"+String(e.b.autor).replace(/^@/,""):"komunita",day});if(anim)born.set(t.n+"#"+idx,now+(k++)*120)}
   changed.add(t)});return changed}
 async function fetchWorld(){const urls=QS.get("data")?[CONFIG.DATA_URL]:["world.json","../world.json"];for(const u of urls){try{const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});if(!r.ok)continue;const w=await r.json();if(!w||!Array.isArray(w.obce)||w.ukazka)continue;CONFIG.DATA_URL=u;QS.set("data",u);return w}catch(e){}}return null}
-async function pollWorld(){const w=await fetchWorld();if(!w)return;if(w.revize!==undefined&&w.revize===WORLD_REV)return;WORLD_REV=w.revize;const before=POP;const ch=applyEvents(worldEvents(w),true);if(w.den_hry)DAY=w.den_hry;
+/* nový stát: název do hlavičky, vlajka na stožáry u návsí a na Náměstí sjednocení (world.stat, pro náhled ?stat=Název) */
+const STAT={nazev:"",svg:""};const FLAG_TEX=new T.CanvasTexture(Object.assign(document.createElement("canvas"),{width:384,height:256}));
+const FLAG_MAT=new T.MeshLambertMaterial({map:FLAG_TEX,side:T.DoubleSide,visible:false}),POLE_MAT=new T.MeshLambertMaterial({color:0xd9dde6});
+function flagSvg(v){if(v&&v.svg)return v.svg;const pr=(v&&v.pruhy&&v.pruhy.length?v.pruhy:["#2F4AA8","#ffffff"]),n=pr.length,ver=v&&v.smer==="v";
+ const bands=pr.map((c,i)=>ver?`<rect x="${i*300/n}" y="0" width="${300/n+.5}" height="200" fill="${c}"/>`:`<rect x="0" y="${i*200/n}" width="300" height="${200/n+.5}" fill="${c}"/>`).join("");
+ const sym=v&&v.symbol?`<text x="150" y="104" font-size="96" text-anchor="middle" dominant-baseline="middle">${String(v.symbol).replace(/[<&>]/g,"")}</text>`:"";
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" width="300" height="200">${bands}${sym}</svg>`}
+function applyStat(st){const nazev=(st&&st.nazev?String(st.nazev):"").slice(0,40),svg=st&&st.vlajka?flagSvg(st.vlajka):"";if(nazev===STAT.nazev&&svg===STAT.svg)return;STAT.nazev=nazev;STAT.svg=svg;
+ const h=document.querySelector("#brand h1");if(h){h.innerHTML="";if(svg){const im=new Image();im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);im.alt="";im.style.cssText="height:18px;border-radius:3px;margin-right:7px;vertical-align:-3px;box-shadow:0 0 0 1px rgba(0,0,0,.15)";h.appendChild(im)}
+  h.appendChild(document.createTextNode(nazev||"Postav si Říčansko"));if(nazev){const sm=document.createElement("small");sm.textContent="Postav si Říčansko";sm.style.cssText="display:block;font:600 11px Inter,sans-serif;opacity:.6;margin-top:2px";h.appendChild(sm)}}
+ document.title=nazev?nazev+" · Postav si Říčansko":"Postav si Říčansko";
+ if(svg){const im=new Image();im.onload=()=>{const c=FLAG_TEX.image,x=c.getContext("2d");x.clearRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);FLAG_TEX.needsUpdate=true;FLAG_MAT.visible=true};im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)}else FLAG_MAT.visible=false;
+ if(window.GAME&&GAME.onStat)GAME.onStat({nazev,svg})}
+function flagpole(x,z,h){const o=new T.Group();const pole=new T.Mesh(new T.CylinderGeometry(.11,.14,h,8),POLE_MAT);pole.position.y=h/2;pole.castShadow=true;o.add(pole);const knob=new T.Mesh(new T.SphereGeometry(.24,10,8),POLE_MAT);knob.position.y=h+.1;o.add(knob);
+ const fl=new T.Mesh(new T.PlaneGeometry(h*.42,h*.28,6,1),FLAG_MAT);const pa=fl.geometry.attributes.position;for(let i=0;i<pa.count;i++)pa.setZ(i,Math.sin(pa.getX(i)*1.7)*.16);fl.geometry.computeVertexNormals();fl.position.set(h*.21+.12,h-h*.16,0);fl.castShadow=true;o.add(fl);o.position.set(x,0,z);o.rotation.y=.6;return o}
+async function pollWorld(){const w=await fetchWorld();if(!w)return;applyStat(w.stat);if(w.revize!==undefined&&w.revize===WORLD_REV)return;WORLD_REV=w.revize;const before=POP;const ch=applyEvents(worldEvents(w),true);if(w.den_hry)DAY=w.den_hry;
  if(ch.size){refreshAll([...ch]);if(POP>before)toast(`+${POP-before} nových obyvatel`,[...ch].map(t=>t.n).slice(0,3).join(" · "))}else updateUI()}
 /* názvy staveb z komentářů: filtr sprostých slov + délka; nevhodné -> výchozí název kategorie */
 const BAD=/(kurv|pi[cč][aeouy]|kokot|[cč]ur[aá]k|mrd|debil|hitler|nac[ií]s|nazi|negr|cig[aá]n|buzn|buzer|porn|fuck|shit|bitch|hovn|prdel|sex|onlyfans|penis|vagin|kund|ho[vw]ad|sra[cč]k|jeb|zasran|smrd|drog|pervit|kokain|hero[ií]n|\bfet(ak|ák|ka|ky)?\b|chc[ií]p|zabij|smrt|nen[aá]vi|rasis|xenof|teror)/i;
@@ -744,13 +761,15 @@ let orbitSpeed=0,aspectLock=false;
 
 /* ---------- API pro generátor reelů ---------- */
 window.GAME={canvas,THREE:T,
- state:()=>({day:DAY,totalPlayers:POP,towns:TOWNS.map(t=>{const c=tc(t);return{name:t.n,players:t.players.length,abandoned:abandonedN(t),revive:CONFIG.REVIVE,open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl||null,erbSvg:(()=>{const d=ERB.E.find(e=>e[0]===t.n);return d?ERB.erb(d,tierOf(t.players.length)):''})(),center:{x:c.x,y:0,z:c.z},radius:t.R,
+ state:()=>({day:DAY,totalPlayers:POP,towns:TOWNS.map(t=>{const c=tc(t);return{name:t.n,players:t.players.length,abandoned:abandonedN(t),revive:CONFIG.REVIVE,open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl||null,erbSvg:(()=>{const d=ERB.E.find(e=>e[0]===t.n);return d?ERB.erb(d,tierOf(t.players.length)):''})(),center:{x:c.x,y:0,z:c.z},lm:{x:c.x+t.lm.x,y:0,z:c.z+t.lm.z,r:t.lm.r},radius:t.R,
   houses:t.items.map((it,i)=>{const s=t.slots[i];return s&&it.k==="h"?{id:t.n+"#"+i,owner:it.p.nick,no:it.p.no,x:c.x+s.x,y:0,z:c.z+s.z}:null}).filter(Boolean)}})}),
  setAspect:(w,h)=>{aspectLock=!!w;if(w){const k=Math.min(1,+QS.get("render")||1);R.setPixelRatio(1);R.setSize(Math.round(w*k),Math.round(h*k),false);cam.aspect=w/h}else{R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight}cam.updateProjectionMatrix();POST.resize()},
  flyTo:(o,ms)=>flyTo(new T.Vector3(o.target.x,o.target.y,o.target.z),new T.Vector3(o.pos.x,o.pos.y,o.pos.z),ms),
  focusTown:(n,ms,quiet)=>focusTown(byName[n],ms,quiet),
  focusHouse:(id,ms)=>{const [n,i]=id.split("#");const t=byName[n];const s=t.slots[+i];return s?flyToLocal(t,s,22):Promise.resolve()},
  overview:ms=>overview(ms),orbit:s=>{orbitSpeed=s||0},
+ // pro videa: kamera smí níž a blíž (záběry z ulice); slot = místo i-tého domku obce ve světě
+ camFree:on=>{ctr.maxPolarAngle=on?1.5:1.32;ctr.minDistance=on?4:14},slot:(n,i)=>{const t=byName[n];if(!t)return null;const c=tc(t);const q=t.slots[i]||itemPos(t,i)||t.lm;return{x:c.x+q.x,y:0,z:c.z+q.z}},
  addPlayers:(n,list,quiet)=>{const t=byName[n];if(t){addPlayers(t,(list&&list.length)||1);if(quiet){born.clear();placeHouses(performance.now())}}},
  links:()=>[...LINKS].map(k=>k.split('|')),linkSegs:()=>LINKSEG,buildSpecial:n=>buildSpecial(byName[n]),dbgItems:n=>byName[n].items.map((it,i)=>({k:it.k,id:it.id,pos:it.pos||null,slot:!!byName[n].slots[i]})),buildSpecialId:(n,id,text)=>{const t=byName[n];if(!t)return;const idx=addItem(t,{k:"s",id,text:text||id,author:"admin",day:DAY});born.set(t.n+"#"+idx,performance.now());refreshAll([t]);const s=itemPos(t,idx);if(s)flyToLocal(t,s,30)},
  dbg:n=>{const t=byName[n];return {lm:[t.lm.x|0,t.lm.z|0,t.lm.type],R:t.R|0,pat:t.plan.pat,blocks:t.usedB.length,Rb:t.Rb|0,cuts:(t.cutsOk||[]).length,slots:t.slots.slice(0,Math.min(t.items.length,t.slots.length)).map(s=>Math.round(Math.hypot(s.x,s.z))).join(",")}},select:(n,idx)=>selectItem(byName[n],idx),closeInfo:()=>closeInfo(),
@@ -779,6 +798,7 @@ window.GAME={canvas,THREE:T,
  setMsg("plánuji 52 obcí podle skutečných silnic…");await new Promise(r=>setTimeout(r,20));
  TOWNS.forEach(planTown);initInstanced();
  setMsg("načítám herní data…");let real=CONFIG.DEMO?null:await fetchWorld();
+ applyStat(QS.get("stat")?{nazev:QS.get("stat"),vlajka:{pruhy:["#2F4AA8","#C6FF3D"],symbol:"⭐"}}:real&&real.stat);
  if(real){WORLD_REV=real.revize;applyEvents(worldEvents(real),false);DAY=real.den_hry||DAY}else{seedDemo();document.getElementById("demoTag").style.display=""}if(+QS.get("den")>0)DAY=+QS.get("den");
  TOWNS.forEach(t=>{t.open=t.players.length>=CONFIG.OPEN_AT;layoutTown(t);t.R=townRadius(t)});
  S=Starget=S0=+QS.get("s")||L;updTownParams();// celá mapa v měřítku domků: nic se nenafukuje (?s=0.05 = staré rybí oko)

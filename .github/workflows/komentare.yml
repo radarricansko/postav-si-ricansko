@@ -8,6 +8,7 @@ on:
       media: { description: "Jen jeden post: ID média, odkaz nebo shortcode (prázdné = všechny posty s #postavsiricansko)", required: false }
       publikovat: { description: "Ukázat na webu celý koncept hned (jinak se web mění až s novým dílem)", type: boolean, default: false }
       dry: { description: "Jen vypsat shrnutí, nic nezapisovat", type: boolean, default: false }
+      token: { description: "Jen zkontrolovat platnost Instagram tokenu", type: boolean, default: false }
 permissions:
   contents: write
   actions: write
@@ -31,10 +32,10 @@ jobs:
           POSTY_OD: ${{ vars.POSTY_OD }}
           PUBLIKACE: ${{ vars.PUBLIKACE }}   # prázdné / dil = web až s novým dílem; hned = web při každém běhu
           UZAVERKA_HODINA: ${{ vars.UZAVERKA_HODINA }}   # výchozí 17 (Praha)
-        run: node tools/ig/komentare.js ${{ inputs.dry && '--dry' || '' }} ${{ inputs.publikovat && '--publikovat' || '' }}
+        run: node tools/ig/komentare.js ${{ inputs.token && 'token-info' || '' }} ${{ inputs.dry && '--dry' || '' }} ${{ inputs.publikovat && '--publikovat' || '' }}
       - name: Commit a push
         id: push
-        if: ${{ !inputs.dry }}
+        if: ${{ !inputs.dry && !inputs.token }}
         env:
           NOVI: ${{ steps.k.outputs.novi }}
         run: |

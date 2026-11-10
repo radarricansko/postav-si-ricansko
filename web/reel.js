@@ -535,7 +535,7 @@
   function subDisplay(w) { return up(w).replace(/^PLUS$/, '+'); }
 
   // ------------------------------------------------------------------ SCÉNÁŘ
-  var DEFAULT_DUR = { hook: 2800, overview: 3300, town: 2400, comment: 4800, cta: 5200, outro: 2000, jobs: 4600, jobBuilt: 4400, milestone: 4000, newTowns: 3600, findMe: 2500, crown: 4200 };
+  var DEFAULT_DUR = { shot: 1800, hook: 2800, overview: 3300, town: 2400, comment: 4800, cta: 5200, outro: 2000, jobs: 4600, jobBuilt: 4400, milestone: 4000, newTowns: 3600, findMe: 2500, crown: 4200 };
   var MIN_TOTAL = 15000, MAX_TOTAL = 26000;   // cíl 15–25 s, pojistka 26 s (opts.minTotal / opts.maxTotal)
   var EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu;
   // pořadí hooků pro rotaci (výběr viz pickHook)
@@ -1628,6 +1628,83 @@
     }
   };
 
+  // ---------- ZÁBĚR (díly podle scénáře): jedna věta = jeden záběr, kamera jede z pozice A do B, přes to pár prvků
+  // cam: { at: 'region' | 'center' | 'lm:Obec' | 'town:Obec' | 'slot:Obec:i', from: [vzdálenost, výška úhlu (rad), azimut (rad)], to: [...] }
+  // ui: [{ k: 'title' | 'chip' | 'stamp' | 'num' | 'bubble' | 'tag' | 'end', ... , at: ms }]   add: { town, n, at, every }
+  function camPoint(at) {
+    var st = safeState(), p = String(at || 'region').split(':'), t = (st.towns || []).filter(function (x) { return x.name === p[1]; })[0];
+    if (p[0] === 'center') { var c = gcall('center'); if (c && c.x != null) return { x: c.x, y: 3, z: c.z }; }
+    if (p[0] === 'slot' && G() && G().slot) { var q = G().slot(p[1], +p[2] || 0); if (q) return { x: q.x, y: 1.5, z: q.z }; }
+    if (t && p[0] === 'lm' && t.lm) return { x: t.lm.x, y: 2, z: t.lm.z };
+    if (t) return { x: t.center.x, y: 0, z: t.center.z };
+    var xs = (st.towns || []).map(function (x) { return x.center.x; }), zs = (st.towns || []).map(function (x) { return x.center.z; });
+    return xs.length ? { x: (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2, y: 0, z: (Math.min.apply(null, zs) + Math.max.apply(null, zs)) / 2 } : { x: 0, y: 0, z: 0 };
+  }
+  function camPose(T, a) {
+    var d = a[0], el = a[1], az = a[2] || 0, off = a[3] || [0, 0];
+    var tx = T.x + off[0], tz = T.z + off[1];
+    return { target: { x: tx, y: T.y, z: tz }, pos: { x: tx + d * Math.cos(el) * Math.sin(az), y: T.y + d * Math.sin(el), z: tz + d * Math.cos(el) * Math.cos(az) } };
+  }
+  SCENES.shot = {
+    enter: function (s) {
+      gcall('orbit', 0); gcall('camFree', true);
+      var c = s.cam || {}, T = camPoint(c.at), from = camPose(T, c.from || [400, 0.7, 0]), to = camPose(T, c.to || c.from || [400, 0.7, 0]);
+      var p = gcall('flyTo', from, 16);
+      if (p && p.then) p.then(function () { gcall('flyTo', to, Math.max(600, s.dur * 1.25)); });
+      if (s.add) for (var i = 0; i < (s.add.n || 1); i++) (function (i2) {
+        later(function () { gcall('addPlayers', s.add.town, [{}]); }, (s.add.at || 500) + i2 * (s.add.every || 260));
+        AU.pop(((s.add.at || 500) + i2 * (s.add.every || 260)) / 1000 + 0.05, 520 + i2 * 70);
+      })(i);
+      (s.ui || []).forEach(function (u) { if (u.k === 'stamp' || u.k === 'end') AU.boom((u.at || 0) / 1000); else if (u.k === 'num' || u.k === 'bubble') AU.ping((u.at || 0) / 1000, 990 + (u.at || 0) % 400); });
+      if (s.last) AU.stopMusic(s.dur / 1000);
+    },
+    draw: function (g, s, lt) {
+      var out = s.dur - 220, oa = s.last ? 1 : 1 - prog(lt, out, out + 180);
+      // čitelnost: jemný přechod nahoře a dole, ať je mapa vidět
+      var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(10,18,51,0.55)'); gr.addColorStop(0.3, 'rgba(10,18,51,0.08)'); gr.addColorStop(0.62, 'rgba(10,18,51,0.05)'); gr.addColorStop(1, 'rgba(10,18,51,0.62)');
+      g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      (s.ui || []).forEach(function (u) {
+        var at = u.at || 0, p = prog(lt, at, at + POP); if (p <= 0) return;
+        var x = u.x == null ? W / 2 : u.x, y = u.y == null ? 620 : u.y;
+        if (u.k === 'title') kLine(g, up(u.text), x, y, u.size || 96, lt, at, { out: s.last ? 1e9 : out, stagger: 55, maxW: u.maxW || 940, box: u.box, solid: u.solid });
+        else if (u.k === 'chip') chip(g, u.text, x, y, { size: u.size || 36, solid: !!u.solid, scale: popS(p), alpha: popA(p) * oa });
+        else if (u.k === 'stamp') stamp(g, u.text, x, y, { size: u.size || 64, p: p, alpha: oa, rot: u.rot == null ? -0.06 : u.rot });
+        else if (u.k === 'num') numCard(g, x, y, u.w || 400, u.h || 190, u.num, u.label, { p: p, alpha: oa, numSize: u.numSize || 96, labelSize: 28 });
+        else if (u.k === 'tag') {            // jmenovka nad domkem
+          g.save(); g.globalAlpha = popA(p) * oa; g.translate(x, y - (1 - E.outBack(p)) * -30); bf(g, u.size || 44, 700);
+          var tw = g.measureText(u.text).width + 56; g.fillStyle = C.acc; rr(g, -tw / 2, -40, tw, 80, 40); g.fill();
+          g.beginPath(); g.moveTo(-16, 38); g.lineTo(16, 38); g.lineTo(0, 62); g.closePath(); g.fill();
+          g.fillStyle = C.ink; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(u.text, 0, 2); g.restore();
+        } else if (u.k === 'bubble') {       // komentář
+          g.save(); bf(g, 46, 600); var lines = wrap(g, u.text, (u.w || 700) - 68);
+          g.translate(x, y); g.scale(popS(p), popS(p)); g.translate(-x, -y);
+          bubble(g, x - (u.w || 700) / 2, y, u.w || 700, lines, { head: u.author || 'ty', sub: u.sub || 'právě teď', size: 46, lh: 60, alpha: popA(p) * oa, side: u.side });
+          g.restore();
+        } else if (u.k === 'end') {          // závěrečná karta
+          var cv = E.inOut(prog(lt, at, at + 380)); g.save(); g.beginPath(); g.rect(0, H * (1 - cv), W, H * cv); g.clip();
+          g.fillStyle = C.night; g.fillRect(0, 0, W, H); backdrop(g, lt + 5000, 0, {}); g.restore();
+          (u.lines || []).forEach(function (ln, i) { var lp = prog(lt, at + 260 + i * 240, at + 260 + i * 240 + POP); if (lp <= 0) return;
+            if (ln.big) kLine(g, up(ln.text), W / 2, 560 + i * 200, ln.size || 92, lt, at + 260 + i * 240, { out: 1e9, stagger: 50, maxW: 940, solid: ln.solid });
+            else chip(g, ln.text, W / 2, 560 + i * 200, { size: ln.size || 44, solid: !!ln.solid, scale: popS(lp), alpha: popA(lp) }); });
+          var hp = prog(lt, at + 1200, at + 1500); if (hp > 0 && u.handle) { g.save(); g.globalAlpha = hp; bf(g, 38, 600); g.fillStyle = 'rgba(255,255,255,0.8)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(u.handle, W / 2, 1310); g.restore(); }
+        }
+      });
+    }
+  };
+  // scénář dílu ze seznamu záběrů (tools/video/dily/dil-N.json)
+  function scriptFromShots(def, opts) {
+    opts = opts || {};
+    var scenes = (def.shots || []).map(function (sh, i, all) {
+      var s = { type: 'shot', role: 'content', vo: sh.vo || '', cam: sh.cam, ui: sh.ui || [], add: sh.add || null, voStart: sh.voStart == null ? 60 : sh.voStart, noSubs: !!sh.noSubs, last: i === all.length - 1 };
+      if (sh.dur) s.durFixed = sh.dur;
+      (s.ui || []).forEach(function (u) { if (u.k === 'end' && !u.handle) u.handle = opts.handle || ''; });
+      return s;
+    });
+    var script = { version: 2, day: def.dil || 1, hook: 'dil', title: def.title || ('Postav si Říčansko · Díl ' + (def.dil || 1)), opts: opts, scenes: scenes };
+    layout(script);
+    return script;
+  }
+
   // ---------- CHTĚLI JSTE → POSTAVILI JSME (chat bubliny)
   SCENES.comment = {
     enter: function (s) {
@@ -2260,6 +2337,7 @@
   }
 
   function restoreAspect(opts) {
+    gcall('camFree', false);
     if (opts && opts.restoreAspect && R._prevSize && G() && G().setAspect) try { G().setAspect(R._prevSize[0], R._prevSize[1]); } catch (e) {}
   }
 
@@ -2437,7 +2515,7 @@
 
   root.REEL = {
     version: '2.0.0', W: W, H: H, SAFE_TOP: SAFE_TOP, SAFE_BOTTOM: SAFE_BOTTOM, colors: C,
-    scriptFromDay: scriptFromDay, layout: layout, play: play, record: record, stop: stop,
+    scriptFromDay: scriptFromDay, scriptFromShots: scriptFromShots, layout: layout, play: play, record: record, stop: stop,
     voiceScript: voiceScript, setVoiceTrack: setVoiceTrack, setVoiceSegments: setVoiceSegments, renderAt: renderAt,
     frames: frames, renderAudio: renderAudio,
     hooks: HOOK_IDS.concat(['expanded', 'quiet']), cz: { townGen: townGen, townDat: townDat, jobForm: jobForm, buildingAcc: buildingAcc },

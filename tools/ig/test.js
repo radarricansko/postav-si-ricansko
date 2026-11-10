@@ -410,16 +410,19 @@ test('denní rytmus: web se mění jen s novým dílem a ukazuje stav k uzávěr
   assert.deepStrictEqual(nav.navrhy.map(n => [n.autor, n.hlasy]), [['iva', 9], ['ota', 3]], 'nápady jen do uzávěrky, podle lajků');
   // večer přidáme do konceptu stavbu pro další díl (ručně) – na web se dostane až s dílem 2
   const w = json(s.world); w.obce.find(o => o.id === 'tehov').specialni_budovy.push({ typ: 'jine', nazev_cedule: 'Metro Tehov', autor: 'iva', datum: '2026-11-16T18:30:00Z' }); w.revize++;
+  w.stat = { nazev: 'Radarie', datum: '2026-11-16T18:40:00Z', vlajka: { pruhy: ['#2F4AA8', '#C6FF3D'], smer: 'h', symbol: '🦌' } };
   fs.writeFileSync(s.world, JSON.stringify(w, null, 1) + '\n');
   r = await beh('2026-11-16T19:00:00Z');
   assert.strictEqual(json(dilF).obce.find(o => o.id === 'tehov').specialni_budovy.length, 1, 'díl už stavbu má');
   assert.deepStrictEqual(hraci(live), []);
+  assert.ok(json(dilF).stat && !json(live).stat, 'název státu je v dílu, na webu ještě ne');
   // úterý 9:10 – vyšel díl 2 → web skočí na stav k pondělní uzávěrce + večerní stavba
   media = [D2, D1]; k2 = [kom('21', 'Mukařov', 'tom', '2026-11-17T08:05:00+0000', 1)];
   r = await beh('2026-11-17T08:10:00Z');
   assert.match(r.text, /web: MĚNÍM – 2 hráčů/);
   assert.deepStrictEqual(hraci(live), ['iva', 'ota']);
   assert.strictEqual(json(live).obce.find(o => o.id === 'tehov').specialni_budovy[0].nazev_cedule, 'Metro Tehov');
+  assert.strictEqual(json(live).stat.nazev, 'Radarie');
   assert.deepStrictEqual(hraci(s.world), ['iva', 'jan', 'ota', 'tom']);
   assert.deepStrictEqual(json(stav).posty.map(p => p.id), ['501', '502']);
   // úterý 12:00 – další běh nic nemění (web se přes den nehýbe)

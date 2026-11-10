@@ -215,6 +215,7 @@ function rez(world, hraciDo, budovyDo) {
     o.specialni_budovy = (o.specialni_budovy || []).filter(b => !b.datum || !budovyDo || iso(b.datum) <= budovyDo);
   }
   w.obce = w.obce.filter(o => o.hraci.length || o.specialni_budovy.length);
+  if (w.stat && w.stat.datum && budovyDo && iso(w.stat.datum) > budovyDo) delete w.stat;   // název a vlajka se na webu objeví až s dílem
   if (Array.isArray(w.log_udalosti)) w.log_udalosti = w.log_udalosti.filter(e => !e.datum || iso(e.datum) <= (budovyDo || hraciDo));
   return w;
 }
