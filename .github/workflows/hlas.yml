@@ -2,7 +2,7 @@ name: Hlas Pana Radara
 on:
   workflow_dispatch:
     inputs:
-      akce: { description: "gemini = ukázky hlasů Gemini (zdarma) · nahledy/ulozit = ElevenLabs Voice Design (placený tarif)", type: choice, options: [gemini, nahledy, ulozit], default: gemini }
+      akce: { description: "zive = díl 1 živě, víc hlasů · gemini = ukázky hlasů Gemini (zdarma) · nahledy/ulozit = ElevenLabs Voice Design (placený tarif)", type: choice, options: [zive, gemini, nahledy, ulozit], default: zive }
       hlasy: { description: "Gemini hlasy oddělené čárkou (výchozí Sadaltager)", required: false }
       tempa: { description: "Tempa oddělená čárkou, např. 1,1.12,1.25", required: false }
       popis: { description: "Popis hlasu (anglicky, nepovinné)", required: false }
@@ -28,7 +28,10 @@ jobs:
           POPIS: ${{ inputs.popis }}
           VID: ${{ inputs.id }}
         run: |
-          if [ "${{ inputs.akce }}" = "gemini" ]; then
+          if [ "${{ inputs.akce }}" = "zive" ]; then
+            [ -n "$HLASY" ] || unset HLASY
+            node tools/hlas/gemini.js zive --out out
+          elif [ "${{ inputs.akce }}" = "gemini" ]; then
             [ -n "$HLASY" ] || unset HLASY
             [ -n "$TEMPA" ] || unset TEMPA
             node tools/hlas/gemini.js nahledy --out out
