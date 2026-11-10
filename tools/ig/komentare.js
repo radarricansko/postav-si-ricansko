@@ -208,6 +208,8 @@ async function pripoj(env = process.env) {
       let ucty = [];
       try { const acc = await api(adresa(base, '/me/accounts', { fields: 'instagram_business_account{id,username}', limit: '100' })); ucty = (acc.data || []).map(p => p.instagram_business_account).filter(Boolean); } catch (e) { }
       if (!ucty.length) { try { const pg = await api(adresa(base, '/me', { fields: 'instagram_business_account{id,username}' })); if (pg.instagram_business_account) ucty = [pg.instagram_business_account]; } catch (e) { } }
+      // system-user token (Unified login): /me je systémový uživatel, IG účet je přiřazený asset → zkusit přímo ID účtu
+      if (!ucty.length) { const uid = String(env.IG_USER_ID || '17841474213627967'); try { const u = await api(adresa(base, '/' + uid, { fields: 'id,username' })); if (u && u.id) ucty = [{ id: u.id, username: u.username || '' }]; } catch (e) { log(`  ${base.replace('https://', '')}: /${uid} selhalo – ${e.message}`); } }
       if (!ucty.length) throw new ApiError('token nevidí žádný Instagram business účet');
       const own = ascii(env.IG_OWN || 'radar_ricansko');
       const ig = ucty.find(a => ascii(a.username) === own) || ucty[0];

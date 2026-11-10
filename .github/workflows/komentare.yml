@@ -25,6 +25,7 @@ jobs:
           IG_MEDIA_ID: ${{ inputs.media || vars.IG_MEDIA_ID }}
           IG_MEDIA_URL: ${{ vars.IG_MEDIA_URL }}
           START_DATE: ${{ vars.START_DATE }}
+          IG_USER_ID: ${{ vars.IG_USER_ID }}
         run: node tools/ig/komentare.js ${{ inputs.dry && '--dry' || '' }}
       - name: Commit a push
         id: push
