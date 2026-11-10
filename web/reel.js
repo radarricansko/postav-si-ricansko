@@ -1649,7 +1649,7 @@
     enter: function (s) {
       gcall('orbit', 0); gcall('camFree', true);
       var c = s.cam || {}, T = camPoint(c.at), from = camPose(T, c.from || [400, 0.7, 0]), to = camPose(T, c.to || c.from || [400, 0.7, 0]);
-      var p = gcall('flyTo', from, 16);
+      var p = gcall('flyTo', from, 0);   // střih: kamera skočí hned, pak pomalu jede do cílové pozice
       if (p && p.then) p.then(function () { gcall('flyTo', to, Math.max(600, s.dur * 1.25)); });
       if (s.add) for (var i = 0; i < (s.add.n || 1); i++) (function (i2) {
         later(function () { gcall('addPlayers', s.add.town, [{}]); }, (s.add.at || 500) + i2 * (s.add.every || 260));

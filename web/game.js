@@ -709,7 +709,7 @@ function closeInfo(){$("info").classList.remove("on");ring.visible=false}
 
 /* ---------- kamera ---------- */
 let fly=null;
-function flyTo(target,pos,ms=1500){return new Promise(ok=>{fly={from:ctr.target.clone(),to:target.clone(),cf:cam.position.clone(),ct:pos.clone(),t0:performance.now(),ms,ok}})}
+function flyTo(target,pos,ms=1500){if(ms<=1){fly=null;ctr.target.copy(target);cam.position.copy(pos);return Promise.resolve()}return new Promise(ok=>{fly={from:ctr.target.clone(),to:target.clone(),cf:cam.position.clone(),ct:pos.clone(),t0:performance.now(),ms,ok}})}
 function flyToLocal(t,s,dist){const c=tc(t);const target=new T.Vector3(c.x+s.x,1.5,c.z+s.z);const az=ctr.getAzimuthalAngle();const el=.62;const pos=target.clone().add(new T.Vector3(Math.sin(az)*Math.cos(el),Math.sin(el),Math.cos(az)*Math.cos(el)).multiplyScalar(dist));return flyTo(target,pos,1300)}
 function focusTown(t,ms,quiet){sel.value=t.n;if(!quiet&&window.GAME&&GAME.onTownFocus)GAME.onTownFocus(t.n);const c=tc(t);const d=Math.max(60,t.R*2.6);const az=ctr.getAzimuthalAngle();return flyTo(new T.Vector3(c.x,0,c.z),new T.Vector3(c.x+Math.sin(az)*d*.62,d*.72,c.z+Math.cos(az)*d*.62),ms||1500)}
 function overview(ms){const b=regionBox();const c=new T.Vector3((b[0]+b[2])/2,0,(b[1]+b[3])/2);const d=Math.max(b[2]-b[0],b[3]-b[1])*.78;return flyTo(c,new T.Vector3(c.x+d*.18,d*.82,c.z+d*.62),ms||1800)}
