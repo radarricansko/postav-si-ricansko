@@ -1,0 +1,35 @@
+name: Hlas Pana Radara
+on:
+  workflow_dispatch:
+    inputs:
+      akce: { description: "nahledy = 3 ukázky hlasu · ulozit = uložit vybraný", type: choice, options: [nahledy, ulozit], default: nahledy }
+      popis: { description: "Popis hlasu (anglicky, nepovinné)", required: false }
+      id: { description: "generated_voice_id vybrané ukázky (jen pro ulozit)", required: false }
+permissions: { contents: write, actions: write }
+jobs:
+  hlas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Voice Design
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          POPIS: ${{ inputs.popis }}
+          VID: ${{ inputs.id }}
+        run: |
+          if [ "${{ inputs.akce }}" = "ulozit" ]; then
+            node tools/hlas/hlas.js ulozit --id "$VID" --out out
+            gh variable set ELEVENLABS_VOICE_ID --body "$(cat out/voice_id.txt)" || echo "proměnnou se nepodařilo nastavit, voice_id je v logu"
+          else
+            node tools/hlas/hlas.js nahledy --popis "$POPIS" --out out
+          fi
+      - name: Ukázky do větve previews
+        if: inputs.akce == 'nahledy'
+        run: |
+          git config user.name "RADAR bot"; git config user.email "radar.ricansko@gmail.com"
+          git fetch -q origin previews && git checkout -q previews
+          mkdir -p hlas && cp out/hlas-*.mp3 out/hlas.json hlas/ && git add hlas && git commit -q -m "ukázky hlasu Pana Radara" && git push -q origin previews
