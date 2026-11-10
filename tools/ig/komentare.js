@@ -38,9 +38,9 @@ const nevhodne = s => NICK_RE.test(ascii(s));
 
 /* hlasování v komentáři: „název - Říčanská republika“, „vlajka - jelen, zelená a zlatá“, „nápad - metro do Říčan“.
    Všechno za klíčovým slovem je hlas, ne přihláška: obec se hledá jen v části před ním („Mukařov, vlajka - jelen“). */
-const HLAS_SLOVA = { vlajka: 'vlajka', vlajku: 'vlajka', vlajky: 'vlajka', vlajce: 'vlajka', nazev: 'nazev', jmeno: 'nazev', napad: 'napad', navrh: 'napad' };
+const HLAS_SLOVA = { vlajka: 'vlajka', vlajku: 'vlajka', vlajky: 'vlajka', vlajce: 'vlajka', nazev: 'nazev', jmeno: 'nazev', napad: 'napad', navrh: 'napad', mena: 'mena', jidlo: 'jidlo' };
 // „vlajka“ stačí samotná, u ostatních slov musí následovat pomlčka nebo dvojtečka („super nápad!“ hlas není)
-const HLAS_RE = /(^|[^\p{L}])(?:(vlajk[auye])(?![\p{L}])\s*[-–—:=>]*|(n[aá]zev|jm[eé]no|n[aá]pad|n[aá]vrh)\s*[-–—:=>]+)\s*/giu;
+const HLAS_RE = /(^|[^\p{L}])(?:(vlajk[auye])(?![\p{L}])\s*[-–—:=>]*|(n[aá]zev|jm[eé]no|n[aá]pad|n[aá]vrh|m[eě]na|j[ií]dlo)\s*[-–—:=>]+)\s*/giu;
 function hlasy(text) {
   const t = String(text || ''), m = [...t.matchAll(HLAS_RE)], out = [];
   m.forEach((x, i) => {

@@ -42,9 +42,9 @@ Když se žádný post nenajde, skript vypíše posledních 10 médií (ID, datu
 
 ## Hlasování v komentářích
 
-- `název - Říčanská republika`, `vlajka - jelen, zelená a zlatá`, `nápad - metro do Říčan` (stačí i dvojtečka; u vlajky nemusí být nic).
+- `název - Říčanská republika`, `vlajka - jelen, zelená a zlatá`, `nápad - metro do Říčan`, `měna - radar`, `jídlo - kebab` (stačí i dvojtečka; u vlajky nemusí být nic).
 - Jde to dohromady s přihláškou: `Mukařov, vlajka - jelen, zelená`. Obec se hledá jen **před** klíčovým slovem, takže „název - Republika Říčany“ nikoho do Říčan nepřihlásí.
-- Po uzávěrce je v `tools/ig/navrhy/DATUM.json` pořadí: `hlasovani.nazev`, `hlasovani.vlajka`, `hlasovani.napad` (stejné texty se sčítají, body = počet komentářů + lajky) a `navrhy` (nejlajkovanější komentáře dne celkově).
+- Po uzávěrce je v `tools/ig/navrhy/DATUM.json` pořadí: `hlasovani.nazev`, `.vlajka`, `.napad`, `.mena`, `.jidlo` (stejné texty se sčítají, body = počet komentářů + lajky) a `navrhy` (nejlajkovanější komentáře dne celkově).
 
 ## Pravidla
 

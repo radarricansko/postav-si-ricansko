@@ -369,6 +369,8 @@ test('hlasy v komentáři: název, vlajka, nápad; obec jen z části před hlas
   assert.deepStrictEqual(p('Říčany nápad - metro do Mukařova'), ['ricany', ['napad=metro do Mukařova']]);
   assert.deepStrictEqual(p('Super nápad, zdravím z Tehova'), ['tehov', []], 'běžná věta se slovem nápad není hlas');
   assert.deepStrictEqual(p('Vlajkonoš z Tehova'), ['tehov', []]);
+  assert.deepStrictEqual(p('Tehov měna: radar, jídlo - kebab'), ['tehov', ['mena=radar', 'jidlo=kebab']]);
+  assert.deepStrictEqual(p('Jídlo tady nemáme, jsem z Tehova'), ['tehov', []]);
   const s = K.sectiHlasy([{ druh: 'nazev', text: 'Radarie', autor: 'a', lajky: 2 }, { druh: 'nazev', text: 'radarie', autor: 'b', lajky: 0 }, { druh: 'nazev', text: 'Říčanská republika', autor: 'c', lajky: 3 }, { druh: 'vlajka', text: 'jelen, zelená', autor: 'a', lajky: 1 }]);
   assert.deepStrictEqual(s.nazev.map(x => [x.text, x.body, x.komentaru]), [['Radarie', 4, 2], ['Říčanská republika', 4, 1]]);
   assert.deepStrictEqual(s.vlajka.map(x => x.text), ['jelen, zelená']);

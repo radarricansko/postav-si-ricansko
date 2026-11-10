@@ -1,48 +1,140 @@
-# Postav si Říčansko: stav projektu, příběh, vývoj a retence
+# Postav si Říčansko: příběh, denní rytmus a první týden
 
-Verze 3 (aktualizace 7. 11. 2026 odpoledne): **Sjednocené Říčansko, vypráví Pan Radar.** Teaser **čt 12. 11.**, start **po 16. 11.** Konec neplánujeme: hra může mít 10 dílů i 40, každý díl stojí sám za sebe. Hra běží na hlavním IG Radaru (cca 2 700 sledujících).
+Verze 4 (10. 11. 2026): **Co kdyby se Říčansko osamostatnilo.** Vypráví Pan Radar. Termín startu je otevřený, nic ještě není venku. Hra běží jen na Instagramu Radaru.
 
-**Pravidla v 1 řádku:** Dej follow a napiš do komentáře svou obec (52 obcí ORP Říčany), klidně i s povoláním („Mukařov hasič“). Dostaneš domek na 3D mapě se svým nickem a tvoje obec tím přispěje ke sjednocenému městu.
+**Pravidla v 1 řádku:** Napiš do komentáře svou obec (52 obcí ORP Říčany) a máš na 3D mapě domek se svým nickem. Sledování neověřujeme, je to na důvěře.
 
----
-
-## Stav projektu (7. 11., 5 dní do teaseru)
-
-Hotovo = funguje a je otestované. Procenta jsou odhad, jak daleko je část k „můžeme spustit“.
-
-| # | Část | Stav | Hotovo | Zbývá | Blokuje |
-|---|---|---|---|---|---|
-| 1 | **Hra (web, 3D mapa)** | 🟢 90 % | Mapa z OSM, 52 obcí s erby a dominantami, domky s nicky, Náměstí sjednocení (katedrála, socha 52 mečů, renesanční domy, alej), Koruna týdne, povolání a stavby (stadion, nádraží, letiště, tvrz…), zahušťování obcí bez stropu, spojování ulic sousedů, filtr názvů, glass UI, mobil (1 prst pan, 2 prsty zoom), kompas, vyhledávání, Příběh/Jak hrát, admin režim, GitHub Pages | Test na mobilech kolegů; drobná kosmetika (velký trávník u řídkých obcí); vypnout zmínky o Vánocích; jméno města po anketě | – |
-| 2 | **Příběh a texty** | 🟡 70 % | Linka v3, Pan Radar, teaser + díl 1 (popisky, připnutý komentář, DM šablony), pravidla | Vyhodit finále z textů; scénáře dílů 2–7 (vrchol každého dílu, popichování obcí); 10 vět Pana Radara „do zásoby“; story anketa o název | Rozhodnutí o Praze jako soupeři (jen vtip, nebo osa) |
-| 3 | **Video** | 🟢 80 % | Cesta A: reel dne z hry automaticky v GitHub Actions (RADAR grafika, 1080×1920). Cesta C: 7 klipů + brief pro střih v Claudovi (24 min v CI). ElevenLabs klíč vložen | Ověřit hlas Pana Radara v reelu (test běží); šablona briefu → hotový reel; kontrola grafiky na mobilu | – |
-| 4 | **Komentáře → data** | 🔴 30 % | Make scénář (komentář → hráč + obec, aliasy 52 obcí, povolání, dedup, filtr nicků), scénář publikace world.json každé 2 h | **Propojení Instagramu**: Make nevidí FB stránku RADAR. Plán A: číst komentáře přímo z Instagram API v GitHub Actions (bez Make, bez FB stránky). Plán B: bookmarklet v prohlížeči | Meta oprávnění (Maty u počítače, 10–15 min) |
-| 5 | **Provoz a spuštění** | 🟡 50 % | Web na GitHub Pages, admin klíč, docs/spusteni.md (rutina 20 min denně), checklist | Vlastní adresa hra.radar-ricansko.cz (volitelné); zkušební post + test celé linky komentář → domek → reel; pravidla do highlightu; zaučení týmu | Část 4 |
-| 6 | **Komunita a růst** | 🟡 40 % | Plán aktivace (zakladatelé obcí, výzva s hodinami, pozvi souseda, partneři, obecní FB skupiny, hall of fame, story ankety) | Seznam FB skupin obcí (3 denně), oslovení partnerů (hasiči, fotbal, hospody), story šablony | – |
-
-**Co potřebuju od Matyho:** (a) Meta/Instagram oprávnění u počítače, (b) rozhodnutí: Praha jako soupeř jen vtip?, (c) kolegové na test mobilu.
-
-**Nejbližší milníky:** ne 9. 11. celá linka komentář → domek → reel otestovaná na zkušebním postu · út 11. 11. teaser hotový a schválený · čt 12. 11. teaser ven · po 16. 11. díl 1.
+**Vždy fikce:** každý popisek začíná „Co kdyby…“ nebo „Představ si…“. Žádná skutečná politika. Praha jen jako občasný vtip.
 
 ---
 
-## Linka v3: co se změnilo a proč
+## Denní rytmus
 
+| čas | co se děje | kdo |
+|---|---|---|
+| **9:00** | Vychází díl (reel s `#PostavSiŘíčansko`). Do půl hodiny se na webu najednou změní mapa: domky všech, kdo stihli včerejší uzávěrku, a stavba, kterou jsme večer postavili. | Maty naplánuje reel na 9:00, mapa se překlopí sama |
+| 9:00–17:00 | Lidi komentují: obec = domek, k tomu hlas nebo nápad dne. Mapa se přes den nemění. | – |
+| **17:00** | Uzávěrka. Sečtou se hlasy a nejlajkovanější komentáře, v 17:20 se vyrenderuje první verze videa. | automat |
+| 17:00–20:00 | Vybereme vítěze (Maty schvaluje), vymyslíme, jak bude vypadat, postavíme ho do mapy, přerenderujeme video. | Maty + Claude |
+| do 20:00 | Hotový díl naplánovaný na 9:00. | Maty |
 
-**Premisa.** Říčansko má 52 obcí a dohromady víc lidí než leckteré okresní město, jen se to nikdy nespočítalo. Pan Radar (starší, klidný hlas, který „vidí celé Říčansko ze své věže“) vyhlásí sjednocení: uprostřed regionu, na poli mezi Strančicemi, Mnichovicemi a Klokočnou, vzniká **Náměstí sjednocení** s gotickou katedrálou a **sochou 52 mečů**, kolem které stojí 52 erbů. Každý erb svítí podle stavu obce: šedý = opuštěná, dřevo / stříbro / zlato / platina = liga. Dlouhodobý cíl: **rozsvítit všech 52**, ale hra nemá pevný konec.
+Kdo napíše obec po 17:00, má domek o den později. Komentáře se berou pod všemi díly, jeden účet má jeden domek.
 
-**Soupeř: Praha.** Lidé navrhují, co má Praha a sjednocené město ještě ne (metro, zoo s pandami, letiště v Mukařově, stadion, univerzita…). Nejlajkovanější přání se postaví u náměstí, jakmile město dosáhne prahu obyvatel. Ukazatel **Město vs Praha** měří, co už jsme dohnali. Tón je vtipný, ne agresivní: Praha je soupeř, který nemůže odpovědět; nikdy ne nadávání na Pražáky (půlka sledujících tam studuje).
-
-**Obce zůstávají obcemi.** Každá má erb, ceduli, dominantu, domky s nicky, ligy, korunu týdne a povolání. Patriotismus je na dvou úrovních: *moje obec* (žebříček, koruna, hospoda) a *naše město* (socha, přání proti Praze). Mapa je **pevná** (nenafukuje se): když obci dojde místo, zahustí se (užší parcely, nové uličky), takže každý vždy dostane domek. Když se dvě obce dotknou, jejich ulice se propojí.
-
-**Název města** určí anketa v 1. dílu (Říčansko / Velké Říčany / Město R / Radarov / Nové Říčany).
-
-**Hra je fikce.** Žádné reálné slučování obcí, žádná politika; jedna věta v pravidlech.
-
-**Co platí z v2 beze změny:** opuštěné obce (pod 5 obyvatel šedé domy, při 5 obec ožije), koruna týdne, povolání (5 stejných = budova), katalog staveb podle prahů, názvy staveb z komentářů s filtrem vulgarit, fáze příběhu (Probuzení → Rozmach → Svazky a Mikuláš → Zima → Vánoční trh → Finále), reel denně, Pan Radar jako vypravěč.
-
-**Konec hry:** neplánujeme. Každý díl má vlastní vrchol (nová obec, koruna, stavba), socha s erby je jediná přesahová linka. Až hra skončí, poslední díl ukáže sochu a Pan Radar řekne „zatím končíme“. Odměna pro komunitu (reálný díl / sraz na poli u Klokočné) jen pokud to poběží dlouho. Fáze a finále v sekcích 2–3 níže jsou původní plán z v1 a berou se jako zásobník nápadů, ne harmonogram.
+Proč 9:00: cílovka je ve škole, díl se má šířit o přestávkách.
 
 ---
+
+## Kostra každého dílu (20–30 s)
+
+1. **Hák (2 s):** jedna věta, záběr z výšky nebo z ulice.
+2. **Co se stalo včera (8 s):** kolik nás přibylo, kdo má korunu (největší obec = hlavní město), zakladatelé, co se postavilo a kdo to navrhl.
+3. **Dneska rozhodujete (8 s):** jedna otázka dne.
+4. **Výzva (3 s):** „Napiš obec, máš domek. Hlasuje se do pěti.“
+
+V každém dílu zazní jedna prázdná obec, pokaždé jiná („Výžerky, pořád nikdo?“).
+
+Zápis hlasů v komentáři: `název - …`, `vlajka - symbol, barvy`, `nápad - …`, `měna - …`, `jídlo - …`. Jde to spojit s obcí: `Mukařov, vlajka - jelen, zelená a zlatá`.
+
+---
+
+## Prvních 7 dílů
+
+| díl | téma | otázka dne | co večer vyrábíme |
+|---|---|---|---|
+| 1 | Říčansko vyhlásilo nezávislost | Jak se stát jmenuje? Co je na vlajce? | vlajku podle vítězného návrhu, název do hry |
+| 2 | Máme jméno a vlajku, zakladatelé | Co postavíme první? (metro, stadion, obří hrad…) | první stavbu |
+| 3 | První stavba stojí, boj o hlavní město | Co dál? + která obec bude hlavní město (ta největší) | druhou stavbu, koruna = hlavní město |
+| 4 | Stát bez peněz není stát | Měna a národní jídlo | bankovku, jídlo jako stánek/podnik v hlavním městě |
+| 5 | Derby dvou obcí | Kdo bude v 17:00 větší? | stavbu pro vítěze derby |
+| 6 | Praha si nás všimla | Co bude na hraniční bráně? | bránu na hranici s Prahou |
+| 7 | Týden jedna: stát v číslech | Kdo dostane vyznamenání? / poslední prázdné obce | souhrn, vyznamenání; konec, nebo háček na 2. část |
+
+### Díl 1: Říčansko vyhlásilo nezávislost
+
+Cíl: co nejvíc lidí, název a vlajka.
+
+**Pan Radar:** „Co kdyby se Říčansko osamostatnilo? Tak jo. Od dneška jsme stát. Dvaapadesát obcí, nula obyvatel, žádný název a žádná vlajka. To je trochu málo. Napiš do komentáře svou obec a máš tu domek se svým jménem. Prvních pět v každé obci jsou zakladatelé. Napořád. A rovnou rozhodni: jak se náš stát jmenuje a co bude na vlajce? Hlasuje se do pěti.“
+
+**Na obraze:** přelet nad prázdnou mapou → cedule obce bez domků → první domek s nickem → prázdný stožár. Titulky: `název - …` · `vlajka - symbol, barvy`.
+
+**Popisek:**
+> Co kdyby se Říčansko osamostatnilo? 🏴 Představ si, že jo. A že ho stavíš ty.
+>
+> 1️⃣ Napiš svou obec → máš domek se svým nickem na mapě (odkaz v biu)
+> 2️⃣ název - jak se má stát jmenovat
+> 3️⃣ vlajka - symbol + barvy
+>
+> Prvních 5 v každé obci = zakladatelé. Hlasuje se do 17:00, zítra v 9 uvidíš výsledek.
+> Je to hra a fikce, žádná politika. #PostavSiŘíčansko
+
+### Díl 2: Máme jméno a vlajku
+
+Cíl: ukázat, že hlas něco změnil, a otevřít hlavní mechaniku: lidi rozhodují, co se postaví.
+
+**Pan Radar:** „Den dva. Náš stát má jméno: [NÁZEV]. A vlajku: [symbol], [barvy]. Navrhl ji [@nick]. Za jediný den se nastěhovalo [N] lidí. [Obec] založili [@a], [@b] a [@c]. Největší je [obec], takže má korunu. Jenže stát, kde nic není, je jenom pole. Co postavíme první? Metro? Stadion? Obří hrad? Napiš nápad. Ten s nejvíc lajky zítra stojí.“
+
+**Na obraze:** vlajka vyjíždí na stožár → záběr z ulice na domky zakladatelů s nicky → koruna nad největší obcí → tři rychlé „co kdyby“ obrázky (metro, stadion, hrad). Titulek: `nápad - …`.
+
+### Díl 3: První stavba, boj o hlavní město
+
+**Pan Radar:** „Chtěli jste [stavbu]. Tak ji máte. Navrhl [@nick], jeho jméno je na ceduli. Je nás [N]. A teď to hlavní: každý stát má hlavní město. U nás je to obec, kde bydlí nejvíc lidí. Vede [A], [B] ztrácí jen [k] domků. Koruna se může stěhovat každý den. Napiš obec a přitáhni spolužáky. A [prázdná obec]: pořád nikdo? Co postavíme dál?“
+
+### Díl 4: Měna a národní jídlo
+
+**Pan Radar:** „Hlavní město je [A]. V [obec] stojí [stavba 2]. Jenže čím se tu vlastně platí? Stát bez peněz není stát. Jak se jmenuje naše měna? A co je národní jídlo? Vítězná bankovka zítra v devět.“
+
+Večer: bankovka s dominantou hlavního města (žádné tváře skutečných lidí), jídlo jako stánek ve hře.
+
+### Díl 5: Derby
+
+Dvě obce, které jsou si počtem nejblíž (ideálně sousedi). Kdo má v 17:00 víc domků, dostane stavbu.
+
+**Pan Radar:** „Platíme [měnou], jíme [jídlo]. A dneska derby: [B] proti [C]. Dělí je [k] domků. Kdo bude v pět odpoledne větší, dostane [stavbu]. Ten druhý nic. Pište obec, svolejte třídu.“
+
+### Díl 6: Praha si nás všimla
+
+Praha jen jako vtip, nemůže odpovědět.
+
+**Pan Radar:** „Derby vyhrál [B], [stavba] stojí. Je nás [N] a Praha si toho všimla. Prý kam jsme zmizeli. Tak jim na hranici postavíme pořádnou bránu, ať to vidí. Co na ní bude napsáno? Nejlepší nápis zítra visí nad silnicí.“
+
+### Díl 7: Týden jedna
+
+**Pan Radar:** „Týden jedna. [N] obyvatel, [k] z dvaapadesáti obcí žije. Máme jméno, vlajku, měnu, [stavby]. Hlavní město: [A]. Státní vyznamenání: skokan týdne [obec], nejlepší nápad [@nick], zakladatel týdne [@nick].“
+
+- **Konec A (uzavřít):** „Stát stojí a mapa zůstává. Tvůj domek ti nikdo nevezme.“
+- **Konec B (pokračovat):** „Jenže dneska ráno přišel dopis. Z Prahy. Pokračování zítra v devět.“
+
+Oba konce natočíme, rozhodneme se večer před dílem 7. Pokračovat, když díly 5 a 6 mají aspoň tolik zhlédnutí jako díl 2 a přibývá 30 a víc domků denně.
+
+---
+
+## Druhá část, pokud to poběží
+
+| varianta | o co jde | proč ano | riziko |
+|---|---|---|---|
+| **A + B dohromady (doporučuju)** | Praha chce Říčansko zpátky. Odpověď není armáda, ale hrad: opravujeme říčanský hrad jako sídlo státu. Každý nový obyvatel = kámen, po 100 lidech další patro. Kdo chce, hlásí se do Hradní stráže (odznak u domku). | má soupeře i cíl, hrad je skutečné místo v Říčanech, je vidět postup | držet to absurdní, žádné zbraně a boj |
+| A samotná | Praha útočí, hlásíme se do armády | jednoduché, vtipné | „armáda“ a „útok“ se snadno čtou vážně, obce jako partneři to nemusí vzít |
+| C | Zima ve státě: první sníh, Mikuláš 5. 12., vánoční trh a strom v hlavním městě | termíny dává kalendář, snadná výroba | malé drama, spíš doplněk k A + B |
+
+Drak a podobná fantasy ne.
+
+---
+
+## Stav částí (10. 11.)
+
+| část | stav | zbývá |
+|---|---|---|
+| Mapa | nové měřítko 1:1 bez nafukování, obce rostou do skutečné krajiny, čtvrti z bloků, sousedi se nepřekrývají | doladit přehled z výšky, mobil, název státu a vlajka ve hře |
+| Instagram → data | hotovo: komentáře pod všemi díly, hlasy (název, vlajka, nápad…), uzávěrka 17:00, web se mění jen s novým dílem | zkouška na ostrém postu |
+| Video | reel se renderuje sám v 17:20, hlas Sadaltager | přestavět podle reference (záběry z ulice, jedna věta na záběr), vybrat tempo hlasu |
+| Texty | příběh v4, 7 dílů, popisek dílu 1 | popisky dílů 2–7 vznikají den předem podle výsledků |
+| Provoz | web na GitHub Pages, admin | večerní rutina 17–20 vyzkoušet nanečisto |
+
+---
+
+# Archiv: starší verze (v1–v3)
+
+Všechno níže je původní plán (sjednocení, povolání, koruna týdne, finále 24. 12.). Platí jen jako zásobník nápadů.
 
 ## 0. Co jsme si ověřili na podobných hrách (zkráceně)
 
