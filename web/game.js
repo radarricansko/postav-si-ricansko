@@ -283,19 +283,21 @@ const FIELD=["#c8b46a","#b7c36a","#9dbd59","#d0b878","#a7b75d","#c3a75a","#8db15
 const fieldTex=canvasTex(64,64,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.fillStyle="rgba(0,0,0,.07)";for(let y=0;y<h;y+=8)g.fillRect(0,y,w,3)},true);
 let landMesh,waterMesh,landSrc=null,waterSrc=null;
 function buildLandSource(){const r=rng(5);
- const mk=(arr,kind,out)=>arr.forEach(a=>{const p=polyFromFlat(a);if(p.length<3)return;let tri;try{tri=T.ShapeUtils.triangulateShape(p.map(q=>new T.Vector2(q[0],q[1])),[])}catch(e){return}if(!tri.length)return;
+ // každá plocha má vlastní výšku (pole < ostatní < louky < les), aby se překrývající plochy neprolínaly
+ const LY={A:.012,O:.02,M:.028,F:.036,W:0};
+ const mk=(arr,kind,out)=>arr.forEach((a,pi)=>{const p=polyFromFlat(a);if(p.length<3)return;const yy=LY[kind]+(pi%7)*.0009;let tri;try{tri=T.ShapeUtils.triangulateShape(p.map(q=>new T.Vector2(q[0],q[1])),[])}catch(e){return}if(!tri.length)return;
   const base=out.m.length/2;let col;if(kind==="A")col=new T.Color(FIELD[Math.floor(r()*FIELD.length)]);else if(kind==="M")col=new T.Color(r()<.5?"#a4cc6c":"#97c463");else if(kind==="O")col=new T.Color("#88b85a");else if(kind==="F")col=new T.Color("#5d8a43");else col=new T.Color("#4f9ccc");
   const an=r()*Math.PI,ca=Math.cos(an),sa=Math.sin(an);const sc=kind==="A"?26:60;
-  p.forEach(q=>{out.m.push(q[0],q[1]);out.c.push(col.r,col.g,col.b);out.u.push((q[0]*ca+q[1]*sa)/sc,(-q[0]*sa+q[1]*ca)/sc)});tri.forEach(t3=>{const a=p[t3[0]],b=p[t3[1]],c=p[t3[2]];const cr=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);if(cr>0)out.i.push(base+t3[0],base+t3[1],base+t3[2]);else out.i.push(base+t3[0],base+t3[2],base+t3[1])})});
- landSrc={m:[],c:[],u:[],i:[]};mk(LAND.F,"F",landSrc);mk(LAND.M,"M",landSrc);mk(LAND.O,"O",landSrc);mk(LAND.A,"A",landSrc);
- waterSrc={m:[],c:[],u:[],i:[]};mk(LAND.W,"W",waterSrc);
+  p.forEach(q=>{out.m.push(q[0],q[1]);out.y.push(yy);out.c.push(col.r,col.g,col.b);out.u.push((q[0]*ca+q[1]*sa)/sc,(-q[0]*sa+q[1]*ca)/sc)});tri.forEach(t3=>{const a=p[t3[0]],b=p[t3[1]],c=p[t3[2]];const cr=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);if(cr>0)out.i.push(base+t3[0],base+t3[1],base+t3[2]);else out.i.push(base+t3[0],base+t3[2],base+t3[1])})});
+ landSrc={m:[],y:[],c:[],u:[],i:[]};mk(LAND.F,"F",landSrc);mk(LAND.M,"M",landSrc);mk(LAND.O,"O",landSrc);mk(LAND.A,"A",landSrc);
+ waterSrc={m:[],y:[],c:[],u:[],i:[]};mk(LAND.W,"W",waterSrc);
  const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(new Float32Array(landSrc.m.length/2*3),3));g.setAttribute("color",new T.Float32BufferAttribute(landSrc.c,3));g.setAttribute("uv",new T.Float32BufferAttribute(landSrc.u,2));
  const N=new Float32Array(landSrc.m.length/2*3);for(let i=1;i<N.length;i+=3)N[i]=1;g.setAttribute("normal",new T.BufferAttribute(N,3));g.setIndex(landSrc.i);
  landMesh=new T.Mesh(g,new T.MeshLambertMaterial({vertexColors:true,map:fieldTex,polygonOffset:true,polygonOffsetFactor:-.5,polygonOffsetUnits:-.5}));landMesh.receiveShadow=true;landMesh.frustumCulled=false;scene.add(landMesh);
  const w=new T.BufferGeometry();w.setAttribute("position",new T.BufferAttribute(new Float32Array(waterSrc.m.length/2*3),3));const WN=new Float32Array(waterSrc.m.length/2*3);for(let i=1;i<WN.length;i+=3)WN[i]=1;w.setAttribute("normal",new T.BufferAttribute(WN,3));w.setIndex(waterSrc.i);
  waterMesh=new T.Mesh(w,new T.MeshPhongMaterial({color:"#4c9fd0",shininess:80,specular:"#cfe8ff",polygonOffset:true,polygonOffsetFactor:-1.5,polygonOffsetUnits:-1.5}));waterMesh.frustumCulled=false;waterMesh.receiveShadow=false;scene.add(waterMesh)}
 const tmp2=[0,0];
-function mapLand(){const pa=landMesh.geometry.attributes.position.array,m=landSrc.m;for(let i=0,j=0;i<m.length;i+=2,j+=3){F(m[i],m[i+1],tmp2);pa[j]=tmp2[0];pa[j+1]=.02;pa[j+2]=tmp2[1]}landMesh.geometry.attributes.position.needsUpdate=true;
+function mapLand(){const pa=landMesh.geometry.attributes.position.array,m=landSrc.m;for(let i=0,j=0;i<m.length;i+=2,j+=3){F(m[i],m[i+1],tmp2);pa[j]=tmp2[0];pa[j+1]=landSrc.y[i>>1];pa[j+2]=tmp2[1]}landMesh.geometry.attributes.position.needsUpdate=true;
  const wa=waterMesh.geometry.attributes.position.array,w=waterSrc.m;for(let i=0,j=0;i<w.length;i+=2,j+=3){F(w[i],w[i+1],tmp2);wa[j]=tmp2[0];wa[j+1]=.085;wa[j+2]=tmp2[1]}waterMesh.geometry.attributes.position.needsUpdate=true}
 const ground=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshLambertMaterial({color:"#90b95f"}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 
@@ -426,7 +428,7 @@ function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.user
  const used=Math.min(t.items.length,t.slots.length);
  // lawn pod obcí (zakryje pole)
  // trávník jen pod zastavěnými bloky (ne velký kruh): čtverec kolem každého bloku + kruh kolem návsi
- {const lp=[],li=[];const fan=(pts)=>{const b=lp.length/3;let cx=0,cz=0;pts.forEach(q=>{cx+=q.x;cz+=q.z});cx/=pts.length;cz/=pts.length;lp.push(cx,.03,cz);pts.forEach(q=>lp.push(q.x,.03,q.z));for(let i=0;i<pts.length;i++)li.push(b,b+1+(i+1)%pts.length,b+1+i)};
+ {const lp=[],li=[];const fan=(pts)=>{const b=lp.length/3;let cx=0,cz=0;pts.forEach(q=>{cx+=q.x;cz+=q.z});cx/=pts.length;cz/=pts.length;lp.push(cx,.044,cz);pts.forEach(q=>lp.push(q.x,.044,q.z));for(let i=0;i<pts.length;i++)li.push(b,b+1+(i+1)%pts.length,b+1+i)};
   const circ=(x,z,r)=>{const a=[];for(let i=0;i<28;i++){const an=i/28*6.283;a.push({x:x+Math.cos(an)*r,z:z+Math.sin(an)*r})}fan(a)};
   circ(t.lm.x,t.lm.z,t.lm.r+14);(t.usedB||[]).forEach(b=>{circ(b.cx,b.cz,b.lr)});(t.slots||[]).forEach(q=>{if(q.big)circ(q.x,q.z,q.big+4)});
   const lg=new T.BufferGeometry();lg.setAttribute("position",new T.Float32BufferAttribute(lp,3));lg.setIndex(li);lg.computeVertexNormals();const lawn=new T.Mesh(lg,MAT.lawn);lawn.receiveShadow=true;lawn.userData.tmp=1;g.add(lawn)}
