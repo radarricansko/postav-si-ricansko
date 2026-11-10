@@ -28,7 +28,7 @@ const TABS=["rank","story","build","stats","info"];
 
 const root=document.createElement("div");root.id="pui";root.innerHTML=`
 <div id="pTop" class="glass">
- <div class="pTitle"><h1>Postav si <span>Říčansko</span></h1><span id="pSub" class="pDay">Den 1</span><button id="pSearchBtn" class="ico" aria-label="Hledat">🔍</button></div>
+ <div class="pTitle"><h1 id="pH1">Postav si <span>Říčansko</span></h1><span id="pSub" class="pDay">Den 1</span><button id="pSearchBtn" class="ico" aria-label="Hledat">🔍</button></div>
  <div class="pStats">
   <span class="chip"><b id="kPop">0</b>obyvatel</span>
   <span class="chip"><b id="kAlive">0<i id="kTot"></i></b>oživených obcí</span>
@@ -154,6 +154,10 @@ q.addEventListener("input",()=>{const v=q.value.trim();if(!v){res.innerHTML="";r
 q.addEventListener("keydown",e=>{if(e.key==="Enter"){const b=res.querySelector("button");if(b)b.click()}if(e.key==="Escape"){q.value="";res.innerHTML="";q.blur()}});
 document.addEventListener("pointerdown",e=>{if(res.innerHTML&&!e.target.closest(".pSearch"))res.innerHTML=""});
 
+/* ---------- název státu a vlajka v hlavičce (po dílu 1; game.js volá GAME.onStat) ---------- */
+(function(){const h=$("pH1");if(!h)return;const set=st=>{if(!st||!st.nazev){h.innerHTML="Postav si <span>Říčansko</span>";return}
+ h.innerHTML=(st.svg?`<img alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(st.svg)}" style="height:.8em;border-radius:3px;margin-right:.35em;vertical-align:-.06em;box-shadow:0 0 0 1px rgba(10,18,51,.15)">`:"")+`<span>${esc(st.nazev)}</span>`};
+ GAME.onStat=set;if(GAME.stat)set(GAME.stat())})();
 /* ---------- kompas: popisky na dial zůstávají vzpřímené (game.js otáčí #compass .n) ---------- */
 (function(){const n=document.querySelector("#compass .n");const c=$("compass");if(!n||!c||!GAME.onFrame)return;let last="";
  GAME.onFrame(()=>{const tr=n.style.transform;if(tr===last)return;last=tr;const m=/rotate\((-?[\d.e+-]+)rad\)/.exec(tr);c.style.setProperty("--r",m?(-m[1])+"rad":"0rad")})})();
