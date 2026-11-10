@@ -42,7 +42,7 @@ jobs:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: |
           DATA="$([ -f world-dil.json ] && echo world-dil.json || echo world.json)"
-          node tools/video/render.js --dil "$DIL" --data "$DATA" $ZK --voice-out out/hlas.json --out out
+          node tools/video/render.js --dil "$DIL" ${ZK:---data $DATA} --voice-out out/hlas.json --out out
           # podklady, ze kterých kreslí všechny části stejně
           mkdir -p podklady && cp out/hlas.json podklady/ && cp world.json podklady/ && (cp world-dil.json podklady/ 2>/dev/null || true) && (cp -r tools/ig/navrhy podklady/navrhy 2>/dev/null || true)
       - uses: actions/upload-artifact@v4
@@ -66,7 +66,7 @@ jobs:
         run: |
           cp podklady/world.json world.json; [ -f podklady/world-dil.json ] && cp podklady/world-dil.json world-dil.json; [ -d podklady/navrhy ] && mkdir -p tools/ig/navrhy && cp -r podklady/navrhy/. tools/ig/navrhy/
           DATA="$([ -f world-dil.json ] && echo world-dil.json || echo world.json)"
-          node tools/video/render.js --dil "$DIL" --data "$DATA" $ZK --voice-in podklady/hlas.json --part "${{ matrix.cast }}/6" --out out
+          node tools/video/render.js --dil "$DIL" ${ZK:---data $DATA} --voice-in podklady/hlas.json --part "${{ matrix.cast }}/6" --out out
       - uses: actions/upload-artifact@v4
         with: { name: "snimky-${{ matrix.cast }}", path: out/frames/, retention-days: 1 }
   slozit:
@@ -88,7 +88,7 @@ jobs:
           cp podklady/world.json world.json; [ -f podklady/world-dil.json ] && cp podklady/world-dil.json world-dil.json; [ -d podklady/navrhy ] && mkdir -p tools/ig/navrhy && cp -r podklady/navrhy/. tools/ig/navrhy/
           DATA="$([ -f world-dil.json ] && echo world-dil.json || echo world.json)"
           ls out/frames | wc -l
-          node tools/video/render.js --dil "$DIL" --data "$DATA" $ZK --voice-in podklady/hlas.json --mux --out out
+          node tools/video/render.js --dil "$DIL" ${ZK:---data $DATA} --voice-in podklady/hlas.json --mux --out out
       - name: Video do větve previews
         run: |
           f=$(ls out/*.mp4 | head -1); n=$(basename "$f" .mp4)
