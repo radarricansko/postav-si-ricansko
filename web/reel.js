@@ -682,7 +682,7 @@
     var cr = x.crown, info = x.townBy[cr.name] || {}, w = cr.week || 0, pr = townPron(cr.name);
     return {
       type: 'crown', role: 'content', noSubs: true, name: cr.name, week: w, pron: pr, assets: { erb: info.erbUrl || info.erbSvg || '' },
-      vo: 'Korunu týdne má ' + cr.name + '!' + (w ? ' Plus ' + w + ' za týden.' : '') + ' Kdo ' + pr + ' ji vezme?'
+      vo: 'Korunu má ' + cr.name + ', největší obec Říčanska! Kdo ' + pr + ' ji vezme?'
     };
   }
   function sceneComment(x) {
@@ -835,7 +835,7 @@
     var cta = {
       type: 'cta', role: 'cta', noSubs: true, subsUntil: /^Dej$/i, sample: typed,
       next: next ? { author: String(next.author || '').replace(/^@/, ''), text: String(next.text).trim().slice(0, 90), likes: next.likes || 0 } : null,
-      vo: 'Zítra stavíme top komentář. Co to bude? Dej follow, napiš obec a povolání a máš domek se jménem!'
+      vo: 'Zítra stavíme top komentář. Co to bude? Dej follow, napiš svou obec a máš domek se jménem!'
     };
     var outro = { type: 'outro', role: 'outro', day: d, vo: 'Zítra den ' + (d + 1) + '!', handle: opts.handle || '' };
 
@@ -1937,7 +1937,7 @@
       if (bp2 > 0) {
         var w2 = 720, x2 = W - 80 - w2;
         g.save(); g.globalAlpha = popA(bp2) * oa; g.translate(x2 + w2, 800); g.scale(popS(bp2), popS(bp2)); g.translate(-(x2 + w2), -800);
-        bubble(g, x2, 740, w2, ['napiš obec a povolání', 'do komentů ↓'], { side: 'right', size: 40, lh: 52, pad: 30 });
+        bubble(g, x2, 740, w2, ['napiš svou obec', 'do komentů ↓'], { side: 'right', size: 40, lh: 52, pad: 30 });
         g.restore();
       }
       // psaní komentáře (ukázka)

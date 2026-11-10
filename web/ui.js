@@ -15,18 +15,12 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const plural=(n,a,b,c)=>n===1?a:n>=2&&n<=4?b:c;
 /* příběh po dnech (scénář), doplněný o automatické hlášení z dat */
 const STORY={
- 1:{t:"Říčansko se sjednocuje",x:"Pan Radar vyhlásil sjednocení. Uprostřed regionu vzniklo Náměstí sjednocení se sochou 52 mečů a 52 erby. Všechny jsou zatím šedé: 52 obcí, všechny opuštěné. Každý nový obyvatel opraví jeden dům, při 5 lidech obec ožije a její erb na soše se rozsvítí.",ph:"Fáze 1 · Probuzení"},
- 2:{t:"Praha má metro. My?",x:"Napiš do komentářů, co má Praha a sjednocené město ještě ne. Nejlajkovanější přání se postaví u náměstí, až na něj bude dost lidí."},
- 3:{t:"První povolání",x:"K obci můžeš napsat i povolání. Když se sejde 5 hasičů, postaví si hasičárnu. 5 skejťáků skatepark."},
- 5:{t:"Koruna týdne",x:"Nad obcí s největším přírůstkem za 7 dní se objevila zlatá koruna. Je putovní: kdo roste rychleji, ten ji vezme."},
- 8:{t:"Rozmach",x:"Odemykají se ligy erbů a povolanské budovy. Kdo bude první stříbrná obec? A které přání proti Praze se splní jako první?",ph:"Fáze 2 · Rozmach"},
- 15:{t:"Svazky obcí",x:"Sousední obce se můžou spojit do svazku (max. 3) a postavit společnou stavbu.",ph:"Fáze 3 · Svazky a Mikuláš"},
- 17:{t:"Výpadek radaru",x:"Pan Radar na pár sekund ztratil signál. Co se mezitím na mapě objevilo?"},
- 20:{t:"Mikuláš",x:"Anděl nadělil nejaktivnější obci, čert nasypal uhlí obci, která tři dny nevyrostla."},
- 22:{t:"Zima",x:"Na Říčansko napadl sníh a na okraji mapy se objevila tajemná budova.",ph:"Fáze 4 · Zima"},
- 29:{t:"Vánoční trh",x:"Každá obydlená obec dostane stánek na Náměstí sjednocení. Název vybere top komentář.",ph:"Fáze 5 · Vánoční trh"},
- 36:{t:"Finále",x:"Poslední týden. Cíl: rozsvítit všech 52 erbů na soše.",ph:"Fáze 6 · Finále"},
- 39:{t:"Rozsvícení",x:"Socha svítí celá. Pan Radar končí hlášení."}
+ 1:{t:"Co kdyby se Říčansko osamostatnilo?",x:"Představ si, že 52 obcí Říčanska vyhlásí vlastní stát. Uprostřed vzniká Náměstí sjednocení se sochou 52 mečů a 52 erby. Zatím jsou všechny šedé: každý nový obyvatel opraví jeden dům, při 5 lidech obec ožije a její erb se rozsvítí. První úkol: jak se nový stát bude jmenovat a jakou bude mít vlajku?",ph:"Díl 1"},
+ 2:{t:"Jméno a vlajka",x:"Hlasuje se o názvu nového státu a o jeho vlajce. Vítězný návrh zavlaje na Náměstí sjednocení."},
+ 3:{t:"Zakladatelé",x:"Prvních 5 obyvatel každé obce jsou její zakladatelé. Napořád."},
+ 5:{t:"Koruna",x:"Nad největší obcí se vznáší zlatá koruna. Kdo ji předběhne, ten ji vezme."},
+ 8:{t:"Co postavíme?",x:"Nový stát potřebuje všechno. Metro? Letiště? Zoo s pandami? Nejlajkovanější nápad dne se postaví i s cedulí autora."},
+ 15:{t:"Sousedé",x:"Když se dvě obce rozrostou až k sobě, jejich ulice se propojí."}
 };
 const TABN={rank:"Obce",story:"Příběh",build:"Stavby",stats:"Čísla",info:"Jak hrát"};
 const TABI={rank:"🏆",story:"📅",build:"🏗️",stats:"📈",info:"❓"};
@@ -77,7 +71,7 @@ function renderRank(){const r=GAME.ranking();const rv=GAME.revive();$("pane-rank
 function storyFacts(d,latest){const L=GAME.dayLog(d);const f=[];
  if(latest){let dd=null;try{dd=GAME.dayData&&GAME.dayData()}catch(e){}
   if(dd&&dd.topComment&&dd.topComment.text)f.push(`<li><i>💬</i><span>Lidi si přáli: <b>„${esc(dd.topComment.text)}“</b></span></li>`);
-  const cr=GAME.crown();if(cr)f.push(`<li><i>👑</i><span>Koruna týdne: <b>${esc(cr.name)}</b></span></li>`)}
+  const cr=GAME.crown();if(cr)f.push(`<li><i>👑</i><span>Korunu má <b>${esc(cr.name)}</b></span></li>`)}
  L.revived.forEach(n=>f.push(`<li><i>🏡</i><span><b>${esc(n)}</b> ožila</span></li>`));
  L.built.forEach(b=>f.push(`<li><i>${b.emoji}</i><span><b>${esc(b.town)}</b> postavila ${esc(b.text)}${b.job?` <small>(${esc(b.job)})</small>`:""}</span></li>`));
  return f}
@@ -89,16 +83,15 @@ function renderStory(){const d0=GAME.info().day;let h=`<div class="paneHead"><b>
 
 /* ---------- katalog staveb ---------- */
 let buildDone=false;
-function renderBuild(){if(buildDone)return;const el=$("pane-build");el.innerHTML=`<div class="paneHead"><b>Katalog staveb</b><small>Odemykají se počtem obyvatel obce. Co se postaví, vybírá nejlajkovanější komentář a stavba dostane ceduli s názvem.</small></div><div class="loading">Připravuji náhledy…</div>`;
- setTimeout(()=>{const th=GAME.catalogThumbs();el.innerHTML=el.querySelector(".paneHead").outerHTML+`<div class="cgrid">`+th.map(c=>`<div class="cit"><img src="${c.img}" alt=""><div><b>${c.emoji} ${esc(c.name)}</b><span class="th">od ${c.th} ${plural(c.th,"obyvatele","obyvatel","obyvatel")}</span>${c.job?`<span class="jb2">nebo ${GAME.jobN()}× ${c.job.e} ${esc(c.job.n.toLowerCase())}</span>`:""}<small>„${esc(c.example)}“</small></div></div>`).join("")+`</div>`;buildDone=true},30)}
+function renderBuild(){if(buildDone)return;const el=$("pane-build");el.innerHTML=`<div class="paneHead"><b>Katalog staveb</b><small>Inspirace, co jde postavit. Rozhodují komentáře: nejlajkovanější nápad dne se postaví a dostane ceduli s názvem a nickem autora.</small></div><div class="loading">Připravuji náhledy…</div>`;
+ setTimeout(()=>{const th=GAME.catalogThumbs();el.innerHTML=el.querySelector(".paneHead").outerHTML+`<div class="cgrid">`+th.map(c=>`<div class="cit"><img src="${c.img}" alt=""><div><b>${c.emoji} ${esc(c.name)}</b><span class="th">od ${c.th} ${plural(c.th,"obyvatele","obyvatel","obyvatel")}</span><small>„${esc(c.example)}“</small></div></div>`).join("")+`</div>`;buildDone=true},30)}
 
 /* ---------- čísla ---------- */
 function renderStats(){const H=GAME.history();const r=GAME.ranking();const i=GAME.info();const rv=GAME.revive();
  const top=r.slice(0,5).map(t=>t.name);const week=r.slice().sort((a,b)=>b.week-a.week)[0];
- const jobs={};GAME.ranking().forEach(t=>{const ti=GAME.townInfo(t.name);(ti.jobs||[]).forEach(j=>jobs[j.n]=(jobs[j.n]||0)+j.c)});const topJob=Object.entries(jobs).sort((a,b)=>b[1]-a[1])[0];
  $("pane-stats").innerHTML=`<div class="paneHead"><b>Čísla Říčanska</b><small>vývoj od dne 1</small></div>
  <div class="kpi2"><div><b>${i.pop}</b><span>obyvatel</span></div><div><b>${r.filter(t=>t.players>=rv).length}/${i.total}</b><span>ožilých obcí</span></div>
- <div><b>${week&&week.week?esc(week.name):"–"}</b><span>nejrychlejší tento týden${week&&week.week?` (+${week.week})`:""}</span></div><div><b>${topJob?esc(topJob[0]):"–"}</b><span>nejčastější povolání</span></div></div>
+ <div><b>${week&&week.week?esc(week.name):"–"}</b><span>nejrychlejší tento týden${week&&week.week?` (+${week.week})`:""}</span></div><div><b>${r[0]&&r[0].players?esc(r[0].name):"–"}</b><span>největší obec 👑</span></div></div>
  <h5>Obyvatelé celkem</h5><canvas id="chTot" height="150"></canvas><h5>Top 5 obcí</h5><canvas id="chTop" height="170"></canvas><div class="legend" id="chLeg"></div>`;
  const COLS=["#2F4AA8","#e0572b","#2fa35a","#d99a00","#7c3aed"];
  drawChart($("chTot"),H.days,[{v:H.total,c:"#2F4AA8",fill:true}]);
@@ -118,17 +111,17 @@ let infoDone=false;
 function renderInfo(){if(infoDone)return;infoDone=true;const rv=GAME.revive();const jn=GAME.jobN();
  const frames=["wood","silver","gold","plat"].map(t=>{const d=ERB.E.find(e=>e[0]==="Říčany");return`<div class="lg"><img src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(ERB.erb(d,t))}" alt=""><b>${TIERN[t]}</b><small>${{wood:"5–19",silver:"20–49",gold:"50–99",plat:"100+"}[t]} obyvatel</small></div>`}).join("");
  $("pane-info").innerHTML=`<div class="paneHead"><b>Jak hrát</b></div>
- <p class="lead">Říčansko se sjednocuje v jedno město a chce být lepší než Praha. Na mapě je 52 obcí, uprostřed Náměstí sjednocení se sochou 52 erbů. <b>Kdo se přidá, dostane domek se svým nickem</b> a rozsvěcí erb své obce.</p>
+ <p class="lead">Co kdyby se Říčansko osamostatnilo? 52 obcí, jeden nový stát a uprostřed Náměstí sjednocení se sochou 52 erbů. <b>Kdo se přidá, dostane domek se svým nickem</b> a rozsvítí erb své obce.</p>
  <ol class="steps"><li><b>Sleduj @radar_ricansko</b><span>Hra běží na Instagramu Radaru.</span></li>
- <li><b>Napiš do komentářů svou obec</b><span>Pod herní příspěvek, klidně i s povoláním: „Mukařov hasič“.</span></li>
+ <li><b>Napiš do komentářů svou obec</b><span>Pod herní příspěvek. Stačí název, třeba „Mukařov“.</span></li>
  <li><b>Najdi svůj domek</b><span>Do 2 hodin vyroste na mapě. Hledej podle nicku.</span></li></ol>
  <h5>🏚️ Opuštěné obce</h5><p>Pod ${rv} obyvatel je obec opuštěná: šedé domy, šedý erb. Každý nový obyvatel jeden dům opraví, při ${rv} obec <b>ožije</b>.</p>
  <h5>🛡️ Ligy obcí</h5><p>Rámeček erbu roste s počtem obyvatel.</p><div class="lgs">${frames}</div>
- <h5>👑 Koruna týdne</h5><p>Vznáší se nad obcí s <b>největším přírůstkem za 7 dní</b>. Kdo roste rychleji, ten ji vezme.</p>
- <h5>🧑‍🚒 Povolání</h5><p>${jn} lidí se stejným povoláním v jedné obci = vlastní budova.</p><div class="jobsG">${GAME.jobs().map(j=>`<span>${j.e} ${esc(j.n)} <small>→ ${esc(j.b)}</small></span>`).join("")}</div>
- <h5>🏗️ Nápad dne</h5><p>Napiš pod reel, co má obec postavit, nebo co má Praha a my ne (metro, zoo…). Nejlajkovanější nápad se postaví i s cedulí a tvým nickem.</p>
+ <h5>👑 Koruna</h5><p>Vznáší se nad obcí s <b>nejvíc obyvateli</b>. Kdo ji předběhne, ten ji vezme.</p>
+ <h5>🏅 Zakladatelé</h5><p>Prvních 5 obyvatel každé obce jsou její zakladatelé.</p>
+ <h5>🏗️ Nápad dne</h5><p>Napiš pod reel, co má nový stát postavit (metro, zoo, letiště…). Nejlajkovanější nápad se postaví i s cedulí a tvým nickem.</p>
  <a class="cta" href="${IG}" target="_blank" rel="noopener">Hrát na Instagramu</a>
- <p class="fine">Nechceš být ve hře? Napiš nám DM a domek odstraníme. Hra je fikce a zábava, žádné reálné slučování obcí, bez cen. Mapa © OpenStreetMap.</p>`}
+ <p class="fine">Nechceš být ve hře? Napiš nám DM a domek odstraníme. Hra je fikce a zábava: žádné skutečné osamostatnění ani slučování obcí, bez cen. Mapa © OpenStreetMap.</p>`}
 
 /* ---------- karta obce ---------- */
 let curTown=null;
@@ -137,12 +130,10 @@ function renderTown(){document.body.classList.toggle("card-open",!!curTown||info
  const H=GAME.history();const ser=H.towns[t.name]||[];
  el.innerHTML=`<button class="x" id="pTownX" aria-label="Zavřít">×</button><div class="tHead">${erbImg(t.erbUrl,"erbL")}<div><h3>${esc(t.name)}</h3><span class="tier" style="--c:${alive?TIERC[t.tier]:"#9b8b6e"}">${alive?TIERN[t.tier]:"🏚️ Opuštěná obec"}</span></div></div>
  <div class="tStats"><div><b>${t.players}</b><span>obyvatel</span></div><div><b>${t.specials.length}</b><span>staveb</span></div><div><b>${alive?(nt?nt.to-t.players:"✓"):rv-t.players}</b><span>${alive?(nt?nt.lab:"max. liga"):"do oživení"}</span></div></div>
- ${t.crown?`<p class="note gold">👑 <b>Koruna týdne!</b> Největší přírůstek za 7 dní (+${t.weekGain}). Udrží ji do neděle?</p>`:""}
+ ${t.crown?`<p class="note gold">👑 <b>Koruna!</b> Největší obec Říčanska. Kdo ji předběhne?</p>`:""}
  ${alive?"":`<p class="note">🏚️ V obci stojí ${t.abandoned} ${plural(t.abandoned,"opuštěný dům","opuštěné domy","opuštěných domů")}. Každý nový obyvatel jeden opraví. Při ${rv} obyvatelích obec ožije!</p>`}
- ${t.full?`<p class="note">🏘️ Obec je nabitá k prasknutí (${t.cap} parcel) – další domky se vejdou jen po zahuštění.</p>`:""}
  ${t.linked&&t.linked.length?`<p class="note">🤝 Spojeno s: <b>${t.linked.map(esc).join(", ")}</b></p>`:""}
  ${ser.length>1&&t.players?`<canvas id="tSpark" height="54"></canvas>`:""}
- ${t.jobs&&t.jobs.length?`<div class="jobs">${t.jobs.map(j=>`<div class="job"><span>${j.e} ${esc(j.n)}</span><span class="jb"><i style="width:${Math.min(100,j.c/j.need*100)}%"></i></span><small>${j.built?"✓ "+esc(j.b):j.c+"/"+j.need+" → "+esc(j.b)}</small></div>`).join("")}</div>`:""}
  <p class="lm">📍 ${esc(t.landmark)}</p>
  ${t.specials.length?`<div class="sp">${t.specials.map(x=>`<span>🏗️ ${esc(x.text)}</span>`).join("")}</div>`:""}
  ${t.next?`<p class="nx">Další stavba se odemkne při <b>${t.next.th} obyvatelích</b> ${t.next.emoji}</p>`:""}
@@ -170,7 +161,7 @@ document.addEventListener("pointerdown",e=>{if(res.innerHTML&&!e.target.closest(
 /* ---------- aktualizace ---------- */
 function upd(){const i=GAME.info();const r=GAME.ranking();const rv=GAME.revive();$("pSub").textContent=`Den ${i.day} · ${dayDate(i.day)}`;
  $("kPop").textContent=i.pop.toLocaleString("cs-CZ");$("kAlive").firstChild.textContent=r.filter(t=>t.players>=rv).length;$("kTot").textContent="/"+i.total;
- const cr=GAME.crown();const cb=$("pCrown");cb.hidden=!cr;if(cr){cb.innerHTML=`<i>👑</i><b>${esc(cr.name)}</b><span>koruna týdne · +${cr.week}</span>`;cb.title="Koruna týdne: "+cr.name;cb.onclick=()=>{closeSheets();GAME.focusTown(cr.name)}}
+ const cr=GAME.crown();const cb=$("pCrown");cb.hidden=!cr;if(cr){cb.innerHTML=`<i>👑</i><b>${esc(cr.name)}</b><span>největší obec</span>`;cb.title="Korunu má "+cr.name;cb.onclick=()=>{closeSheets();GAME.focusTown(cr.name)}}
  if(curTab==="rank"||curTab==="story"||curTab==="stats")render(curTab);renderTown();fitTop()}
 function fitTop(){document.documentElement.style.setProperty("--topB",($("pTop").offsetTop+$("pTop").offsetHeight+12)+"px")}
 new ResizeObserver(fitTop).observe($("pTop"));addEventListener("resize",fitTop);fitTop();
