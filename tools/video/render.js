@@ -1,5 +1,6 @@
 /* Noční render reelu „Postav si Říčansko“ (headless Chromium + ffmpeg).
  *   Rychlý render po částech (dil.yml): --voice-out soubor (jen hlas) · --voice-in soubor --part k/P (jen snímky části k z P) · --voice-in soubor --mux (zvuk + složení)
+ *   Hudba: --music lofi|funk|minimal|trap|puvodni|bez (nebo "hudba" ve scénáři dílu, nebo proměnná MUSIC) · --audio-only --musics a,b,c = jen zvukové ukázky (hlas + podkres) pro výběr
  *   node tools/video/render.js --dil N [--sheet]     díl podle scénáře tools/video/dily/dil-N.json (--sheet = jen náhledové snímky po 0,5 s)
  *   node tools/video/render.js [--out out/] [--day N] [--data world.json] [--handle @radar_ricansko] [--scale 0.5] [--fps 30] [--frames N]
  * Env: ELEVENLABS_API_KEY (volitelně, hlas), ELEVENLABS_VOICE_ID (ID hlasu z Voice Library), ELEVENLABS_MODEL (default eleven_multilingual_v2)
@@ -70,7 +71,12 @@ function splitTake(mp3,texts){const tmp=path.join(OUT,'take.mp3');fs.writeFileSy
   if(VOUT){fs.writeFileSync(VOUT,JSON.stringify({clips,via:ttsVia}));console.log('hlas uložen:',VOUT,'segmentů',voiced,'/',segs.length,ttsVia);await b.close();srv.close();return}
   if(clips.some(Boolean))  await p.evaluate(async clips=>{const blobs=clips.map(c=>c?new Blob([Uint8Array.from(atob(c),ch=>ch.charCodeAt(0))],{type:'audio/mpeg'}):null);await REEL.setVoiceSegments(window.__script,blobs,{padMs:window.__script.hook==='dil'?0:80})},clips);
   console.log('hlas: segmentů',voiced,'/',segs.length)}else if(VOUT){fs.writeFileSync(VOUT,JSON.stringify({clips:[],via:''}));console.log('hlas: žádný klíč, video bude bez hlasu');await b.close();srv.close();return}else console.log('hlas: bez ElevenLabs (chybí ELEVENLABS_API_KEY) – video bude jen s hudbou, text je v .txt/.srt');
+ const MUSIC=arg('music')||(def&&def.hudba)||process.env.MUSIC||'';if(MUSIC)console.log('hudba:',await p.evaluate(m=>REEL.setMusic(m),MUSIC));
  fs.writeFileSync(path.join(OUT,tag+'.json'),JSON.stringify(await p.evaluate(()=>window.__script),null,1));
+ if(process.argv.includes('--audio-only')){ /* ukázky podkresů: stejný hlas, různá hudba */
+  for(const m of (arg('musics')||'lofi,funk,minimal,trap,puvodni,bez').split(',')){await p.evaluate(x=>REEL.setMusic(x),m);const w=await p.evaluate(async()=>{const bl=await REEL.renderAudio(window.__script);const ab=await bl.arrayBuffer();let s='';const u=new Uint8Array(ab);for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)});
+   const wf=path.join(OUT,`${tag}-hudba-${m}.wav`),mf=wf.replace(/wav$/,'mp3');fs.writeFileSync(wf,Buffer.from(w,'base64'));execFileSync('ffmpeg',['-v','error','-y','-i',wf,'-b:a','160k',mf]);fs.unlinkSync(wf);console.log('ukázka:',mf)}
+  await b.close();srv.close();return}
  /* snímky */
  if(SHEET){const sd=path.join(OUT,'sheet');fs.rmSync(sd,{recursive:true,force:true});fs.mkdirSync(sd);await p.exposeFunction('__sheet',(i,b64)=>fs.writeFileSync(path.join(sd,String(i).padStart(3,'0')+'.jpg'),Buffer.from(b64,'base64')));
   const n=await p.evaluate(()=>REEL.frames(window.__script,{fps:2,each:async(cv,t,i)=>{await window.__sheet(i,cv.toDataURL('image/jpeg',.8).slice(23))}}));console.log('náhledů:',n,'délka',(script.total/1000).toFixed(1),'s');await b.close();srv.close();return}

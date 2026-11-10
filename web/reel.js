@@ -319,9 +319,63 @@
         this.music.gain.linearRampToValueAtTime(0.0001, t + fade);
       }
     },
+    // ---- styly podkresu: REEL.setMusic('lofi' | 'funk' | 'minimal' | 'trap' | 'puvodni' | 'bez')
+    style: 'puvodni',
+    BPMS: { puvodni: 124, lofi: 84, funk: 108, minimal: 100, trap: 140, bez: 124 },
+    setStyle: function (name) { this.style = this.BPMS[name] ? name : 'puvodni'; this.BPM = this.BPMS[this.style]; this.muted = this.style === 'bez'; return this.style; },
+    // malé nástroje pro styly
+    _kick: function (t, peak, f0, f1, dec) { var k = this.osc('sine', f0 || 150, t, (dec || 0.3) + 0.1), g = this.ctx.createGain(); k.frequency.exponentialRampToValueAtTime(f1 || 45, t + 0.11); this.env(g, t, 0.002, peak, dec || 0.3); k.connect(g); g.connect(this.music); },
+    _nz: function (t, peak, dec, type, freq, q) { var n = this.noise(t, dec + 0.05), f = this.ctx.createBiquadFilter(), g = this.ctx.createGain(); f.type = type; f.frequency.value = freq; if (q) f.Q.value = q; this.env(g, t, 0.001, peak, dec); n.connect(f); f.connect(g); g.connect(this.music); },
+    _tone: function (t, type, midi, peak, dec, lp, det, att) { var o = this.osc(type, this.mtof(midi), t, dec + 0.1), f = this.ctx.createBiquadFilter(), g = this.ctx.createGain(); if (det) o.detune.value = det; f.type = 'lowpass'; f.frequency.value = lp || 2000; this.env(g, t, att || 0.004, peak, dec); o.connect(f); f.connect(g); g.connect(this.music); return f; },
+    styles: {
+      // klidný boom-bap: teplé akordy, líný rytmus, houpavé šestnáctiny
+      lofi: function (s, t, spb) {
+        var st = s % 16, bar = Math.floor(s / 16) % 4, ch = [[57, 60, 64, 67], [50, 57, 60, 65], [55, 59, 62, 65], [48, 55, 59, 64]][bar], self = this;
+        if (st % 2 === 1) t += spb * 0.3;
+        if (st === 0 || st === 7 || st === 10) this._kick(t, st === 0 ? 0.8 : 0.6, 110, 44, 0.28);
+        if (st === 4 || st === 12) { this._nz(t, 0.3, 0.13, 'bandpass', 1700, 0.7); this._tone(t, 'triangle', 55, 0.14, 0.07, 900); }
+        if (st % 2 === 0) this._nz(t, st % 4 === 2 ? 0.08 : 0.05, 0.03, 'highpass', 7000); else if (st === 7 || st === 15) this._nz(t, 0.03, 0.02, 'highpass', 8000);
+        if (st === 0 || st === 10) ch.forEach(function (m, i) { self._tone(t + i * 0.012, 'triangle', m, 0.075, st === 0 ? 1.3 : 0.8, 1300, i % 2 ? 6 : -6, 0.012); self._tone(t + i * 0.012, 'sine', m + 12, 0.018, 0.6, 2400); });
+        if (st === 0) { this._tone(t, 'sine', ch[0] - 24, 0.42, spb * 6, 500); this._tone(t, 'triangle', ch[0] - 12, 0.1, spb * 5, 420); this._nz(t, 0.012, spb * 15, 'bandpass', 3200, 0.4); }
+        if (st === 7) this._tone(t, 'sine', ch[0] - 24, 0.34, spb * 2, 500);
+        if (st === 10) this._tone(t, 'sine', ch[0] - 24 + (bar % 2 ? 7 : 0), 0.38, spb * 5, 500);
+      },
+      // svižný groove: synkopovaná basa, krátké akordy na lehkou dobu
+      funk: function (s, t, spb) {
+        var st = s % 16, bar = Math.floor(s / 16) % 4, ch = [[57, 60, 64, 67], [50, 54, 57, 60], [53, 57, 60, 64], [52, 56, 59, 62]][bar], self = this, r = ch[0];
+        if (st === 0 || st === 3 || st === 8 || st === 10) this._kick(t, 0.85, 140, 48, 0.2);
+        if (st === 4 || st === 12) { this._nz(t, 0.4, 0.11, 'bandpass', 1900, 0.9); this._nz(t + 0.012, 0.2, 0.09, 'bandpass', 1500, 0.9); }
+        this._nz(t, st % 4 === 2 ? 0.14 : 0.055, st === 14 ? 0.14 : 0.03, 'highpass', 8500);
+        var bl = { 0: r - 24, 3: r - 12, 6: r - 17, 8: r - 24, 11: r - 14, 14: r - 12 }[st];
+        if (bl != null) { var f = this._tone(t, 'sawtooth', bl, 0.34, 0.14, 1400); f.frequency.setValueAtTime(1400, t); f.frequency.exponentialRampToValueAtTime(220, t + 0.12); this._tone(t, 'sine', bl, 0.3, 0.16, 400); }
+        if (st === 2 || st === 6 || st === 10 || st === 15) ch.forEach(function (m) { var o = self.osc('sawtooth', self.mtof(m + 12), t, 0.12), bp = self.ctx.createBiquadFilter(), g = self.ctx.createGain(); bp.type = 'bandpass'; bp.frequency.value = 1900; bp.Q.value = 1.2; self.env(g, t, 0.003, 0.05, 0.07); o.connect(bp); bp.connect(g); g.connect(self.music); });
+      },
+      // skoro nic: hluboký puls, řídká melodie, hodně místa pro hlas
+      minimal: function (s, t, spb) {
+        var st = s % 16, bar = Math.floor(s / 16) % 4, ch = this.chords[bar], mel = [69, 72, 76, 74, 79, 76, 72, 74];
+        if (st === 0 || st === 10) this._kick(t, st === 0 ? 0.7 : 0.45, 100, 42, 0.32);
+        if (st === 4 || st === 12) this._tone(t, 'triangle', 84, 0.07, 0.03, 4000);
+        if (st % 4 === 2) this._nz(t, 0.04, 0.025, 'highpass', 9000);
+        if (st === 0) { this._tone(t, 'sine', ch[0] - 24, 0.42, spb * 12, 300, 0, 0.02); for (var i = 0; i < 3; i++) this._tone(t, 'sine', ch[i], 0.022, spb * 14, 1200, 0, 0.4); }
+        var pi = { 0: 0, 3: 1, 6: 2, 10: 3, 13: 4 }[st];
+        if (pi != null) { var m = mel[(pi + bar * 2) % mel.length]; this._tone(t, 'triangle', m, 0.085, 0.26, 2200); this._tone(t + spb * 3, 'triangle', m, 0.03, 0.22, 1500); this._tone(t + spb * 6, 'triangle', m, 0.012, 0.2, 1100); }
+      },
+      // poloviční tempo, dlouhé basy, sypané činely, temný zvonek
+      trap: function (s, t, spb) {
+        var st = s % 32, bar = Math.floor(s / 16) % 4, ch = [[57, 60, 64], [57, 60, 64], [53, 57, 60], [55, 58, 62]][bar], self = this;
+        if (st === 0 || st === 6 || st === 14 || st === 19 || st === 22 || st === 27) { var b = this.osc('sine', this.mtof(ch[0] - 24), t, 0.75), g = this.ctx.createGain(); b.frequency.setValueAtTime(this.mtof(ch[0] - 12), t); b.frequency.exponentialRampToValueAtTime(this.mtof(ch[0] - 24), t + 0.05); this.env(g, t, 0.003, 0.62, 0.62); b.connect(g); g.connect(this.music); this._kick(t, 0.5, 170, 55, 0.09); }
+        if (st === 8 || st === 24) { this._nz(t, 0.42, 0.16, 'bandpass', 2100, 0.8); this._nz(t + 0.015, 0.2, 0.12, 'highpass', 3500); }
+        var roll = (st >= 12 && st <= 15) || (st >= 28 && st <= 31);
+        if (st % 2 === 0 || roll) this._nz(t, roll ? 0.07 + (st % 4) * 0.02 : 0.1, 0.022, 'highpass', 9000);
+        if (st >= 28) this._nz(t + spb / 2, 0.06, 0.02, 'highpass', 9000);
+        var bi = { 0: 0, 3: 2, 6: 1, 10: 2, 16: 0, 19: 1, 22: 2, 28: 1 }[st];
+        if (bi != null) { var m = ch[bi] + 24; this._tone(t, 'sine', m, 0.06, 0.5, 5000); this._tone(t, 'triangle', m + 12, 0.014, 0.3, 6000); }
+      }
+    },
     playStep: function (s, t, spb) {
       var c = this.ctx, bar = Math.floor(s / 16) % 4, st = s % 16, ch = this.chords[bar], I = this.intensity;
       if (this.muted) return;
+      if (this.styles[this.style]) return this.styles[this.style].call(this, s, t, spb);
       // kick
       if (st % 4 === 0) {
         var k = this.osc('sine', 150, t, 0.4), kg = c.createGain();
@@ -2528,6 +2582,7 @@
 
   root.REEL = {
     version: '2.0.0', W: W, H: H, SAFE_TOP: SAFE_TOP, SAFE_BOTTOM: SAFE_BOTTOM, colors: C,
+    setMusic: function (name) { return AU.setStyle(name); }, musicStyles: ['lofi', 'funk', 'minimal', 'trap', 'puvodni', 'bez'],
     scriptFromDay: scriptFromDay, scriptFromShots: scriptFromShots, layout: layout, play: play, record: record, stop: stop,
     voiceScript: voiceScript, setVoiceTrack: setVoiceTrack, setVoiceSegments: setVoiceSegments, renderAt: renderAt,
     frames: frames, renderAudio: renderAudio,
