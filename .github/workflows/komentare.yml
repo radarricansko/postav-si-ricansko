@@ -1,0 +1,48 @@
+name: Komentáře → world.json
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+    inputs:
+      media: { description: "Herní post: ID média, odkaz nebo shortcode (prázdné = proměnná IG_MEDIA_ID / IG_MEDIA_URL, jinak #postavsiricansko)", required: false }
+      dry: { description: "Jen vypsat shrnutí, nic nezapisovat", type: boolean, default: false }
+permissions:
+  contents: write
+  actions: write
+concurrency: { group: komentare, cancel-in-progress: false }
+jobs:
+  komentare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Komentáře z Instagramu
+        id: k
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_MEDIA_ID: ${{ inputs.media || vars.IG_MEDIA_ID }}
+          IG_MEDIA_URL: ${{ vars.IG_MEDIA_URL }}
+          START_DATE: ${{ vars.START_DATE }}
+        run: node tools/ig/komentare.js ${{ inputs.dry && '--dry' || '' }}
+      - name: Commit a push
+        id: push
+        if: ${{ !inputs.dry }}
+        env:
+          NOVI: ${{ steps.k.outputs.novi }}
+        run: |
+          # git add místo holého git diff: zachytí i nerozpoznane.json, který v repu ještě není
+          git add world.json
+          if [ -f tools/ig/nerozpoznane.json ]; then git add tools/ig/nerozpoznane.json; fi
+          if git diff --cached --quiet; then echo "beze změny"; exit 0; fi
+          if ! git diff --cached --quiet -- world.json; then echo "web=true" >> "$GITHUB_OUTPUT"; fi
+          git config user.name "RADAR bot"; git config user.email "radar.ricansko@gmail.com"
+          git commit -q -m "world.json: +${NOVI:-0} hráčů"
+          git push -q || { git pull -q --rebase && git push -q; }
+      # push z GITHUB_TOKEN nespustí pages.yml, proto ho spouštíme ručně
+      - name: Nasadit web
+        if: steps.push.outputs.web == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"
