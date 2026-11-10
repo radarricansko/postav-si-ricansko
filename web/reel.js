@@ -1633,7 +1633,7 @@
   // ui: [{ k: 'title' | 'chip' | 'stamp' | 'num' | 'bubble' | 'tag' | 'end', ... , at: ms }]   add: { town, n, at, every }
   function camPoint(at) {
     var st = safeState(), p = String(at || 'region').split(':'), t = (st.towns || []).filter(function (x) { return x.name === p[1]; })[0];
-    if (p[0] === 'center') { var c = gcall('center'); if (c && c.x != null) return { x: c.x, y: 3, z: c.z }; }
+    if (p[0] === 'center' && G() && G().center) { var c = G().center(); if (c && c.x != null) return { x: c.x, y: 8, z: c.z }; }
     if (p[0] === 'slot' && G() && G().slot) { var q = G().slot(p[1], +p[2] || 0); if (q) return { x: q.x, y: 1.5, z: q.z }; }
     if (t && p[0] === 'lm' && t.lm) return { x: t.lm.x, y: 2, z: t.lm.z };
     if (t) return { x: t.center.x, y: 0, z: t.center.z };
@@ -1684,9 +1684,9 @@
           var cv = E.inOut(prog(lt, at, at + 380)); g.save(); g.beginPath(); g.rect(0, H * (1 - cv), W, H * cv); g.clip();
           g.fillStyle = C.night; g.fillRect(0, 0, W, H); backdrop(g, lt + 5000, 0, {}); g.restore();
           (u.lines || []).forEach(function (ln, i) { var lp = prog(lt, at + 260 + i * 240, at + 260 + i * 240 + POP); if (lp <= 0) return;
-            if (ln.big) kLine(g, up(ln.text), W / 2, 560 + i * 200, ln.size || 92, lt, at + 260 + i * 240, { out: 1e9, stagger: 50, maxW: 940, solid: ln.solid });
-            else chip(g, ln.text, W / 2, 560 + i * 200, { size: ln.size || 44, solid: !!ln.solid, scale: popS(lp), alpha: popA(lp) }); });
-          var hp = prog(lt, at + 1200, at + 1500); if (hp > 0 && u.handle) { g.save(); g.globalAlpha = hp; bf(g, 38, 600); g.fillStyle = 'rgba(255,255,255,0.8)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(u.handle, W / 2, 1310); g.restore(); }
+            if (ln.big) kLine(g, up(ln.text), W / 2, 700 + i * 190, ln.size || 92, lt, at + 260 + i * 240, { out: 1e9, stagger: 50, maxW: 940, solid: ln.solid });
+            else chip(g, ln.text, W / 2, 700 + i * 190, { size: ln.size || 44, solid: !!ln.solid, scale: popS(lp), alpha: popA(lp) }); });
+          var hp = prog(lt, at + 1200, at + 1500); if (hp > 0 && u.handle) { g.save(); g.globalAlpha = hp; bf(g, 38, 600); g.fillStyle = 'rgba(255,255,255,0.8)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(u.handle, W / 2, 1440); g.restore(); }
         }
       });
     }
@@ -2166,7 +2166,7 @@
     if (S && S.draw) { g.save(); S.draw(g, sc, lt); g.restore(); }
     var next = R.script.scenes[sc.idx + 1], DIP = 90;
     if (next && next.type !== 'outro' && sc.t0 + sc.dur - t < DIP) dip(g, 1 - (sc.t0 + sc.dur - t) / DIP);
-    if (sc.type !== 'hook' && sc.type !== 'outro' && lt < DIP) dip(g, 1 - lt / DIP);
+    if (sc.type !== 'hook' && sc.type !== 'outro' && sc.idx > 0 && lt < DIP) dip(g, 1 - lt / DIP);
     drawChrome(g, t, sc);
     drawSubs(g, t, sc);
     if (R.opts.debugSafe) drawSafe(g);

@@ -7,6 +7,9 @@ on:
       day:
         description: "Den hry (prázdné = podle dat)"
         required: false
+      dil:
+        description: "Díl podle scénáře (číslo, tools/video/dily/dil-N.json). Prázdné = denní reel z dat."
+        required: false
       co:
         description: "reel | klipy | oboje"
         required: false
@@ -31,6 +34,7 @@ jobs:
           POSTY_OD: ${{ vars.POSTY_OD }}
           START_DATE: ${{ vars.START_DATE }}
           UZAVERKA_HODINA: ${{ vars.UZAVERKA_HODINA }}
+        if: ${{ !inputs.dil }}
         run: node tools/ig/komentare.js || echo "komentáře se nepodařilo načíst, renderuji z toho, co je v repu"
       - name: Render
         env:
@@ -38,16 +42,16 @@ jobs:
           ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID || 'kOWmvbNszhdJeaeyEzJB' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_VOICE: ${{ vars.GEMINI_VOICE || 'Sadaltager' }}
-          GEMINI_TEMPO: ${{ vars.GEMINI_TEMPO || '1.12' }}
-        run: node tools/video/render.js --data "$([ -f world-dil.json ] && echo world-dil.json || echo world.json)" --out out ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
+          GEMINI_TEMPO: ${{ inputs.dil && '1.06' || vars.GEMINI_TEMPO || '1.12' }}
+        run: node tools/video/render.js ${{ inputs.dil && format('--dil {0}', inputs.dil) || '' }} --data "$([ -f world-dil.json ] && echo world-dil.json || echo world.json)" --out out ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
       - name: Náhled (6 snímků) do větve previews
         run: |
           f=$(ls out/*.mp4 | head -1); n=$(basename "$f" .mp4)
           ffmpeg -v error -y -i "$f" -vf "select='not(mod(n\,100))',scale=270:-1,tile=7x1" -frames:v 1 "out/$n-nahled.jpg"
           git config user.name "RADAR bot"; git config user.email "radar.ricansko@gmail.com"
-          git checkout -q --orphan previews && git rm -rfq --cached . >/dev/null && git clean -fdq -e out -e nahledy
+          git fetch -q origin previews && git checkout -q -f previews || (git checkout -q --orphan previews && git rm -rfq --cached . >/dev/null && git clean -fdq -e out -e nahledy)
           # do větve previews jde i samotné video (přehraje se v mobilu přes raw odkaz); větev držíme na jednom commitu, ať neroste
-          mkdir -p nahledy && cp "out/$n-nahled.jpg" "out/$n.txt" "$f" nahledy/ && git add nahledy && git commit -q -m "náhled $n" && git push -q -f origin previews || echo "náhled nepushnut"
+          mkdir -p nahledy && cp "out/$n-nahled.jpg" "out/$n.txt" "$f" nahledy/ && git add nahledy && git commit -q -m "náhled $n" && git push -q origin previews || echo "náhled nepushnut"
           git checkout -q main
       - uses: actions/upload-artifact@v4
         with:
@@ -63,7 +67,7 @@ jobs:
           f=$(ls out/*.mp4 | head -1); t=$(ls out/*.txt | head -1)
           curl -sS -F chat_id="$CHAT" -F video=@"$f" -F supports_streaming=true -F caption="$(head -c 900 "$t")" "https://api.telegram.org/bot$TG/sendVideo" > /dev/null
   klipy:
-    if: ${{ inputs.co != 'reel' }}
+    if: ${{ inputs.co != 'reel' && !inputs.dil }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
