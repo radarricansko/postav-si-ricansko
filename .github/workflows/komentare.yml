@@ -2,10 +2,11 @@ name: Komentáře → world.json
 on:
   schedule:
     - cron: "*/30 * * * *"
+    - cron: "10,20,40,50 7,8 * * *"   # ráno po vydání dílu (9:00 Praha) častěji, ať web naskočí rychle
   workflow_dispatch:
     inputs:
       media: { description: "Jen jeden post: ID média, odkaz nebo shortcode (prázdné = všechny posty s #postavsiricansko)", required: false }
-      publikovat: { description: "Překlopit koncept na web hned (jinak až s novým dílem)", type: boolean, default: false }
+      publikovat: { description: "Ukázat na webu celý koncept hned (jinak se web mění až s novým dílem)", type: boolean, default: false }
       dry: { description: "Jen vypsat shrnutí, nic nezapisovat", type: boolean, default: false }
 permissions:
   contents: write
@@ -29,6 +30,7 @@ jobs:
           IG_USER_ID: ${{ vars.IG_USER_ID }}
           POSTY_OD: ${{ vars.POSTY_OD }}
           PUBLIKACE: ${{ vars.PUBLIKACE }}   # prázdné / dil = web až s novým dílem; hned = web při každém běhu
+          UZAVERKA_HODINA: ${{ vars.UZAVERKA_HODINA }}   # výchozí 17 (Praha)
         run: node tools/ig/komentare.js ${{ inputs.dry && '--dry' || '' }} ${{ inputs.publikovat && '--publikovat' || '' }}
       - name: Commit a push
         id: push
@@ -38,10 +40,10 @@ jobs:
         run: |
           # git add místo holého git diff: zachytí i nerozpoznane.json, který v repu ještě není
           git add world.json
-          for f in world-live.json tools/ig/nerozpoznane.json tools/ig/stav.json; do if [ -f "$f" ]; then git add "$f"; fi; done
+          for f in world-live.json world-dil.json tools/ig/nerozpoznane.json tools/ig/stav.json tools/ig/navrhy; do if [ -e "$f" ]; then git add "$f"; fi; done
           if git diff --cached --quiet; then echo "beze změny"; exit 0; fi
-          # web se nasazuje při změně konceptu i veřejného stavu (koncept je na webu jako world-koncept.json pro adminy)
-          if ! git diff --cached --quiet -- world.json world-live.json; then echo "web=true" >> "$GITHUB_OUTPUT"; fi
+          # web se nasazuje jen při změně veřejného stavu nebo podkladu pro další díl (ne při každém komentáři)
+          if ! git diff --cached --quiet -- world-live.json world-dil.json; then echo "web=true" >> "$GITHUB_OUTPUT"; fi
           git config user.name "RADAR bot"; git config user.email "radar.ricansko@gmail.com"
           git commit -q -m "world.json: +${NOVI:-0} hráčů"
           git push -q || { git pull -q --rebase && git push -q; }

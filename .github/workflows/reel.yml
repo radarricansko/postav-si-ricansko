@@ -1,11 +1,11 @@
 name: Denní reel a klipy
 on:
   schedule:
-    - cron: "30 4 * * *"   # 05:30 Praha (zimní čas)
+    - cron: "20 16 * * *"   # 17:20 Praha (zimní čas) – hned po uzávěrce, večer se ladí, ráno v 9 se vydává
   workflow_dispatch:
     inputs:
       day:
-        description: "Den hry (prázdné = podle world.json)"
+        description: "Den hry (prázdné = podle dat)"
         required: false
       co:
         description: "reel | klipy | oboje"
@@ -24,6 +24,14 @@ jobs:
         with: { node-version: 22 }
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - run: npm i --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
+      - name: Čerstvé komentáře a stav k uzávěrce (world-dil.json)
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ vars.IG_USER_ID }}
+          POSTY_OD: ${{ vars.POSTY_OD }}
+          START_DATE: ${{ vars.START_DATE }}
+          UZAVERKA_HODINA: ${{ vars.UZAVERKA_HODINA }}
+        run: node tools/ig/komentare.js || echo "komentáře se nepodařilo načíst, renderuji z toho, co je v repu"
       - name: Render
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
@@ -31,7 +39,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_VOICE: ${{ vars.GEMINI_VOICE || 'Sadaltager' }}
           GEMINI_TEMPO: ${{ vars.GEMINI_TEMPO || '1.12' }}
-        run: node tools/video/render.js --out out ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
+        run: node tools/video/render.js --data "$([ -f world-dil.json ] && echo world-dil.json || echo world.json)" --out out ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
       - name: Náhled (6 snímků) do větve previews
         run: |
           f=$(ls out/*.mp4 | head -1); n=$(basename "$f" .mp4)
@@ -65,7 +73,7 @@ jobs:
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - run: npm i --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
       - name: Klipy + brief
-        run: node tools/video/clips.js --out out/klipy --max 7 ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
+        run: node tools/video/clips.js --data "$([ -f world-dil.json ] && echo world-dil.json || echo world.json)" --out out/klipy --max 7 ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
       - uses: actions/upload-artifact@v4
         with:
           name: klipy

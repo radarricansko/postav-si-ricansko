@@ -2,7 +2,7 @@ name: Web (GitHub Pages)
 on:
   push:
     branches: [main]
-    paths: ["web/**", "world.json", "world-live.json", ".github/workflows/pages.yml"]
+    paths: ["web/**", "world-live.json", "world-dil.json", ".github/workflows/pages.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -15,8 +15,8 @@ jobs:
     environment: { name: github-pages, url: "${{ steps.d.outputs.page_url }}" }
     steps:
       - uses: actions/checkout@v4
-      # web ukazuje world-live.json (stav po posledním díle); koncept s průběžnými komentáři je vedle jako world-koncept.json
-      - run: mkdir -p site && cp -r web/. site/ && cp "$([ -f world-live.json ] && echo world-live.json || echo world.json)" site/world.json && cp world.json site/world-koncept.json && touch site/.nojekyll
+      # web ukazuje world-live.json (stav k uzávěrce před nejnovějším dílem); world-dil.json = podklad pro další díl (náhled pro tým: ?data=world-dil.json)
+      - run: mkdir -p site && cp -r web/. site/ && cp "$([ -f world-live.json ] && echo world-live.json || echo world.json)" site/world.json && cp "$([ -f world-dil.json ] && echo world-dil.json || echo world.json)" site/world-dil.json && touch site/.nojekyll
       - name: Verze skriptů (aby prohlížeč nenačítal staré soubory z mezipaměti)
         run: sed -i -E 's#<script src="([a-z-]+\.js)"></script>#<script src="\1?v='"${GITHUB_SHA::7}"'"></script>#' site/index.html && grep -c "?v=" site/index.html
       - uses: actions/configure-pages@v5

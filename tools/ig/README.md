@@ -23,14 +23,22 @@ Komentáře se berou ze **všech** postů a reelů, které mají v popisku `#pos
 
 Když se žádný post nenajde, skript vypíše posledních 10 médií (ID, datum, začátek popisku) a skončí beze změny.
 
-## Koncept a web
+## Denní rytmus: koncept → díl → web
 
-- `world.json` = **koncept**: průběžný stav, doplňuje se každých 30 minut. Dělá se z něj video dalšího dílu.
-- `world-live.json` = **web**: to, co vidí lidi na mapě. Překlopí se z konceptu, až když vyjde nový díl (objeví se nový post s hashtagem).
-- `tools/ig/stav.json` = seznam dílů a kdy se naposledy publikovalo.
-- Ručně hned: Actions → „Komentáře → world.json“ → Run workflow → zaškrtnout **publikovat**.
-- Průběžně jako dřív: proměnná `PUBLIKACE` = `hned` (web = koncept při každém běhu).
-- Koncept na mapě (jen pro tým): `…/postav-si-ricansko/?data=world-koncept.json`.
+| čas (Praha) | co se děje |
+|---|---|
+| 9:00 | vyjde díl (post s `#postavsiricansko`). Do půl hodiny web skočí na stav k včerejší uzávěrce + stavby přidané večer. |
+| 9:00–17:00 | lidi komentují. Web se nemění. Komentáře se průběžně sbírají do konceptu. |
+| 17:00 | uzávěrka. Uloží se `tools/ig/navrhy/DATUM.json` (nejlajkovanější komentáře dne) a `world-dil.json` (kdo stihl uzávěrku). V 17:20 se z něj vyrenderuje první verze videa. |
+| 17:00–20:00 | ladíme vítězný nápad: stavba se přidá do `world.json` (`specialni_budovy`), video se přerenderuje. Náhled mapy dalšího dílu: `…/postav-si-ricansko/?data=world-dil.json`. |
+| po 17:00 | komentáře se sbírají dál, ale patří už do pozítřejšího dílu. |
+
+- `world.json` = **koncept**: všechno, co kdy přišlo.
+- `world-dil.json` = **díl**: hráči do poslední uzávěrky + všechny stavby. Podklad pro video.
+- `world-live.json` = **web**: hráči do uzávěrky před nejnovějším dílem, stavby do chvíle jeho vydání. Počítá se pokaždé znovu z konceptu, takže se nemůže rozejít.
+- `tools/ig/stav.json` = seznam dílů.
+- Web hned (výjimečně): Actions → „Komentáře → world.json“ → Run workflow → zaškrtnout **publikovat**. Platí do dalšího dílu.
+- Průběžně jako dřív: proměnná `PUBLIKACE` = `hned`. Jiná hodina uzávěrky: proměnná `UZAVERKA_HODINA`.
 
 ## Pravidla
 

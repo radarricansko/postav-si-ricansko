@@ -361,46 +361,67 @@ test('API: POSTY_OD odřízne starší posty', async () => {
   assert.deepStrictEqual(json(s.world).obce.map(o => [o.id, o.hraci.map(h => h.ig)]), [['ricany', ['eva']], ['mukarov', ['tom']]]);
 });
 
-test('publikace: web se překlopí až s novým dílem; --publikovat a PUBLIKACE=hned', async () => {
-  const s = kopieSveta('pub'), live = path.join(path.dirname(s.world), 'world-live.json'), stav = path.join(path.dirname(s.ner), 'stav.json');
+test('uzávěrka 17:00 pražského času (zimní i letní čas)', () => {
+  assert.deepStrictEqual(K.uzaverkaPred('2026-11-16T08:00:00Z'), { den: '2026-11-15', cas: '2026-11-15T16:00:00Z' });
+  assert.deepStrictEqual(K.uzaverkaPred('2026-11-16T16:00:00Z'), { den: '2026-11-16', cas: '2026-11-16T16:00:00Z' });
+  assert.deepStrictEqual(K.uzaverkaPred('2026-07-01T14:59:00Z'), { den: '2026-06-30', cas: '2026-06-30T15:00:00Z' });
+  assert.deepStrictEqual(K.uzaverkaPred('2026-10-25T15:30:00Z'), { den: '2026-10-24', cas: '2026-10-24T15:00:00Z' });
+});
+
+test('denní rytmus: web se mění jen s novým dílem a ukazuje stav k uzávěrce; --publikovat, PUBLIKACE=hned', async () => {
+  const s = kopieSveta('pub'), dir = path.dirname(s.world), live = path.join(dir, 'world-live.json'), dilF = path.join(dir, 'world-dil.json'), stav = path.join(path.dirname(s.ner), 'stav.json');
   const args = ['--world', s.world, '--nerozpoznane', s.ner];
   const hraci = f => json(f).obce.flatMap(o => o.hraci.map(h => h.ig)).sort();
-  // 1. běh: jen díl 100 → web ještě nic nemá, publikuje se
-  let media = [MEDIA[2]], kom200 = KOM1.concat(KOM2);
-  const host = () => igHost({ '/me/media': () => [200, { data: media }], '/200/comments': () => [200, { data: kom200 }] });
-  let r = await sApi(host(), args, {});
-  assert.strictEqual(r.kod, 0, r.text);
-  assert.match(r.text, /web: publikuji \(web ještě nemá žádný stav\)/);
-  assert.deepStrictEqual(hraci(live), ['eva', 'ota']);
-  assert.strictEqual(json(stav).publikovano.post, '100');
-  // 2. běh: pod dílem 100 přibyl hráč → koncept ano, web ne
-  const puv = KOM0.slice(); KOM0.push({ id: '92', text: 'Tehov', username: 'iva', timestamp: '2026-11-02T09:00:00+0000', like_count: 0 });
-  try {
-    r = await sApi(host(), args, {});
-    assert.match(r.text, /web: beze změny, čeká na další díl \(v konceptu \+1 hráčů\)/);
-    assert.deepStrictEqual(hraci(s.world), ['eva', 'iva', 'ota']);
-    assert.deepStrictEqual(hraci(live), ['eva', 'ota']);
-    // 3. běh: vyšel díl 200 → web se překlopí na celý koncept
-    media = [MEDIA[1], MEDIA[2]];
-    r = await sApi(host(), args, {});
-    assert.match(r.text, /web: publikuji \(nový díl https:\/\/www\.instagram\.com\/reel\/HRA222\/\)/);
-    assert.deepStrictEqual(hraci(live), ['eva', 'iva', 'ota', 'tom']);
-    assert.strictEqual(fs.readFileSync(live, 'utf8'), fs.readFileSync(s.world, 'utf8'));
-    assert.deepStrictEqual([json(stav).publikovano.post, json(stav).posty.map(p => p.id)], ['200', ['100', '200']]);
-    // 4. běh: další komentář pod dílem 200 → zase jen koncept; --publikovat web překlopí ručně
-    kom200 = kom200.concat([{ id: '5', text: 'Světice', username: 'jan', timestamp: '2026-11-16T09:00:00+0000', like_count: 0 }]);
-    r = await sApi(host(), args, {});
-    assert.deepStrictEqual(hraci(live), ['eva', 'iva', 'ota', 'tom']);
-    r = await sApi(host(), args.concat('--publikovat'), {});
-    assert.match(r.text, /web: publikuji \(ruční publikace\)/);
-    assert.deepStrictEqual(hraci(live), ['eva', 'iva', 'jan', 'ota', 'tom']);
-    // 5. režim „hned“: web = koncept při každém běhu
-    kom200 = kom200.concat([{ id: '6', text: 'Tehov', username: 'kuba', timestamp: '2026-11-16T09:30:00+0000', like_count: 0 }]);
-    r = await sApi(host(), args, { PUBLIKACE: 'hned' });
-    assert.match(r.text, /web: publikuji \(režim „hned“\)/);
-    assert.ok(hraci(live).includes('kuba'));
-    validni(json(live));
-  } finally { KOM0.length = 0; KOM0.push(...puv); }
+  const kom = (id, text, username, timestamp, like_count = 0) => ({ id, text, username, timestamp, like_count });
+  // díl 1 vyšel v pondělí 16. 11. v 9:00 (08:00Z), díl 2 v úterý v 9:00
+  const D1 = { id: '501', caption: 'Díl 1 #postavsiricansko', permalink: 'https://www.instagram.com/reel/DIL1/', timestamp: '2026-11-16T08:00:00+0000' };
+  const D2 = { id: '502', caption: 'Díl 2 #PostavSiŘíčansko', permalink: 'https://www.instagram.com/reel/DIL2/', timestamp: '2026-11-17T08:00:00+0000' };
+  let media = [D1], k1 = [], k2 = [];
+  const host = () => igHost({ '/me/media': () => [200, { data: media }], '/501/comments': () => [200, { data: k1 }], '/502/comments': () => [200, { data: k2 }] });
+  const beh = async (ted, extra = [], env = {}) => { const r = await sApi(host(), args.concat(extra), { TED: ted, ...env }); assert.strictEqual(r.kod, 0, r.text); return r; };
+
+  // pondělí 10:00 – dva komentáře pod dílem 1: v konceptu jsou, na webu ani v dílu ještě ne
+  k1 = [kom('11', 'Kamenice', 'ota', '2026-11-16T08:30:00+0000', 3), kom('12', 'Tehov, chceme metro!', 'iva', '2026-11-16T09:00:00+0000', 9)];
+  let r = await beh('2026-11-16T09:00:00Z');
+  assert.deepStrictEqual(hraci(s.world), ['iva', 'ota']);
+  assert.deepStrictEqual([hraci(dilF), hraci(live)], [[], []]);
+  validni(json(live));
+  // pondělí 17:30 – uzávěrka: díl (podklad pro video) má hráče do 17:00, web pořád nic; uloží se nápady dne
+  k1.push(kom('13', 'Světice', 'jan', '2026-11-16T16:20:00+0000', 50));          // 17:20 – po uzávěrce
+  r = await beh('2026-11-16T16:30:00Z');
+  assert.deepStrictEqual(hraci(s.world), ['iva', 'jan', 'ota']);
+  assert.deepStrictEqual([hraci(dilF), hraci(live)], [['iva', 'ota'], []]);
+  const nav = json(path.join(path.dirname(s.ner), 'navrhy', '2026-11-16.json'));
+  assert.deepStrictEqual(nav.navrhy.map(n => [n.autor, n.hlasy]), [['iva', 9], ['ota', 3]], 'nápady jen do uzávěrky, podle lajků');
+  // večer přidáme do konceptu stavbu pro další díl (ručně) – na web se dostane až s dílem 2
+  const w = json(s.world); w.obce.find(o => o.id === 'tehov').specialni_budovy.push({ typ: 'jine', nazev_cedule: 'Metro Tehov', autor: 'iva', datum: '2026-11-16T18:30:00Z' }); w.revize++;
+  fs.writeFileSync(s.world, JSON.stringify(w, null, 1) + '\n');
+  r = await beh('2026-11-16T19:00:00Z');
+  assert.strictEqual(json(dilF).obce.find(o => o.id === 'tehov').specialni_budovy.length, 1, 'díl už stavbu má');
+  assert.deepStrictEqual(hraci(live), []);
+  // úterý 9:10 – vyšel díl 2 → web skočí na stav k pondělní uzávěrce + večerní stavba
+  media = [D2, D1]; k2 = [kom('21', 'Mukařov', 'tom', '2026-11-17T08:05:00+0000', 1)];
+  r = await beh('2026-11-17T08:10:00Z');
+  assert.match(r.text, /web: MĚNÍM – 2 hráčů/);
+  assert.deepStrictEqual(hraci(live), ['iva', 'ota']);
+  assert.strictEqual(json(live).obce.find(o => o.id === 'tehov').specialni_budovy[0].nazev_cedule, 'Metro Tehov');
+  assert.deepStrictEqual(hraci(s.world), ['iva', 'jan', 'ota', 'tom']);
+  assert.deepStrictEqual(json(stav).posty.map(p => p.id), ['501', '502']);
+  // úterý 12:00 – další běh nic nemění (web se přes den nehýbe)
+  const pred = fs.readFileSync(live, 'utf8');
+  r = await beh('2026-11-17T11:00:00Z');
+  assert.match(r.text, /web: beze změny/);
+  assert.strictEqual(fs.readFileSync(live, 'utf8'), pred);
+  // ruční publikace: web hned ukáže celý koncept a vydrží to do dalšího dílu
+  r = await beh('2026-11-17T11:30:00Z', ['--publikovat']);
+  assert.deepStrictEqual(hraci(live), ['iva', 'jan', 'ota', 'tom']);
+  k2.push(kom('22', 'Říčany', 'eva', '2026-11-17T12:00:00+0000'));
+  r = await beh('2026-11-17T12:30:00Z');
+  assert.deepStrictEqual(hraci(live), ['iva', 'jan', 'ota', 'tom'], 'po ruční publikaci se web dál sám nemění');
+  // režim „hned“: web = koncept
+  r = await beh('2026-11-17T12:40:00Z', [], { PUBLIKACE: 'hned' });
+  assert.deepStrictEqual(hraci(live), ['eva', 'iva', 'jan', 'ota', 'tom']);
+  validni(json(live)); validni(json(dilF));
 });
 
 test('API: IG_MEDIA_ID, odkaz v IG_MEDIA_ID i IG_MEDIA_URL', async () => {
