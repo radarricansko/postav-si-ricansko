@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 /* Postav si Říčansko – komentáře pod herním postem → world.json (náhrada Make scénářů 8385083 a 8387398).
-   node tools/ig/komentare.js [--dry] [--fixture soubor.json] [--world cesta] [--nerozpoznane cesta]
+   node tools/ig/komentare.js [--dry] [--publikovat] [--fixture soubor.json] [--world cesta] [--live cesta] [--stav cesta] [--nerozpoznane cesta]
+   Komentáře se berou ze VŠECH postů s #postavsiricansko (díly hry). world.json = koncept (průběžný stav, z něj se dělá video),
+   world-live.json = to, co vidí lidi na webu. Režim PUBLIKACE=dil (výchozí): web se překlopí, až když vyjde nový díl
+   (nový post s hashtagem) nebo ručně přes --publikovat. PUBLIKACE=hned: web = koncept při každém běhu.
    node tools/ig/komentare.js token-info      -> username, user_id, platnost tokenu (když ji host umí)
    node tools/ig/komentare.js refresh         -> prodlouží long-lived token, vypíše jen novou expiraci
-   env: IG_TOKEN, IG_MEDIA_ID, IG_MEDIA_URL, START_DATE (2026-11-16), IG_OWN (radar_ricansko), IG_API_VERSION (v21.0), NAVRHY_MIN_LIKES (1)
+   env: IG_TOKEN, IG_MEDIA_ID, IG_MEDIA_URL (jen jeden post), POSTY_OD (YYYY-MM-DD, starší posty ignorovat), PUBLIKACE, START_DATE (2026-11-16), IG_OWN (radar_ricansko), IG_API_VERSION (v21.0), NAVRHY_MIN_LIKES (1)
    Node 20+, bez závislostí. Token se nikdy nevypisuje (viz redact). */
 const fs = require('fs'), path = require('path');
 
@@ -101,7 +104,7 @@ function zpracuj(world, komentare, opts = {}) {
   const obecById = new Map(w.obce.map(o => [o.id, o]));
 
   const kom = (Array.isArray(komentare) ? komentare : [])
-    .map(c => ({ id: String(c.id), text: typeof c.text === 'string' ? c.text : '', username: String(c.username || (c.from && c.from.username) || ''), datum: iso(c.timestamp), likes: Math.max(0, parseInt(c.like_count, 10) || 0), parent: c.parent_id }))
+    .map(c => ({ id: String(c.id), text: typeof c.text === 'string' ? c.text : '', username: String(c.username || (c.from && c.from.username) || ''), datum: iso(c.timestamp), likes: Math.max(0, parseInt(c.like_count, 10) || 0), parent: c.parent_id, media: c.media == null ? '' : String(c.media) }))
     .filter(c => c.username && c.datum && !c.parent)       // jen top-level komentáře s autorem a časem
     .sort((a, b) => (a.datum < b.datum ? -1 : a.datum > b.datum ? 1 : cmpId(a.id, b.id)));
 
@@ -140,7 +143,8 @@ function zpracuj(world, komentare, opts = {}) {
   for (const o of w.obce) { o.pocet_hracu = o.hraci.length; if (!Array.isArray(o.specialni_budovy)) o.specialni_budovy = []; }
 
   // navrhy_dne: ruční položky zůstávají, položky „ig-…“ = top 10 komentářů podle lajků
-  const top = kom.filter(c => c.likes >= minLikes && c.text.trim() && !vlastni.has(ascii(c.username)) && !blok.has(ascii(c.username)) && IG_RE.test(c.username) && !nevhodne(c.username) && !NICK_RE.test(normText(c.text)))
+  // nápady se berou jen z nejnovějšího dílu (opts.navrhyMedia), ať se nemíchají s minulými
+  const top = kom.filter(c => (!opts.navrhyMedia || c.media === String(opts.navrhyMedia)) && c.likes >= minLikes && c.text.trim() && !vlastni.has(ascii(c.username)) && !blok.has(ascii(c.username)) && IG_RE.test(c.username) && !nevhodne(c.username) && !NICK_RE.test(normText(c.text)))
     .sort((a, b) => b.likes - a.likes || (a.datum < b.datum ? -1 : a.datum > b.datum ? 1 : cmpId(a.id, b.id))).slice(0, 10)
     .map(c => { const ob = parsuj(c.text).obec; const n = { id: 'ig-' + c.id }; if (ob) n.obec_id = ob; return Object.assign(n, { text: zkrat(c.text, 140), autor: c.username, hlasy: c.likes, datum: c.datum }); });
   w.navrhy_dne = w.navrhy_dne.filter(n => !String(n.id).startsWith('ig-')).concat(top);
@@ -225,32 +229,38 @@ function shortcode(s) {
   const m = s.match(/\/(?:p|reels?|tv)\/([A-Za-z0-9_-]+)/);
   return m ? m[1] : (/^[A-Za-z0-9_-]{5,}$/.test(s) ? s : '');
 }
-// herní post: IG_MEDIA_ID → shortcode z IG_MEDIA_URL → nejnovější médium s hashtagem; null = nenalezen (vypíše seznam)
-async function najdiPost(conn, env = process.env) {
+// herní posty: IG_MEDIA_ID / IG_MEDIA_URL = právě ten jeden post; jinak všechna média s hashtagem (díly hry), od nejstaršího.
+// [] = nenalezeno (vypíše seznam posledních médií)
+const MAX_STRAN_MEDII = 8;
+async function najdiPosty(conn, env = process.env) {
   let id = String(env.IG_MEDIA_ID || '').trim(), odkaz = String(env.IG_MEDIA_URL || '').trim();
   if (id && !/^\d+$/.test(id)) { odkaz = id; id = ''; }   // do IG_MEDIA_ID přišel odkaz nebo shortcode
-  if (id) return api(adresa(conn.base, '/' + id, { fields: MEDIA_POLE }));
-  const sc = shortcode(odkaz), prvni = [];
+  if (id) return [await api(adresa(conn.base, '/' + id, { fields: MEDIA_POLE }))];
+  const sc = shortcode(odkaz), prvni = [], nalezene = [];
+  const od = /^\d{4}-\d{2}-\d{2}$/.test(String(env.POSTY_OD || '').trim()) ? String(env.POSTY_OD).trim() : '';
   if (odkaz && !sc) log('IG_MEDIA_URL není permalink ani shortcode:', odkaz);
   if (!odkaz || sc) {
-    for await (const str of stranky(conn, adresa(conn.base, conn.mediaCesta, { fields: MEDIA_POLE, limit: '50' }), sc ? 10 : 4, 'stop')) {
+    for await (const str of stranky(conn, adresa(conn.base, conn.mediaCesta, { fields: MEDIA_POLE, limit: '50' }), sc ? 10 : MAX_STRAN_MEDII, 'stop')) {
       if (prvni.length < 10) prvni.push(...str.slice(0, 10 - prvni.length));
-      const sedi = str.filter(m => sc ? String(m.permalink || '').includes('/' + sc + '/') || String(m.permalink || '').endsWith('/' + sc) : ascii(m.caption).includes(HASHTAG));
-      if (sedi.length) return sedi.sort((a, b) => (iso(b.timestamp) || '').localeCompare(iso(a.timestamp) || ''))[0];
+      if (sc) { const m = str.find(m => String(m.permalink || '').includes('/' + sc + '/') || String(m.permalink || '').endsWith('/' + sc)); if (m) return [m]; continue; }
+      nalezene.push(...str.filter(m => m && m.id && ascii(m.caption).includes(HASHTAG) && (!od || (iso(m.timestamp) || '').slice(0, 10) >= od)));
+      // média chodí od nejnovějších: jakmile je celá stránka starší než POSTY_OD, dál už nic nebude
+      if (od && str.length && str.every(m => (iso(m.timestamp) || '9').slice(0, 10) < od)) break;
     }
   }
-  log(sc ? `Herní post se shortcodem „${sc}“ jsem mezi médii nenašel.` : `Žádné médium nemá v popisku ${HASHTAG} a IG_MEDIA_ID / IG_MEDIA_URL není nastaveno.`);
+  if (nalezene.length) { const videno = new Set(); return nalezene.filter(m => !videno.has(m.id) && videno.add(m.id)).sort((a, b) => (iso(a.timestamp) || '').localeCompare(iso(b.timestamp) || '') || cmpId(a.id, b.id)); }
+  log(sc ? `Herní post se shortcodem „${sc}“ jsem mezi médii nenašel.` : `Žádné médium nemá v popisku ${HASHTAG}${od ? ' (od ' + od + ')' : ''} a IG_MEDIA_ID / IG_MEDIA_URL není nastaveno.`);
   log('Posledních 10 médií (id · datum · začátek popisku · odkaz):');
   for (const m of prvni) log(`  ${m.id} · ${(iso(m.timestamp) || '?').slice(0, 10)} · ${JSON.stringify(zkrat(m.caption || '', 60))} · ${m.permalink || ''}`);
   if (!prvni.length) log('  (účet nevrátil žádná média)');
-  return null;
+  return [];
 }
 async function nactiKomentare(conn, mediaId) {
   const vse = [];
   const prvni = adresa(conn.base, `/${mediaId}/comments`, { fields: 'id,text,username,timestamp,like_count,from', limit: '50' });
   for await (const str of stranky(conn, prvni, MAX_STRAN_KOMENTARU, 'chyba')) vse.push(...str);
   const videno = new Set();                                // stránkování může komentář vrátit dvakrát
-  return vse.filter(c => c && c.id && !videno.has(c.id) && videno.add(c.id));
+  return vse.filter(c => c && c.id && !videno.has(c.id) && videno.add(c.id)).map(c => ({ ...c, media: String(mediaId) }));
 }
 
 /* ---------- režimy token-info a refresh ---------- */
@@ -282,8 +292,10 @@ async function refresh(env) {
 function zapis(soubor, text) { const tmp = soubor + '.tmp'; fs.writeFileSync(tmp, text); fs.renameSync(tmp, soubor); }
 async function main(argv = process.argv.slice(2), env = process.env) {
   const arg = k => { const i = argv.indexOf('--' + k); return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : ''; };
-  const dry = argv.includes('--dry'), fixture = arg('fixture'), rezim = argv[0] && !argv[0].startsWith('--') ? argv[0] : '';
+  const dry = argv.includes('--dry'), vynutit = argv.includes('--publikovat'), fixture = arg('fixture'), rezim = argv[0] && !argv[0].startsWith('--') ? argv[0] : '';
   const worldCesta = arg('world') || path.join(ROOT, 'world.json'), nerCesta = arg('nerozpoznane') || path.join(__dirname, 'nerozpoznane.json');
+  const liveCesta = arg('live') || path.join(path.dirname(worldCesta), 'world-live.json'), stavCesta = arg('stav') || path.join(path.dirname(nerCesta), 'stav.json');
+  const rezimPub = String(env.PUBLIKACE || '').trim().toLowerCase() === 'hned' ? 'hned' : 'dil';
   TOKEN = String(env.IG_TOKEN || '').trim();
   if (rezim && rezim !== 'token-info' && rezim !== 'refresh') { log('neznámý režim:', rezim, '(umím token-info, refresh)'); return 1; }
   if (!fixture && !TOKEN) { log('IG_TOKEN není nastaven – nic nedělám, world.json zůstává beze změny.'); return 0; }
@@ -293,7 +305,7 @@ async function main(argv = process.argv.slice(2), env = process.env) {
   const world = JSON.parse(fs.readFileSync(worldCesta, 'utf8'));
   if (!world || typeof world !== 'object' || Array.isArray(world)) throw new Error('world.json není objekt');
   const vlastni = [env.IG_OWN || 'radar_ricansko'];
-  let komentare;
+  let komentare, posty = [];
   if (fixture) {
     komentare = JSON.parse(fs.readFileSync(fixture, 'utf8'));
     if (!Array.isArray(komentare)) throw new Error('fixture musí být pole komentářů');
@@ -302,14 +314,19 @@ async function main(argv = process.argv.slice(2), env = process.env) {
     const conn = await pripoj(env);
     vlastni.push(conn.username);
     log(`účet: ${conn.username || '?'} (${conn.id}) přes ${conn.base.replace('https://', '')}`);
-    const post = await najdiPost(conn, env);
-    if (!post) { log('Herní post nenalezen – world.json zůstává beze změny.'); return 0; }
-    log(`herní post: ${post.id} · ${(iso(post.timestamp) || '').slice(0, 10)} · ${post.permalink || ''} · komentářů podle IG: ${post.comments_count == null ? '?' : post.comments_count}`);
-    komentare = await nactiKomentare(conn, post.id);
+    posty = await najdiPosty(conn, env);
+    if (!posty.length) { log('Herní post nenalezen – world.json zůstává beze změny.'); return 0; }
+    if (posty.length > 1) log(`herních postů (dílů) s ${HASHTAG}: ${posty.length}`);
+    komentare = [];
+    for (const post of posty) {
+      log(`herní post: ${post.id} · ${(iso(post.timestamp) || '').slice(0, 10)} · ${post.permalink || ''} · komentářů podle IG: ${post.comments_count == null ? '?' : post.comments_count}`);
+      komentare.push(...await nactiKomentare(conn, post.id));
+    }
   }
   let blokovane = [];
   try { blokovane = JSON.parse(fs.readFileSync(path.join(__dirname, 'blokovane.json'), 'utf8')); } catch (e) { }   // nepovinný seznam usernamů
-  const v = zpracuj(world, komentare, { now: new Date(), start: (env.START_DATE || '').trim() || '2026-11-16', vlastni, blokovane: Array.isArray(blokovane) ? blokovane : [], minLikes: env.NAVRHY_MIN_LIKES ? parseInt(env.NAVRHY_MIN_LIKES, 10) || 0 : 1 });
+  const posledni = posty.length ? posty[posty.length - 1] : null;
+  const v = zpracuj(world, komentare, { navrhyMedia: posledni && posty.length > 1 ? posledni.id : '', now: new Date(), start: (env.START_DATE || '').trim() || '2026-11-16', vlastni, blokovane: Array.isArray(blokovane) ? blokovane : [], minLikes: env.NAVRHY_MIN_LIKES ? parseInt(env.NAVRHY_MIN_LIKES, 10) || 0 : 1 });
 
   log(`komentářů: ${v.komentaru} · nových hráčů: ${v.novi.length} · doplněných povolání: ${v.doplneno.length} · odmítnutých účtů: ${v.odmitnuti.length} · nerozpoznaných: ${v.nerozpoznane.length} · přeskočeno (vlastní účet / další komentář hráče): ${v.vlastnich} / ${v.duplicit} · hráčů celkem: ${v.hracu}`);
   for (const n of v.novi) log(`  + @${n.ig} → ${n.obec} č. ${n.cislo}${n.povolani ? ' (' + n.povolani + ')' : ''}`);
@@ -319,12 +336,30 @@ async function main(argv = process.argv.slice(2), env = process.env) {
   if (v.ukazkaZahozena) log('ukázková data z world.json zahozena, začínám z prázdných obcí');
   log(v.zmena ? `world.json: změna, revize ${v.world.revize}, den hry ${v.world.den_hry}` : 'world.json: beze změny');
 
+  // publikace: koncept (world.json) → web (world-live.json)
+  const konceptText = v.zmena ? JSON.stringify(v.world, null, 1) + '\n' : fs.readFileSync(worldCesta, 'utf8');
+  let stav = {}; try { stav = JSON.parse(fs.readFileSync(stavCesta, 'utf8')) || {}; } catch (e) { }
+  let live = null; try { live = fs.readFileSync(liveCesta, 'utf8'); } catch (e) { }
+  const pub = stav.publikovano || {};
+  let duvod = '';
+  if (vynutit) duvod = 'ruční publikace';
+  else if (live == null && (posledni || rezimPub === 'hned')) duvod = 'web ještě nemá žádný stav';
+  else if (rezimPub === 'hned') duvod = live !== konceptText ? 'režim „hned“' : '';
+  else if (posledni && String(pub.post || '') !== String(posledni.id)) duvod = `nový díl ${posledni.permalink || posledni.id}`;
+  const publikovat = !!duvod && live !== konceptText;
+  const novyStav = { rezim: rezimPub, posty: posty.length ? posty.map(p => ({ id: String(p.id), odkaz: p.permalink || '', datum: iso(p.timestamp) || '' })) : (stav.posty || []), publikovano: pub };
+  if (duvod) novyStav.publikovano = { post: posledni ? String(posledni.id) : String(pub.post || ''), kdy: publikovat || !pub.kdy ? new Date().toISOString().replace(/\.\d{3}Z$/, 'Z') : pub.kdy, revize: v.world.revize || 0, hracu: v.hracu };
+  const ceka = v.hracu - (novyStav.publikovano.hracu || 0);
+  log(publikovat ? `web: publikuji (${duvod}) – ${v.hracu} hráčů` : duvod ? `web: ${duvod}, ale stav je stejný` : `web: beze změny, čeká na další díl${ceka > 0 ? ' (v konceptu +' + ceka + ' hráčů)' : ''}`);
+
   const nerText = JSON.stringify(v.nerozpoznane.map(({ username, text, timestamp }) => ({ username, text, timestamp })), null, 1) + '\n';
   if (dry) { log('--dry: nic nezapisuji'); return 0; }
-  if (v.zmena) zapis(worldCesta, JSON.stringify(v.world, null, 1) + '\n');
+  if (v.zmena) zapis(worldCesta, konceptText);
+  if (publikovat) zapis(liveCesta, konceptText);
+  if (posty.length || vynutit) { const st = JSON.stringify(novyStav, null, 1) + '\n'; let stary = null; try { stary = fs.readFileSync(stavCesta, 'utf8'); } catch (e) { } if (stary !== st) zapis(stavCesta, st); }
   let stare = null; try { stare = fs.readFileSync(nerCesta, 'utf8'); } catch (e) { }
   if (stare !== nerText) zapis(nerCesta, nerText);
-  if (env.GITHUB_OUTPUT) fs.appendFileSync(env.GITHUB_OUTPUT, `novi=${v.novi.length}\nzmena=${v.zmena}\n`);
+  if (env.GITHUB_OUTPUT) fs.appendFileSync(env.GITHUB_OUTPUT, `novi=${v.novi.length}\nzmena=${v.zmena}\npublikovano=${publikovat}\n`);
   return 0;
 }
 

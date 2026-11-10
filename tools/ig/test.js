@@ -188,7 +188,7 @@ test('CLI: fixture do kopie world.json – ukázka pryč, hráči, čísla, odzn
   assert.deepStrictEqual(ner.map(n => n.username), ['vyletnik_cz', 'nekdo_novy', 'dve_obce', 'bezobce', 'jen_job', 'ukecany']);
   assert.deepStrictEqual(ner[1], { username: 'nekdo_novy', text: 'Kostelec', timestamp: '2026-11-16T08:55:00Z' });
   assert.match(r.stdout, /\? @nekdo_novy/);
-  assert.strictEqual(fs.readFileSync(out, 'utf8'), 'novi=17\nzmena=true\n');
+  assert.strictEqual(fs.readFileSync(out, 'utf8'), 'novi=17\nzmena=true\npublikovano=false\n');
   // druhý běh nad stejnými komentáři nic nemění (revize ani soubor)
   const po1 = fs.readFileSync(s.world, 'utf8');
   const r2 = spust(['--fixture', FIXTURE, '--world', s.world, '--nerozpoznane', s.ner], { START_DATE: '2026-11-16' });
@@ -321,6 +321,8 @@ const MEDIA = [
   { id: '100', caption: 'Starší verze #postavsiricansko', permalink: 'https://www.instagram.com/p/OLD333/', timestamp: '2026-11-01T07:00:00+0000', comments_count: 9 },
 ];
 const KOM1 = [{ id: '2', text: 'Mukařov hasič', username: 'tom', timestamp: '2026-11-16T08:10:00+0000', like_count: 1, from: { id: '9', username: 'tom' } }, { id: '3', text: 'Říčany', username: 'radar_ricansko', timestamp: '2026-11-16T08:20:00+0000', like_count: 0 }];
+// starší díl (post 100): jeden nový hráč + eva podruhé (jeden účet = jeden domek, platí první komentář)
+const KOM0 = [{ id: '90', text: 'Kamenice', username: 'ota', timestamp: '2026-11-01T09:00:00+0000', like_count: 7 }, { id: '91', text: 'Mnichovice', username: 'eva', timestamp: '2026-11-01T09:05:00+0000', like_count: 0 }];
 const KOM2 = [{ id: '1', text: 'Říčany', timestamp: '2026-11-16T08:00:00+0000', like_count: 0, from: { id: '8', username: 'eva' } }];
 // graph.instagram.com: /me, média, komentáře na dvě stránky
 const igHost = (zmeny = {}) => (u) => {
@@ -330,19 +332,75 @@ const igHost = (zmeny = {}) => (u) => {
   if (p === '/me') return [200, { user_id: '178', username: 'radar_ricansko', id: '55' }];
   if (p === '/me/media') return [200, { data: MEDIA }];
   if (p === '/200') return [200, MEDIA[1]];
+  if (p === '/100/comments') return [200, { data: KOM0 }];
   if (p === '/200/comments') return u.searchParams.get('after') ? [200, { data: KOM2 }] : [200, { data: KOM1, paging: { next: `https://graph.instagram.com/v21.0/200/comments?after=X&access_token=${TOKEN}` } }];
   return [400, { error: { code: 100, message: `Unsupported get request ${u.pathname}?access_token=${TOKEN}` } }];
 };
 
-test('API: hashtag vybere herní post, komentáře se stránkují, token není v logu', async () => {
+test('API: komentáře ze všech postů s hashtagem, stránkování, token není v logu', async () => {
   const s = kopieSveta('api');
   const r = await sApi(igHost(), ['--world', s.world, '--nerozpoznane', s.ner], {});
   assert.strictEqual(r.kod, 0, r.text);
+  assert.match(r.text, /herních postů \(dílů\) s #postavsiricansko: 2/);
+  assert.match(r.text, /herní post: 100 /);
   assert.match(r.text, /herní post: 200 /);
-  assert.deepStrictEqual(r.volani, ['graph.instagram.com/v21.0/me', 'graph.instagram.com/v21.0/me/media', 'graph.instagram.com/v21.0/200/comments', 'graph.instagram.com/v21.0/200/comments']);
+  assert.deepStrictEqual(r.volani, ['graph.instagram.com/v21.0/me', 'graph.instagram.com/v21.0/me/media', 'graph.instagram.com/v21.0/100/comments', 'graph.instagram.com/v21.0/200/comments', 'graph.instagram.com/v21.0/200/comments']);
   const w = json(s.world);
   validni(w);
-  assert.deepStrictEqual(w.obce.map(o => [o.id, o.hraci.map(h => h.ig)]), [['ricany', ['eva']], ['mukarov', ['tom']]]);
+  // eva psala pod oba díly: platí první komentář (Mnichovice), druhý se nepočítá
+  assert.deepStrictEqual(w.obce.map(o => [o.id, o.hraci.map(h => h.ig)]), [['kamenice', ['ota']], ['mnichovice', ['eva']], ['mukarov', ['tom']]]);
+  // nápady dne jen z nejnovějšího dílu (post 200), i když starší komentář má víc lajků
+  assert.deepStrictEqual(w.navrhy_dne.filter(n => String(n.id).startsWith('ig-')).map(n => n.id), ['ig-2']);
+});
+
+test('API: POSTY_OD odřízne starší posty', async () => {
+  const s = kopieSveta('api-od');
+  const r = await sApi(igHost(), ['--world', s.world, '--nerozpoznane', s.ner], { POSTY_OD: '2026-11-10' });
+  assert.strictEqual(r.kod, 0, r.text);
+  assert.ok(!/herní post: 100 /.test(r.text));
+  assert.deepStrictEqual(json(s.world).obce.map(o => [o.id, o.hraci.map(h => h.ig)]), [['ricany', ['eva']], ['mukarov', ['tom']]]);
+});
+
+test('publikace: web se překlopí až s novým dílem; --publikovat a PUBLIKACE=hned', async () => {
+  const s = kopieSveta('pub'), live = path.join(path.dirname(s.world), 'world-live.json'), stav = path.join(path.dirname(s.ner), 'stav.json');
+  const args = ['--world', s.world, '--nerozpoznane', s.ner];
+  const hraci = f => json(f).obce.flatMap(o => o.hraci.map(h => h.ig)).sort();
+  // 1. běh: jen díl 100 → web ještě nic nemá, publikuje se
+  let media = [MEDIA[2]], kom200 = KOM1.concat(KOM2);
+  const host = () => igHost({ '/me/media': () => [200, { data: media }], '/200/comments': () => [200, { data: kom200 }] });
+  let r = await sApi(host(), args, {});
+  assert.strictEqual(r.kod, 0, r.text);
+  assert.match(r.text, /web: publikuji \(web ještě nemá žádný stav\)/);
+  assert.deepStrictEqual(hraci(live), ['eva', 'ota']);
+  assert.strictEqual(json(stav).publikovano.post, '100');
+  // 2. běh: pod dílem 100 přibyl hráč → koncept ano, web ne
+  const puv = KOM0.slice(); KOM0.push({ id: '92', text: 'Tehov', username: 'iva', timestamp: '2026-11-02T09:00:00+0000', like_count: 0 });
+  try {
+    r = await sApi(host(), args, {});
+    assert.match(r.text, /web: beze změny, čeká na další díl \(v konceptu \+1 hráčů\)/);
+    assert.deepStrictEqual(hraci(s.world), ['eva', 'iva', 'ota']);
+    assert.deepStrictEqual(hraci(live), ['eva', 'ota']);
+    // 3. běh: vyšel díl 200 → web se překlopí na celý koncept
+    media = [MEDIA[1], MEDIA[2]];
+    r = await sApi(host(), args, {});
+    assert.match(r.text, /web: publikuji \(nový díl https:\/\/www\.instagram\.com\/reel\/HRA222\/\)/);
+    assert.deepStrictEqual(hraci(live), ['eva', 'iva', 'ota', 'tom']);
+    assert.strictEqual(fs.readFileSync(live, 'utf8'), fs.readFileSync(s.world, 'utf8'));
+    assert.deepStrictEqual([json(stav).publikovano.post, json(stav).posty.map(p => p.id)], ['200', ['100', '200']]);
+    // 4. běh: další komentář pod dílem 200 → zase jen koncept; --publikovat web překlopí ručně
+    kom200 = kom200.concat([{ id: '5', text: 'Světice', username: 'jan', timestamp: '2026-11-16T09:00:00+0000', like_count: 0 }]);
+    r = await sApi(host(), args, {});
+    assert.deepStrictEqual(hraci(live), ['eva', 'iva', 'ota', 'tom']);
+    r = await sApi(host(), args.concat('--publikovat'), {});
+    assert.match(r.text, /web: publikuji \(ruční publikace\)/);
+    assert.deepStrictEqual(hraci(live), ['eva', 'iva', 'jan', 'ota', 'tom']);
+    // 5. režim „hned“: web = koncept při každém běhu
+    kom200 = kom200.concat([{ id: '6', text: 'Tehov', username: 'kuba', timestamp: '2026-11-16T09:30:00+0000', like_count: 0 }]);
+    r = await sApi(host(), args, { PUBLIKACE: 'hned' });
+    assert.match(r.text, /web: publikuji \(režim „hned“\)/);
+    assert.ok(hraci(live).includes('kuba'));
+    validni(json(live));
+  } finally { KOM0.length = 0; KOM0.push(...puv); }
 });
 
 test('API: IG_MEDIA_ID, odkaz v IG_MEDIA_ID i IG_MEDIA_URL', async () => {
@@ -377,6 +435,7 @@ test('API: fallback na graph.facebook.com přes /me/accounts', async () => {
     if (p === '/me/accounts') return [200, { data: [{ id: 'p1' }, { id: 'p2', instagram_business_account: { id: '1784', username: 'radar_ricansko' } }] }];
     if (p === '/1784/media') return [200, { data: MEDIA }];
     if (p === '/200/comments') return [200, { data: KOM1.concat(KOM2) }];
+    if (p === '/100/comments') return [200, { data: [] }];
     return [404, { error: { code: 100, message: 'nic' } }];
   }, ['--world', s.world, '--nerozpoznane', s.ner], {});
   assert.strictEqual(r.kod, 0, r.text);
@@ -391,7 +450,7 @@ test('API: chyba nebo rate-limit při stahování komentářů → nenulový kó
   const limit = await sApi(igHost({ '/200/comments': (u) => u.searchParams.get('after') ? [400, { error: { code: 4, message: `Application request limit reached access_token=${TOKEN}` } }] : [200, { data: KOM1, paging: { next: `https://graph.instagram.com/v21.0/200/comments?after=X&access_token=${TOKEN}` } }] }), ['--world', s.world, '--nerozpoznane', s.ner], {});
   assert.strictEqual(limit.kod, 1);
   assert.match(limit.text, /rate-limit/);
-  assert.strictEqual(limit.volani.filter(v => v.endsWith('/comments')).length, 4, '1 stránka + 3 pokusy o druhou');
+  assert.strictEqual(limit.volani.filter(v => v.endsWith('/200/comments')).length, 4, '1 stránka + 3 pokusy o druhou');
   // síťová chyba
   const sit = await sApi(igHost({ '/200/comments': () => Object.assign(new TypeError('fetch failed'), { cause: { code: 'ECONNRESET' } }) }), ['--world', s.world, '--nerozpoznane', s.ner], {});
   assert.strictEqual(sit.kod, 1);
@@ -404,6 +463,7 @@ test('API: chyba nebo rate-limit při stahování komentářů → nenulový kó
   assert.strictEqual(cizi.kod, 1);
   assert.strictEqual(fs.readFileSync(s.world, 'utf8'), pred);
   assert.ok(!fs.existsSync(s.ner));
+  assert.ok(!fs.existsSync(path.join(path.dirname(s.world), 'world-live.json')), 'při chybě se nic nepublikuje');
   // dočasná chyba, která se po opakování spraví, běh nezastaví
   let n = 0;
   const ok = await sApi(igHost({ '/me/media': () => (++n < 3 ? [500, { error: { code: 2, message: 'Unexpected error', is_transient: true } }] : [200, { data: MEDIA }]) }), ['--dry', '--world', s.world, '--nerozpoznane', s.ner], {});
