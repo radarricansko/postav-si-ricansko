@@ -361,6 +361,19 @@ test('API: POSTY_OD odřízne starší posty', async () => {
   assert.deepStrictEqual(json(s.world).obce.map(o => [o.id, o.hraci.map(h => h.ig)]), [['ricany', ['eva']], ['mukarov', ['tom']]]);
 });
 
+test('hlasy v komentáři: název, vlajka, nápad; obec jen z části před hlasem', () => {
+  const p = t => [K.parsuj(t).obec, K.hlasy(t).map(h => h.druh + '=' + h.text)];
+  assert.deepStrictEqual(p('Mukařov, název - Říčanská republika, vlajka - jelen, zelená a zlatá'), ['mukarov', ['nazev=Říčanská republika', 'vlajka=jelen, zelená a zlatá']]);
+  assert.deepStrictEqual(p('název - Republika Říčany'), ['', ['nazev=Republika Říčany']], 'hlas o názvu není přihláška do Říčan');
+  assert.deepStrictEqual(p('VLAJKA: hrad, modrá + bílá'), ['', ['vlajka=hrad, modrá + bílá']]);
+  assert.deepStrictEqual(p('Říčany nápad - metro do Mukařova'), ['ricany', ['napad=metro do Mukařova']]);
+  assert.deepStrictEqual(p('Super nápad, zdravím z Tehova'), ['tehov', []], 'běžná věta se slovem nápad není hlas');
+  assert.deepStrictEqual(p('Vlajkonoš z Tehova'), ['tehov', []]);
+  const s = K.sectiHlasy([{ druh: 'nazev', text: 'Radarie', autor: 'a', lajky: 2 }, { druh: 'nazev', text: 'radarie', autor: 'b', lajky: 0 }, { druh: 'nazev', text: 'Říčanská republika', autor: 'c', lajky: 3 }, { druh: 'vlajka', text: 'jelen, zelená', autor: 'a', lajky: 1 }]);
+  assert.deepStrictEqual(s.nazev.map(x => [x.text, x.body, x.komentaru]), [['Radarie', 4, 2], ['Říčanská republika', 4, 1]]);
+  assert.deepStrictEqual(s.vlajka.map(x => x.text), ['jelen, zelená']);
+});
+
 test('uzávěrka 17:00 pražského času (zimní i letní čas)', () => {
   assert.deepStrictEqual(K.uzaverkaPred('2026-11-16T08:00:00Z'), { den: '2026-11-15', cas: '2026-11-15T16:00:00Z' });
   assert.deepStrictEqual(K.uzaverkaPred('2026-11-16T16:00:00Z'), { den: '2026-11-16', cas: '2026-11-16T16:00:00Z' });

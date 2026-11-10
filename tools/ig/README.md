@@ -40,6 +40,12 @@ Když se žádný post nenajde, skript vypíše posledních 10 médií (ID, datu
 - Web hned (výjimečně): Actions → „Komentáře → world.json“ → Run workflow → zaškrtnout **publikovat**. Platí do dalšího dílu.
 - Průběžně jako dřív: proměnná `PUBLIKACE` = `hned`. Jiná hodina uzávěrky: proměnná `UZAVERKA_HODINA`.
 
+## Hlasování v komentářích
+
+- `název - Říčanská republika`, `vlajka - jelen, zelená a zlatá`, `nápad - metro do Říčan` (stačí i dvojtečka; u vlajky nemusí být nic).
+- Jde to dohromady s přihláškou: `Mukařov, vlajka - jelen, zelená`. Obec se hledá jen **před** klíčovým slovem, takže „název - Republika Říčany“ nikoho do Říčan nepřihlásí.
+- Po uzávěrce je v `tools/ig/navrhy/DATUM.json` pořadí: `hlasovani.nazev`, `hlasovani.vlajka`, `hlasovani.napad` (stejné texty se sčítají, body = počet komentářů + lajky) a `navrhy` (nejlajkovanější komentáře dne celkově).
+
 ## Pravidla
 
 - Parsování je stejné jako v Make (`make/blueprint-komentare.json`): malá písmena, bez diakritiky, pryč @zmínky a URL, pryč slova povolání a úvodní „jsem / hraju za / obec / z / v…“, zbytek se hledá v aliasech. Aliasy, povolání a filtr nicků jsou v `obce-aliasy.json` (vygenerováno jednou z blueprintu, test hlídá shodu).

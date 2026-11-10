@@ -36,7 +36,23 @@ const ascii = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/
 const normText = s => ascii(s).replace(/(@\S+|https?:\/\/\S+)/g, ' ').replace(/[^a-z0-9 ]+/g, ' ');
 const nevhodne = s => NICK_RE.test(ascii(s));
 
+/* hlasování v komentáři: „název - Říčanská republika“, „vlajka - jelen, zelená a zlatá“, „nápad - metro do Říčan“.
+   Všechno za klíčovým slovem je hlas, ne přihláška: obec se hledá jen v části před ním („Mukařov, vlajka - jelen“). */
+const HLAS_SLOVA = { vlajka: 'vlajka', vlajku: 'vlajka', vlajky: 'vlajka', vlajce: 'vlajka', nazev: 'nazev', jmeno: 'nazev', napad: 'napad', navrh: 'napad' };
+// „vlajka“ stačí samotná, u ostatních slov musí následovat pomlčka nebo dvojtečka („super nápad!“ hlas není)
+const HLAS_RE = /(^|[^\p{L}])(?:(vlajk[auye])(?![\p{L}])\s*[-–—:=>]*|(n[aá]zev|jm[eé]no|n[aá]pad|n[aá]vrh)\s*[-–—:=>]+)\s*/giu;
+function hlasy(text) {
+  const t = String(text || ''), m = [...t.matchAll(HLAS_RE)], out = [];
+  m.forEach((x, i) => {
+    const od = x.index + x[0].length, po = i + 1 < m.length ? m[i + 1].index : t.length;
+    const obsah = t.slice(od, po).replace(/\s+/g, ' ').replace(/^[\s,.;:–—-]+|[\s,;:–—-]+$/g, '');
+    if (obsah) out.push({ druh: HLAS_SLOVA[ascii(x[2] || x[3])], text: zkrat(obsah, 80) });
+  });
+  return out;
+}
 function parsuj(text) {
+  const prvniHlas = [...String(text || '').matchAll(HLAS_RE)][0];
+  if (prvniHlas) text = String(text).slice(0, prvniHlas.index);
   const slova = normText(text).split(' ').filter(Boolean);
   let povolani = '';
   for (const s of slova) if (POV[s]) povolani = POV[s];   // poslední slovo povolání vyhrává (jako v Make)
@@ -109,13 +125,14 @@ function zpracuj(world, komentare, opts = {}) {
     .filter(c => c.username && c.datum && !c.parent)       // jen top-level komentáře s autorem a časem
     .sort((a, b) => (a.datum < b.datum ? -1 : a.datum > b.datum ? 1 : cmpId(a.id, b.id)));
 
-  const novi = [], doplneno = [], odmitnuti = new Map(), nerozpoznane = [];
+  const novi = [], doplneno = [], odmitnuti = new Map(), nerozpoznane = [], hl = [];
   let vlastnich = 0, duplicit = 0;
   for (const c of kom) {
     const u = ascii(c.username);
     if (vlastni.has(u)) { vlastnich++; continue; }
     if (blok.has(u)) { odmitnuti.set(u, 'blokovaný účet'); continue; }
-    const p = parsuj(c.text);
+    const p = parsuj(c.text), ch = hlasy(c.text);
+    if (IG_RE.test(c.username) && !nevhodne(c.username)) for (const x of ch) if (!NICK_RE.test(normText(x.text))) hl.push({ druh: x.druh, text: x.text, autor: c.username, lajky: c.likes, datum: c.datum, media: c.media });
     const h = hraci.get(u);
     if (h) {
       // jeden účet = jeden domek; pozdější komentář může jen doplnit chybějící povolání
@@ -123,6 +140,7 @@ function zpracuj(world, komentare, opts = {}) {
       else if (p.obec && c.datum !== h.datum) duplicit++;
       continue;
     }
+    if (!p.obec && ch.length) continue;                    // jen hlas bez obce – není to nerozpoznaná přihláška
     if (!p.obec) { nerozpoznane.push({ username: c.username, text: zkrat(c.text, 300), timestamp: c.datum, duvod: p.duvod }); continue; }
     if (nevhodne(c.username)) { odmitnuti.set(u, 'nevhodný nick'); continue; }
     if (!IG_RE.test(c.username)) { odmitnuti.set(u, 'neplatný username'); continue; }
@@ -135,7 +153,7 @@ function zpracuj(world, komentare, opts = {}) {
     novi.push({ ig: hrac.ig, obec: o.id, cislo, povolani: p.povolani || '' });
   }
   const nerozp = nerozpoznane.filter(n => !hraci.has(ascii(n.username)) && !odmitnuti.has(ascii(n.username))).slice(-MAX_NEROZPOZNANE);
-  const prehled = { komentaru: kom.length, novi, doplneno, odmitnuti: [...odmitnuti].map(([ig, duvod]) => ({ ig, duvod })), nerozpoznane: nerozp, vlastnich, duplicit, hracu: hraci.size, ukazkaZahozena: false };
+  const prehled = { komentaru: kom.length, novi, doplneno, odmitnuti: [...odmitnuti].map(([ig, duvod]) => ({ ig, duvod })), nerozpoznane: nerozp, vlastnich, duplicit, hracu: hraci.size, hlasy: hl, ukazkaZahozena: false };
 
   // dokud není žádný skutečný hráč, ukázkový world.json necháme být
   if (bylaUkazka && hraci.size === 0) return { ...prehled, world, zmena: false };
@@ -154,6 +172,20 @@ function zpracuj(world, komentare, opts = {}) {
   const zmena = bezMeta(w) !== bezMeta(world);
   if (zmena) { w.revize = (parseInt(world.revize, 10) || 0) + 1; w.aktualizovano = now.toISOString().replace(/\.\d{3}Z$/, 'Z'); }
   return { ...prehled, world: zmena ? w : world, zmena };
+}
+
+// hlasy → pořadí: stejné texty (bez diakritiky a velikosti písmen) se sčítají; body = počet komentářů + jejich lajky
+function sectiHlasy(hl) {
+  const out = {};
+  for (const h of hl) {
+    const k = normText(h.text).replace(/\s+/g, ' ').trim(); if (!k) continue;
+    const sk = (out[h.druh] = out[h.druh] || new Map());
+    const z = sk.get(k) || { text: h.text, body: 0, komentaru: 0, lajku: 0, autori: [] };
+    z.komentaru++; z.lajku += h.lajky; z.body = z.komentaru + z.lajku; if (z.autori.length < 5 && !z.autori.includes(h.autor)) z.autori.push(h.autor);
+    sk.set(k, z);
+  }
+  for (const d of Object.keys(out)) out[d] = [...out[d].values()].sort((a, b) => b.body - a.body || a.text.localeCompare(b.text, 'cs')).slice(0, 15);
+  return out;
 }
 
 /* ---------- uzávěrka a řez světa ---------- */
@@ -400,7 +432,7 @@ async function main(argv = process.argv.slice(2), env = process.env) {
   let navrhySoubor = '', navrhyText = '';
   if (posledni && !ukazka && uzaverkaPred(iso(posledni.timestamp) || bezMs(ted), hodina).cas < uz.cas) {
     navrhySoubor = path.join(path.dirname(stavCesta), 'navrhy', uz.den + '.json');
-    navrhyText = txt({ den: uz.den, uzaverka: uz.cas, dil: { id: String(posledni.id), odkaz: posledni.permalink || '' }, navrhy: (v.world.navrhy_dne || []).filter(n => String(n.id).startsWith('ig-')) });
+    navrhyText = txt({ den: uz.den, uzaverka: uz.cas, dil: { id: String(posledni.id), odkaz: posledni.permalink || '' }, hlasovani: sectiHlasy(v.hlasy.filter(h => (posty.length < 2 || h.media === String(posledni.id)) && h.datum <= uz.cas)), navrhy: (v.world.navrhy_dne || []).filter(n => String(n.id).startsWith('ig-')) });
     if (fs.existsSync(navrhySoubor)) navrhySoubor = '';      // už uloženo, pořadí se po uzávěrce nemění
     else log(`nápady dne ${uz.den}: uloženo ${JSON.parse(navrhyText).navrhy.length} (tools/ig/navrhy/${uz.den}.json)`);
   }
@@ -418,5 +450,5 @@ async function main(argv = process.argv.slice(2), env = process.env) {
   return 0;
 }
 
-module.exports = { uzaverkaPred, rez, parsuj, normText, zpracuj, denHry, iso, shortcode, redact, main, cfg, DATA };
+module.exports = { hlasy, sectiHlasy, uzaverkaPred, rez, parsuj, normText, zpracuj, denHry, iso, shortcode, redact, main, cfg, DATA };
 if (require.main === module) main().then(k => { process.exitCode = k; }, e => { console.error('CHYBA: ' + redact(e && e.message || e)); process.exitCode = 1; });
