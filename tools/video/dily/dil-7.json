@@ -1,0 +1,216 @@
+{
+ "dil": 7,
+ "title": "Postav si Říčansko · Díl 7: Týden jedna",
+ "shots": [
+  {
+   "vo": "Týden jedna.",
+   "noSubs": true,
+   "dur": 1800,
+   "cam": {
+    "at": "center",
+    "from": [
+     2300,
+     0.95,
+     0.2
+    ],
+    "to": [
+     1500,
+     0.75,
+     0.4
+    ]
+   },
+   "ui": [
+    {
+     "k": "title",
+     "text": "TÝDEN 1",
+     "y": 620,
+     "size": 200,
+     "at": 60,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "vo": "{{pocet}} obyvatel.",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     420,
+     0.8,
+     0.3
+    ],
+    "to": [
+     300,
+     0.62,
+     0.7
+    ]
+   },
+   "ui": [
+    {
+     "k": "num",
+     "num": "{{pocet}}",
+     "label": "obyvatel",
+     "y": 560,
+     "w": 520,
+     "at": 100
+    }
+   ]
+  },
+  {
+   "vo": "{{obci_zivych}} z dvaapadesáti obcí žije.",
+   "cam": {
+    "at": "lm:{{top3}}",
+    "from": [
+     200,
+     0.6,
+     0.9
+    ],
+    "to": [
+     140,
+     0.45,
+     1.4
+    ]
+   },
+   "ui": [
+    {
+     "k": "num",
+     "num": "{{obci_zivych}}/52",
+     "label": "živých obcí",
+     "y": 560,
+     "w": 560,
+     "at": 100
+    }
+   ]
+  },
+  {
+   "vo": "Máme jméno, vlajku a měnu.",
+   "kdyz": "stat",
+   "cam": {
+    "at": "center",
+    "from": [
+     150,
+     0.5,
+     0.3
+    ],
+    "to": [
+     100,
+     0.4,
+     0.6
+    ]
+   },
+   "ui": [
+    {
+     "k": "flag",
+     "y": 560,
+     "w": 520,
+     "at": 100
+    },
+    {
+     "k": "title",
+     "text": "{{stat}}",
+     "y": 880,
+     "size": 110,
+     "at": 700,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "vo": "Hlavní město: {{top1}}.",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     90,
+     0.45,
+     2.2
+    ],
+    "to": [
+     62,
+     0.34,
+     2.8
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "HLAVNÍ MĚSTO · {{top1}}",
+     "y": 470,
+     "at": 200,
+     "size": 46,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "vo": "{{prazdnych}} obcí pořád čeká na prvního zakladatele. Třeba {{prazdna}}.",
+   "kdyz": "prazdna",
+   "cam": {
+    "at": "lm:{{prazdna}}",
+    "from": [
+     200,
+     0.3,
+     0.4
+    ],
+    "to": [
+     140,
+     0.24,
+     0.9
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "{{prazdna}}: 0 obyvatel",
+     "y": 480,
+     "at": 1800,
+     "size": 42
+    }
+   ]
+  },
+  {
+   "vo": "Stát stojí a mapa zůstává. Tvůj domek ti nikdo nevezme.",
+   "noSubs": true,
+   "dur": 4600,
+   "cam": {
+    "at": "center",
+    "from": [
+     700,
+     0.8,
+     1.2
+    ],
+    "to": [
+     1000,
+     0.85,
+     1.6
+    ]
+   },
+   "ui": [
+    {
+     "k": "end",
+     "at": 0,
+     "lines": [
+      {
+       "text": "Stát stojí",
+       "big": true,
+       "size": 120
+      },
+      {
+       "text": "Tvůj domek ti nikdo nevezme",
+       "big": true,
+       "size": 58,
+       "solid": true
+      },
+      {
+       "text": "Mapa zůstává online",
+       "size": 46
+      },
+      {
+       "text": "#PostavSiŘíčansko",
+       "size": 40
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

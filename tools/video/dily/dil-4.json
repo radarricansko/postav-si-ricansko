@@ -1,0 +1,230 @@
+{
+ "dil": 4,
+ "title": "Postav si Říčansko · Díl 4: Měna a národní jídlo",
+ "shots": [
+  {
+   "vo": "Hlavní město: {{top1}}.",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     110,
+     0.5,
+     2.2
+    ],
+    "to": [
+     70,
+     0.36,
+     2.8
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "HLAVNÍ MĚSTO",
+     "y": 450,
+     "at": 80,
+     "solid": true
+    },
+    {
+     "k": "title",
+     "text": "{{top1}}",
+     "y": 610,
+     "size": 120,
+     "at": 250
+    }
+   ]
+  },
+  {
+   "vo": "V obci {{stavba_obec}} stojí {{stavba}}.",
+   "kdyz": "stavba",
+   "cam": {
+    "at": "stavba:{{stavba_obec}}",
+    "from": [
+     64,
+     0.42,
+     0.5
+    ],
+    "to": [
+     42,
+     0.3,
+     1.1
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "{{stavba}} · {{stavba_obec}}",
+     "y": 470,
+     "at": 200,
+     "size": 44
+    }
+   ]
+  },
+  {
+   "vo": "Jenže čím se tu vlastně platí?",
+   "cam": {
+    "at": "slot:{{top1}}:3",
+    "from": [
+     40,
+     0.4,
+     0.3
+    ],
+    "to": [
+     26,
+     0.3,
+     0.9
+    ]
+   },
+   "ui": [
+    {
+     "k": "stamp",
+     "text": "???",
+     "y": 560,
+     "size": 130,
+     "at": 700
+    }
+   ]
+  },
+  {
+   "vo": "Stát bez peněz není stát.",
+   "cam": {
+    "at": "center",
+    "from": [
+     150,
+     0.5,
+     1.4
+    ],
+    "to": [
+     100,
+     0.4,
+     1.9
+    ]
+   },
+   "ui": []
+  },
+  {
+   "vo": "Jak se jmenuje naše měna?",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     330,
+     0.75,
+     -0.4
+    ],
+    "to": [
+     260,
+     0.62,
+     0.0
+    ]
+   },
+   "ui": [
+    {
+     "k": "bubble",
+     "author": "ty",
+     "text": "měna - …",
+     "y": 460,
+     "w": 640,
+     "at": 500
+    }
+   ]
+  },
+  {
+   "vo": "A co je národní jídlo?",
+   "cam": {
+    "at": "lm:{{top2}}",
+    "from": [
+     300,
+     0.75,
+     0.6
+    ],
+    "to": [
+     230,
+     0.62,
+     1.0
+    ]
+   },
+   "ui": [
+    {
+     "k": "bubble",
+     "author": "ty",
+     "text": "jídlo - …",
+     "y": 460,
+     "w": 640,
+     "at": 500,
+     "side": "right"
+    }
+   ]
+  },
+  {
+   "vo": "{{prazdna}}: pořád ani jeden domek. Fakt?",
+   "kdyz": "prazdna",
+   "cam": {
+    "at": "lm:{{prazdna}}",
+    "from": [
+     200,
+     0.3,
+     0.4
+    ],
+    "to": [
+     140,
+     0.24,
+     0.9
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "{{prazdna}}: 0 obyvatel",
+     "y": 480,
+     "at": 200,
+     "size": 42
+    }
+   ]
+  },
+  {
+   "vo": "Vítězná bankovka zítra v devět.",
+   "noSubs": true,
+   "dur": 3600,
+   "cam": {
+    "at": "center",
+    "from": [
+     700,
+     0.8,
+     1.2
+    ],
+    "to": [
+     900,
+     0.85,
+     1.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "end",
+     "at": 0,
+     "lines": [
+      {
+       "text": "měna - …",
+       "big": true,
+       "size": 100
+      },
+      {
+       "text": "jídlo - …",
+       "big": true,
+       "size": 100,
+       "solid": true
+      },
+      {
+       "text": "Hlasuj do 17:00",
+       "size": 46
+      },
+      {
+       "text": "#PostavSiŘíčansko",
+       "size": 40
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

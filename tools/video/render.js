@@ -52,7 +52,7 @@ function splitTake(mp3,texts){const tmp=path.join(OUT,'take.mp3');fs.writeFileSy
  const DIL=arg('dil');let def=DIL?JSON.parse(fs.readFileSync(path.join(ROOT,'tools/video/dily',`dil-${DIL}.json`),'utf8')):null;const SHEET=process.argv.includes('--sheet');
  const data=def&&def.data?def.data:arg('data','world.json');
  /* scénář dílu: {{proměnné}} z dat a z výsledků hlasování */
- if(def){const DD=require('./dil-data');const w=JSON.parse(fs.readFileSync(path.join(ROOT,data),'utf8'));const nav=arg('navrhy')?JSON.parse(fs.readFileSync(path.resolve(ROOT,arg('navrhy')),'utf8')):DD.posledniNavrhy();const r=DD.dosad(def,DD.promenne(w,nav,{dil:+DIL}));def=r.def;if(r.chybi.length)console.log('POZOR: ve scénáři zůstalo nedosazeno:',r.chybi.join(', '))}const dayQ=arg('day')?`&den=${arg('day')}`:'';
+ if(def){const DD=require('./dil-data');const w=JSON.parse(fs.readFileSync(path.join(ROOT,data),'utf8'));const nav=arg('navrhy')?JSON.parse(fs.readFileSync(path.resolve(ROOT,arg('navrhy')),'utf8')):DD.posledniNavrhy();const r=DD.dosad(def,DD.promenne(w,nav,{dil:parseInt(DIL,10)||1}));def=r.def;if(r.chybi.length)console.log('POZOR: ve scénáři zůstalo nedosazeno:',r.chybi.join(', '))}const dayQ=arg('day')?`&den=${arg('day')}`:'';
  await p.goto(`${base}/index.html?admin=fofrburg96&perf=0&render=${arg('scale','0.5')}&data=${encodeURIComponent('/'+data)}${dayQ}${def?'&mlha=0':''}`);
  await p.waitForFunction(()=>window.done===1,null,{timeout:180000});await p.waitForTimeout(2000);
  const info=await p.evaluate(()=>({day:GAME.info().day,pop:GAME.info().pop,hasReel:!!window.REEL}));console.log('hra:',info);if(!info.hasReel)throw new Error('REEL chybí');

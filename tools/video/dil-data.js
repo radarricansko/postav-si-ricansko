@@ -22,7 +22,7 @@ function promenne(world, navrhy, opts = {}) {
   if (s[0] && s[1]) v.rozdil = s[0].hraci.length - s[1].hraci.length;
   // derby: dvě obce (mimo první), které jsou si počtem nejblíž
   let d = null; for (let i = 1; i + 1 < s.length; i++) { const r = s[i].hraci.length - s[i + 1].hraci.length; if (s[i + 1].hraci.length >= 3 && (!d || r < d.r)) d = { a: s[i], b: s[i + 1], r }; }
-  if (d) { v.derby_a = d.a.nazev; v.derby_b = d.b.nazev; v.derby_rozdil = d.r; }
+  if (d) { v.derby_a = d.a.nazev; v.derby_b = d.b.nazev; v.derby_a_n = d.a.hraci.length; v.derby_b_n = d.b.hraci.length; v.derby_rozdil = d.r; }
   // zakladatelé: obec, která včera přibyla nejvíc a má aspoň 3 lidi
   const pri = {}; novi.forEach(h => { pri[h.obec] = (pri[h.obec] || 0) + 1; });
   const zo = s.filter((o, i) => o.hraci.length >= 3 && (i > 0 || s.length < 2 || s[1].hraci.length < 3)).sort((a, b) => (pri[b.nazev] || 0) - (pri[a.nazev] || 0) || b.hraci.length - a.hraci.length)[0];
@@ -38,6 +38,8 @@ function promenne(world, navrhy, opts = {}) {
   const hl = (navrhy && navrhy.hlasovani) || {};
   for (const k of ['nazev', 'vlajka', 'napad', 'mena', 'jidlo']) if (hl[k] && hl[k][0]) { v['hlas_' + k] = hl[k][0].text; if (hl[k][0].autori && hl[k][0].autori[0]) v['hlas_' + k + '_autor'] = nick(hl[k][0].autori[0]); }
   const top = navrhy && navrhy.navrhy && navrhy.navrhy[0]; if (top) { v.komentar = top.text; v.komentar_autor = nick(top.autor); }
+  const domku = n => n + ' ' + (n === 1 ? 'domek' : n >= 2 && n <= 4 ? 'domky' : 'domků');
+  if (v.rozdil != null) v.rozdil_txt = domku(v.rozdil); if (v.derby_rozdil != null) v.derby_rozdil_txt = domku(v.derby_rozdil);
   // výslovnost nicků pro hlas: bez zavináče, tečky a podtržítka jako mezery („{{zakl_1_hlas}}“)
   for (const k of Object.keys(v)) if (typeof v[k] === 'string' && v[k][0] === '@') v[k + '_hlas'] = v[k].slice(1).replace(/[._]+/g, ' ').replace(/(\D)(\d)/g, '$1 $2').trim();
   return v;
@@ -56,7 +58,7 @@ if (require.main === module) {
   const arg = k => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : ''; };
   const world = cti(path.resolve(ROOT, arg('data') || (fs.existsSync(path.join(ROOT, 'world-dil.json')) ? 'world-dil.json' : 'world.json')));
   const nav = arg('navrhy') ? cti(path.resolve(ROOT, arg('navrhy'))) : posledniNavrhy();
-  const v = promenne(world || { obce: [] }, nav, { dil: +arg('dil') || undefined });
+  const v = promenne(world || { obce: [] }, nav, { dil: parseInt(arg('dil'), 10) || undefined });
   console.log(JSON.stringify(v, null, 1));
   if (arg('dil')) { const def = cti(path.join(__dirname, 'dily', `dil-${arg('dil')}.json`)); if (def) { const r = dosad(def, v); console.log('chybí:', r.chybi.join(', ') || 'nic'); console.log(r.def.shots.map(s => '· ' + s.vo).join('\n')); } }
 }

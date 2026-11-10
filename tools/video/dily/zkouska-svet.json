@@ -212,7 +212,14 @@
      "odznaky": []
     }
    ],
-   "specialni_budovy": []
+   "specialni_budovy": [
+    {
+     "typ": "jine",
+     "nazev_cedule": "Metro Mukařov",
+     "autor": "kuba_ric3",
+     "datum": "2026-11-17T18:10:00Z"
+    }
+   ]
   },
   {
    "id": "mnichovice",

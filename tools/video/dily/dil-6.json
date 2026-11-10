@@ -1,0 +1,235 @@
+{
+ "dil": 6,
+ "title": "Postav si Říčansko · Díl 6: Praha si nás všimla",
+ "shots": [
+  {
+   "vo": "Derby je rozhodnuté.",
+   "cam": {
+    "at": "lm:{{stavba_obec}}",
+    "from": [
+     120,
+     0.5,
+     0.4
+    ],
+    "to": [
+     84,
+     0.38,
+     0.8
+    ]
+   },
+   "kdyz": "stavba",
+   "ui": [
+    {
+     "k": "stamp",
+     "text": "ROZHODNUTO",
+     "y": 560,
+     "size": 90,
+     "at": 500
+    }
+   ]
+  },
+  {
+   "vo": "{{stavba_obec}} má novou stavbu: {{stavba}}.",
+   "kdyz": "stavba",
+   "cam": {
+    "at": "stavba:{{stavba_obec}}",
+    "from": [
+     64,
+     0.42,
+     0.5
+    ],
+    "to": [
+     42,
+     0.3,
+     1.1
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "{{stavba}} · {{stavba_obec}}",
+     "y": 470,
+     "at": 200,
+     "size": 44,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "vo": "Je nás {{pocet}}.",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     420,
+     0.8,
+     0.3
+    ],
+    "to": [
+     300,
+     0.62,
+     0.7
+    ]
+   },
+   "ui": [
+    {
+     "k": "num",
+     "num": "{{pocet}}",
+     "label": "obyvatel",
+     "y": 560,
+     "w": 520,
+     "at": 100
+    }
+   ]
+  },
+  {
+   "vo": "A Praha si toho všimla.",
+   "cam": {
+    "at": "center",
+    "from": [
+     2400,
+     0.9,
+     2.4
+    ],
+    "to": [
+     1700,
+     0.7,
+     2.7
+    ]
+   },
+   "ui": [
+    {
+     "k": "stamp",
+     "text": "PRAHA ↖",
+     "x": 330,
+     "y": 520,
+     "size": 84,
+     "at": 600,
+     "rot": -0.06
+    }
+   ]
+  },
+  {
+   "vo": "Prý: kam jsme zmizeli.",
+   "cam": {
+    "at": "lm:Říčany",
+    "from": [
+     420,
+     0.5,
+     2.6
+    ],
+    "to": [
+     320,
+     0.4,
+     2.9
+    ]
+   },
+   "ui": [
+    {
+     "k": "bubble",
+     "author": "Praha",
+     "sub": "viděno",
+     "text": "Kam jste zmizeli??",
+     "y": 470,
+     "w": 680,
+     "at": 300
+    }
+   ]
+  },
+  {
+   "vo": "Tak jim na hranici postavíme pořádnou bránu. Ať to vidí.",
+   "cam": {
+    "at": "lm:Říčany",
+    "from": [
+     260,
+     0.36,
+     2.9
+    ],
+    "to": [
+     180,
+     0.28,
+     3.3
+    ]
+   },
+   "ui": [
+    {
+     "k": "stamp",
+     "text": "BRÁNA",
+     "y": 560,
+     "size": 120,
+     "at": 1500
+    }
+   ]
+  },
+  {
+   "vo": "Co na ní bude napsáno?",
+   "cam": {
+    "at": "lm:{{top2}}",
+    "from": [
+     300,
+     0.75,
+     0.6
+    ],
+    "to": [
+     230,
+     0.62,
+     1.0
+    ]
+   },
+   "ui": [
+    {
+     "k": "bubble",
+     "author": "ty",
+     "text": "nápad - nápis na bránu",
+     "y": 460,
+     "w": 760,
+     "at": 400
+    }
+   ]
+  },
+  {
+   "vo": "Nejlepší nápis zítra visí nad silnicí.",
+   "noSubs": true,
+   "dur": 3600,
+   "cam": {
+    "at": "center",
+    "from": [
+     700,
+     0.8,
+     1.2
+    ],
+    "to": [
+     900,
+     0.85,
+     1.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "end",
+     "at": 0,
+     "lines": [
+      {
+       "text": "nápad - …",
+       "big": true,
+       "size": 110
+      },
+      {
+       "text": "Nápis na hraniční bránu",
+       "big": true,
+       "size": 64,
+       "solid": true
+      },
+      {
+       "text": "Hlasuj do 17:00",
+       "size": 46
+      },
+      {
+       "text": "#PostavSiŘíčansko",
+       "size": 40
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1635,7 +1635,8 @@
     var st = safeState(), p = String(at || 'region').split(':'), t = (st.towns || []).filter(function (x) { return x.name === p[1]; })[0];
     if (p[0] === 'center' && G() && G().center) { var c = G().center(); if (c && c.x != null) return { x: c.x, y: 8, z: c.z }; }
     if (p[0] === 'slot' && G() && G().slot) { var q = G().slot(p[1], +p[2] || 0); if (q) return { x: q.x, y: 1.5, z: q.z }; }
-    if (t && p[0] === 'lm' && t.lm) return { x: t.lm.x, y: 2, z: t.lm.z };
+    if (p[0] === 'stavba' && G() && G().specialPos) { var sp = G().specialPos(p[1]); if (sp) return { x: sp.x, y: 3, z: sp.z }; }
+    if (t && (p[0] === 'lm' || p[0] === 'stavba') && t.lm) return { x: t.lm.x, y: 2, z: t.lm.z };
     if (t) return { x: t.center.x, y: 0, z: t.center.z };
     var xs = (st.towns || []).map(function (x) { return x.center.x; }), zs = (st.towns || []).map(function (x) { return x.center.z; });
     return xs.length ? { x: (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2, y: 0, z: (Math.min.apply(null, zs) + Math.max.apply(null, zs)) / 2 } : { x: 0, y: 0, z: 0 };

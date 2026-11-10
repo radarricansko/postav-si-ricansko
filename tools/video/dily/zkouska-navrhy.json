@@ -37,6 +37,28 @@
      "eliska_muk2"
     ]
    }
+  ],
+  "mena": [
+   {
+    "text": "radar",
+    "body": 20,
+    "komentaru": 5,
+    "lajku": 15,
+    "autori": [
+     "dan_mni2"
+    ]
+   }
+  ],
+  "jidlo": [
+   {
+    "text": "kebab z nádraží",
+    "body": 18,
+    "komentaru": 3,
+    "lajku": 15,
+    "autori": [
+     "sara_str1"
+    ]
+   }
   ]
  },
  "navrhy": []

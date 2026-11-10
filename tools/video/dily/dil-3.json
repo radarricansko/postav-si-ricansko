@@ -1,0 +1,282 @@
+{
+ "dil": 3,
+ "title": "Postav si Říčansko · Díl 3: První stavba, boj o hlavní město",
+ "shots": [
+  {
+   "vo": "Chtěli jste: {{stavba}}. Tak tady je.",
+   "kdyz": "stavba",
+   "cam": {
+    "at": "stavba:{{stavba_obec}}",
+    "from": [
+     70,
+     0.42,
+     0.5
+    ],
+    "to": [
+     44,
+     0.3,
+     1.1
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "CHTĚLI JSTE",
+     "y": 450,
+     "at": 80,
+     "solid": true
+    },
+    {
+     "k": "title",
+     "text": "{{stavba}}",
+     "y": 610,
+     "size": 110,
+     "at": 300
+    }
+   ]
+  },
+  {
+   "vo": "Navrhl to {{stavba_autor_hlas}}. Jméno je na ceduli.",
+   "kdyz": "stavba_autor",
+   "noSubs": true,
+   "cam": {
+    "at": "stavba:{{stavba_obec}}",
+    "from": [
+     30,
+     0.3,
+     2.0
+    ],
+    "to": [
+     22,
+     0.24,
+     2.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "tag",
+     "text": "{{stavba_autor}}",
+     "y": 620,
+     "at": 200,
+     "size": 54
+    },
+    {
+     "k": "chip",
+     "text": "jméno je na ceduli",
+     "y": 760,
+     "at": 1100,
+     "size": 38
+    }
+   ]
+  },
+  {
+   "vo": "Je nás {{pocet}}.",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     420,
+     0.8,
+     0.3
+    ],
+    "to": [
+     300,
+     0.62,
+     0.7
+    ]
+   },
+   "ui": [
+    {
+     "k": "num",
+     "num": "{{pocet}}",
+     "label": "obyvatel",
+     "y": 560,
+     "w": 520,
+     "at": 100
+    }
+   ]
+  },
+  {
+   "vo": "A teď to hlavní: každý stát má hlavní město.",
+   "cam": {
+    "at": "center",
+    "from": [
+     150,
+     0.5,
+     0.3
+    ],
+    "to": [
+     100,
+     0.4,
+     0.6
+    ]
+   },
+   "ui": [
+    {
+     "k": "stamp",
+     "text": "HLAVNÍ MĚSTO?",
+     "y": 560,
+     "size": 84,
+     "at": 900
+    }
+   ]
+  },
+  {
+   "vo": "U nás je to obec, kde bydlí nejvíc lidí.",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     90,
+     0.45,
+     2.2
+    ],
+    "to": [
+     62,
+     0.34,
+     2.8
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "KORUNA · {{top1}} · {{top1_n}} obyvatel",
+     "y": 470,
+     "at": 300,
+     "size": 44,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "vo": "Vede {{top1}}. {{top2}} ztrácí jen {{rozdil_txt}}.",
+   "kdyz": "top2",
+   "cam": {
+    "at": "lm:{{top2}}",
+    "from": [
+     110,
+     0.5,
+     -0.6
+    ],
+    "to": [
+     76,
+     0.36,
+     0.0
+    ]
+   },
+   "ui": [
+    {
+     "k": "num",
+     "num": "{{top1_n}}",
+     "label": "{{top1}}",
+     "x": 300,
+     "y": 540,
+     "at": 150
+    },
+    {
+     "k": "num",
+     "num": "{{top2_n}}",
+     "label": "{{top2}}",
+     "x": 780,
+     "y": 540,
+     "at": 900
+    }
+   ]
+  },
+  {
+   "vo": "Koruna se může stěhovat každý den. Napiš obec a přitáhni spolužáky.",
+   "cam": {
+    "at": "slot:{{top2}}:0",
+    "from": [
+     44,
+     0.42,
+     0.4
+    ],
+    "to": [
+     28,
+     0.3,
+     1.0
+    ]
+   },
+   "ui": [
+    {
+     "k": "bubble",
+     "author": "ty",
+     "text": "{{top2}}",
+     "y": 430,
+     "w": 600,
+     "at": 1500
+    }
+   ]
+  },
+  {
+   "vo": "{{prazdna}}: pořád nikdo?",
+   "kdyz": "prazdna",
+   "cam": {
+    "at": "lm:{{prazdna}}",
+    "from": [
+     200,
+     0.3,
+     0.4
+    ],
+    "to": [
+     140,
+     0.24,
+     0.9
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "{{prazdna}}: 0 obyvatel",
+     "y": 480,
+     "at": 200,
+     "size": 42
+    }
+   ]
+  },
+  {
+   "vo": "A co postavíme dál?",
+   "noSubs": true,
+   "dur": 3600,
+   "cam": {
+    "at": "center",
+    "from": [
+     700,
+     0.8,
+     1.2
+    ],
+    "to": [
+     900,
+     0.85,
+     1.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "end",
+     "at": 0,
+     "lines": [
+      {
+       "text": "nápad - …",
+       "big": true,
+       "size": 110
+      },
+      {
+       "text": "Nejvíc lajků = zítra stojí",
+       "big": true,
+       "size": 64,
+       "solid": true
+      },
+      {
+       "text": "Hlasuj do 17:00",
+       "size": 46
+      },
+      {
+       "text": "#PostavSiŘíčansko",
+       "size": 40
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

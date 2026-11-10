@@ -1,0 +1,260 @@
+{
+ "dil": 5,
+ "title": "Postav si Říčansko · Díl 5: Derby",
+ "shots": [
+  {
+   "vo": "Platíme: {{hlas_mena}}. Jíme: {{hlas_jidlo}}.",
+   "kdyz": "hlas_mena,hlas_jidlo",
+   "cam": {
+    "at": "lm:{{top1}}",
+    "from": [
+     110,
+     0.5,
+     2.2
+    ],
+    "to": [
+     70,
+     0.36,
+     2.8
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "MĚNA: {{hlas_mena}}",
+     "y": 480,
+     "at": 150,
+     "size": 50,
+     "solid": true
+    },
+    {
+     "k": "chip",
+     "text": "JÍDLO: {{hlas_jidlo}}",
+     "y": 620,
+     "at": 1100,
+     "size": 50
+    }
+   ]
+  },
+  {
+   "vo": "A dneska: derby.",
+   "noSubs": true,
+   "dur": 1900,
+   "cam": {
+    "at": "center",
+    "from": [
+     1300,
+     0.8,
+     0.3
+    ],
+    "to": [
+     900,
+     0.65,
+     0.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "title",
+     "text": "DERBY",
+     "y": 620,
+     "size": 220,
+     "at": 60,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "vo": "{{derby_a}}",
+   "kdyz": "derby_a",
+   "noSubs": true,
+   "dur": 1700,
+   "cam": {
+    "at": "lm:{{derby_a}}",
+    "from": [
+     110,
+     0.5,
+     -0.6
+    ],
+    "to": [
+     80,
+     0.38,
+     -0.2
+    ]
+   },
+   "ui": [
+    {
+     "k": "title",
+     "text": "{{derby_a}}",
+     "y": 560,
+     "size": 120,
+     "at": 60
+    },
+    {
+     "k": "num",
+     "num": "{{derby_a_n}}",
+     "label": "obyvatel",
+     "y": 790,
+     "at": 500
+    }
+   ]
+  },
+  {
+   "vo": "proti: {{derby_b}}.",
+   "kdyz": "derby_b",
+   "noSubs": true,
+   "dur": 1900,
+   "cam": {
+    "at": "lm:{{derby_b}}",
+    "from": [
+     110,
+     0.5,
+     0.8
+    ],
+    "to": [
+     80,
+     0.38,
+     1.2
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "PROTI",
+     "y": 440,
+     "at": 40,
+     "solid": true
+    },
+    {
+     "k": "title",
+     "text": "{{derby_b}}",
+     "y": 580,
+     "size": 120,
+     "at": 160
+    },
+    {
+     "k": "num",
+     "num": "{{derby_b_n}}",
+     "label": "obyvatel",
+     "y": 800,
+     "at": 600
+    }
+   ]
+  },
+  {
+   "vo": "Dělí je {{derby_rozdil_txt}}.",
+   "kdyz": "derby_a",
+   "cam": {
+    "at": "slot:{{derby_b}}:0",
+    "from": [
+     44,
+     0.42,
+     0.4
+    ],
+    "to": [
+     28,
+     0.3,
+     1.0
+    ]
+   },
+   "ui": [
+    {
+     "k": "stamp",
+     "text": "{{derby_rozdil_txt}}",
+     "y": 560,
+     "size": 96,
+     "at": 500
+    }
+   ]
+  },
+  {
+   "vo": "Kdo bude v pět odpoledne větší, dostane novou stavbu.",
+   "cam": {
+    "at": "slot:{{derby_a}}:0",
+    "from": [
+     44,
+     0.42,
+     2.4
+    ],
+    "to": [
+     28,
+     0.3,
+     3.0
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "ROZHODUJE SE V 17:00",
+     "y": 470,
+     "at": 900,
+     "size": 44,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "vo": "Ten druhý nic.",
+   "dur": 1700,
+   "cam": {
+    "at": "lm:{{prazdna}}",
+    "from": [
+     200,
+     0.3,
+     0.4
+    ],
+    "to": [
+     160,
+     0.26,
+     0.7
+    ]
+   },
+   "ui": []
+  },
+  {
+   "vo": "Pište obec. Svolejte třídu.",
+   "noSubs": true,
+   "dur": 3600,
+   "cam": {
+    "at": "center",
+    "from": [
+     700,
+     0.8,
+     1.2
+    ],
+    "to": [
+     900,
+     0.85,
+     1.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "end",
+     "at": 0,
+     "lines": [
+      {
+       "text": "{{derby_a}} × {{derby_b}}",
+       "big": true,
+       "size": 84
+      },
+      {
+       "text": "Napiš svou obec",
+       "big": true,
+       "size": 80,
+       "solid": true
+      },
+      {
+       "text": "Hlasuj do 17:00",
+       "size": 46
+      },
+      {
+       "text": "#PostavSiŘíčansko",
+       "size": 40
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
