@@ -22,7 +22,7 @@
   var FONT_H = '"Archivo", "Inter", "Segoe UI", Roboto, Arial, sans-serif';   // nadpisy, čísla, titulky (expanded 125 %, 800)
   var FONT_B = '"Inter", "Segoe UI", Roboto, Arial, sans-serif';              // text v bublinách, popisky
   var FONT = FONT_H;
-  var TIERS = { wood: { label: 'dřevěná liga' }, silver: { label: 'stříbrná liga' }, gold: { label: 'zlatá liga' }, plat: { label: 'platinová liga' } };
+  var TIERS = { wood: { label: 'osada' }, silver: { label: 'ves' }, gold: { label: 'městys' }, plat: { label: 'město' } };
 
   // ------------------------------------------------------------------ utility
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
