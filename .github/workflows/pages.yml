@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: mkdir -p site && cp -r web/. site/ && cp world.json site/world.json && touch site/.nojekyll
+      - name: Verze skriptů (aby prohlížeč nenačítal staré soubory z mezipaměti)
+        run: sed -i -E 's#<script src="([a-z-]+\.js)"></script>#<script src="\1?v='"${GITHUB_SHA::7}"'"></script>#' site/index.html && grep -c "?v=" site/index.html
       - uses: actions/configure-pages@v5
         with: { enablement: true }
       - uses: actions/upload-pages-artifact@v3

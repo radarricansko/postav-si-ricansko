@@ -28,6 +28,9 @@ jobs:
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID || 'kOWmvbNszhdJeaeyEzJB' }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_VOICE: ${{ vars.GEMINI_VOICE || 'Sadaltager' }}
+          GEMINI_TEMPO: ${{ vars.GEMINI_TEMPO || '1.12' }}
         run: node tools/video/render.js --out out ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
       - name: Náhled (6 snímků) do větve previews
         run: |

@@ -23,7 +23,9 @@ async function ttsOnce(text,voice){const key=process.env.ELEVENLABS_API_KEY;
  const r=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`,{method:'POST',headers:{'xi-api-key':key,'content-type':'application/json'},
   body:JSON.stringify({text,model_id:process.env.ELEVENLABS_MODEL||'eleven_multilingual_v2',voice_settings:{stability:.5,similarity_boost:.8,style:.3,use_speaker_boost:true}})});
  if(!r.ok){const t=await r.text().catch(()=>'');console.error('ElevenLabs',r.status,t.slice(0,160));return{err:t}}return{buf:Buffer.from(await r.arrayBuffer())}}
-async function tts(text){const key=process.env.ELEVENLABS_API_KEY;if(!key)return null;
+let GEM=null;try{GEM=require('../hlas/gemini')}catch(e){}
+let ttsVia='';
+async function tts(text){if(process.env.GEMINI_API_KEY&&GEM){const b=await GEM.tts(text);if(b){ttsVia='Gemini';return b}}const key=process.env.ELEVENLABS_API_KEY;if(!key)return null;ttsVia='ElevenLabs';
  const main=process.env.ELEVENLABS_VOICE_ID||'kOWmvbNszhdJeaeyEzJB',fb=process.env.ELEVENLABS_FALLBACK_VOICE||'pqHfZKP75CvOlQylNhV4';
  if(!ttsVoice){const r=await ttsOnce(text,main);if(r.buf){ttsVoice=main;return r.buf}
   if(/free_users_not_allowed|creator tier|voice_not_found|not found/i.test(r.err||'')){console.log('hlas: hlavní hlas není na tomto tarifu dostupný, používám náhradní',fb);ttsVoice=fb}else return null}
@@ -42,7 +44,7 @@ async function tts(text){const key=process.env.ELEVENLABS_API_KEY;if(!key)return
  const tag=`reel-den-${info.day}`;fs.writeFileSync(path.join(OUT,tag+'.srt'),script.vo.srt);fs.writeFileSync(path.join(OUT,tag+'.txt'),script.vo.text);
  console.log('hook:',script.hook,'scény:',script.scenes.join(' › '));
  /* hlas po segmentech */
- const segs=script.vo.segments||[];let voiced=0;if(process.env.ELEVENLABS_API_KEY&&segs.length){const clips=[];for(const s of segs){const buf=await tts(s.text);clips.push(buf?buf.toString('base64'):null);if(buf)voiced++}
+ const segs=script.vo.segments||[];let voiced=0;if((process.env.ELEVENLABS_API_KEY||process.env.GEMINI_API_KEY)&&segs.length){const clips=[];for(const s of segs){const buf=await tts(s.text);clips.push(buf?buf.toString('base64'):null);if(buf)voiced++}
   await p.evaluate(async clips=>{const blobs=clips.map(c=>c?new Blob([Uint8Array.from(atob(c),ch=>ch.charCodeAt(0))],{type:'audio/mpeg'}):null);await REEL.setVoiceSegments(window.__script,blobs,{padMs:80})},clips);
   console.log('hlas: segmentů',voiced,'/',segs.length)}else console.log('hlas: bez ElevenLabs (chybí ELEVENLABS_API_KEY) – video bude jen s hudbou, text je v .txt/.srt');
  fs.writeFileSync(path.join(OUT,tag+'.json'),JSON.stringify(await p.evaluate(()=>window.__script),null,1));
@@ -56,5 +58,5 @@ async function tts(text){const key=process.env.ELEVENLABS_API_KEY;if(!key)return
  const wavPath=path.join(OUT,tag+'.wav');fs.writeFileSync(wavPath,Buffer.from(wav,'base64'));
  const mp4=path.join(OUT,tag+'.mp4');
  execFileSync('ffmpeg',['-y','-framerate',String(FPS),'-i',path.join(fdir,'%05d.jpg'),'-i',wavPath,'-c:v','libx264','-preset','veryfast','-crf','19','-pix_fmt','yuv420p','-r',String(FPS),'-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart',mp4],{stdio:'inherit'});
- fs.rmSync(fdir,{recursive:true,force:true});fs.unlinkSync(wavPath);console.log('hotovo:',mp4,'hlas:',voiced?'ElevenLabs':'bez hlasu');
+ fs.rmSync(fdir,{recursive:true,force:true});fs.unlinkSync(wavPath);console.log('hotovo:',mp4,'hlas:',voiced?ttsVia:'bez hlasu');
  await b.close();srv.close()})().catch(e=>{console.error(e);process.exit(1)});

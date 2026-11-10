@@ -372,7 +372,7 @@ function buildRoads(){roadGroup.children.forEach(c=>c.geometry.dispose());roadGr
  const cm=new T.Mesh(geoFrom(caps.P,caps.U,caps.I),MAT.cap);cm.receiveShadow=true;roadGroup.add(cm)}
 
 /* ---------- domy, zahrady, lampy ---------- */
-const MAXH=6000;let HOUSE=[],ABAND=null,GARDEN,DRIVE,YARD,LAMPS;const houseRef=[[],[],[],[]];
+const MAXH=16000;let HOUSE=[],ABAND=null,GARDEN,DRIVE,YARD,LAMPS;const houseRef=[[],[],[],[]];
 function initInstanced(){const hr=MODELS.b.r;
  HOUSE=ROOFS.map(c=>{const m=new T.InstancedMesh(hr.geo,MODELS.roofMat(hr,c),MAXH);m.castShadow=m.receiveShadow=true;m.count=0;m.frustumCulled=false;scene.add(m);return m});
  {const img=hr.map.image;const c=document.createElement("canvas");c.width=img.width;c.height=img.height;const g=c.getContext("2d");g.filter="grayscale(1) brightness(.5) contrast(1.15) sepia(.18)";g.drawImage(img,0,0);const tx=new T.CanvasTexture(c);tx.flipY=false;
@@ -388,7 +388,7 @@ function placeHouses(now){const cnt=[0,0,0,0];let gi=0,di=0,yi=0,li=0,ai=0;house
    Q.setFromEuler(new T.Euler((w-.5)*.24,s.ry-Math.PI/2+(w-.5)*.3,(w-.3)*.2));V.set(c.x+s.x,-.55-w*.3,c.z+s.z);SC.set(HOUSE_S*.96,HOUSE_S*(.72+w*.12),HOUSE_S*.96);M4.compose(V,Q,SC);ABAND.setMatrixAt(ai++,M4)}}});
  if(ABAND){ABAND.count=ai;ABAND.instanceMatrix.needsUpdate=true}
  TOWNS.forEach(t=>{if(!t.items.length)return;const c=tc(t);t.items.forEach((it,idx)=>{const s=idx<capN(t)?t.slots[idx]:null;if(!s)return;
-   if(it.k==="s"){return}
+   if(it.k==="s"){return}if(gi>=MAXH||cnt[s.roof]>=MAXH)return;
    let k=1;const key=t.n+"#"+idx;if(born.has(key)){const a=(now-born.get(key))/650;if(a<0)k=0.001;else if(a<1)k=a<.7?a/.7*1.12:1.12-(a-.7)/.3*.12;else born.delete(key)}
    Q.setFromAxisAngle(UP,s.ry-Math.PI/2);V.set(c.x+s.x,0,c.z+s.z);SC.set(HOUSE_S*k,HOUSE_S*k,HOUSE_S*k);M4.compose(V,Q,SC);houseRef[s.roof][cnt[s.roof]]={t,idx};HOUSE[s.roof].setMatrixAt(cnt[s.roof]++,M4);
    Q.setFromAxisAngle(UP,s.ry);SC.set(1,1,1);V.set(c.x+s.x,.02,c.z+s.z);M4.compose(V,Q,SC);GARDEN.setMatrixAt(gi++,M4);
@@ -610,6 +610,12 @@ function buildSpecial(t){const cat=unlockedCatalog(t);const done=new Set(t.items
 sel.onchange=()=>focusTown(byName[sel.value]);
 $("add1").onclick=()=>{const t=byName[sel.value];addPlayers(t,1);if(t.open){const s=t.slots[t.items.length-1];if(s)flyToLocal(t,s,40)}};
 $("add10").onclick=()=>{addPlayers(byName[sel.value],10)};
+/* hromadné přidání bez animace (zátěžový test: co když přijde 2 000 lidí) */
+function bulkAdd(add){const t0=performance.now();add.forEach((n,t)=>{for(let k=0;k<n;k++){newPlayer(t,DAY);addItem(t,{k:"h",p:t.players[t.players.length-1]})}});refreshAll([...add.keys()]);born.clear();placeHouses(performance.now());return Math.round(performance.now()-t0)}
+function randomSplit(N){const w=TOWNS.map(t=>t.players.length+1.5);const sum=w.reduce((a,b)=>a+b,0);const add=new Map();for(let k=0;k<N;k++){let v=Math.random()*sum,i=0;while(v>w[i]){v-=w[i];i++}add.set(TOWNS[i],(add.get(TOWNS[i])||0)+1)}return add}
+if($("add100"))$("add100").onclick=()=>{const t=byName[sel.value];bulkAdd(new Map([[t,100]]));toast(`${t.n}: +100 obyvatel`,`celkem ${t.players.length}`)};
+if($("add500"))$("add500").onclick=()=>{const t=byName[sel.value];bulkAdd(new Map([[t,500]]));toast(`${t.n}: +500 obyvatel`,`celkem ${t.players.length}`)};
+if($("wave2k"))$("wave2k").onclick=()=>{DAY++;const add=randomSplit(2000);const ms=bulkAdd(add);toast(`Den ${DAY}: +2 000 nových obyvatel`,`celkem ${POP} · přepočet ${ms} ms`)};
 $("build").onclick=()=>buildSpecial(byName[sel.value]);
 $("wave").onclick=()=>{DAY++;const w=TOWNS.map(t=>t.players.length+1.5);const sum=w.reduce((a,b)=>a+b,0);const add=new Map();for(let k=0;k<40;k++){let v=Math.random()*sum,i=0;while(v>w[i]){v-=w[i];i++}add.set(TOWNS[i],(add.get(TOWNS[i])||0)+1)}
  const now=performance.now();const ch=[];add.forEach((n,t)=>{for(let k=0;k<n;k++){newPlayer(t,DAY);const idx=addItem(t,{k:"h",p:t.players[t.players.length-1]});born.set(t.n+"#"+idx,now+k*90)}ch.push(t)});refreshAll(ch);toast(`Den ${DAY}: +40 nových obyvatel`,[...add.entries()].sort((a,b)=>b[1]-a[1]).slice(0,3).map(([t,n])=>`${t.n} +${n}`).join(" · "))};

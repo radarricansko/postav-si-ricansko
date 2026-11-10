@@ -3,7 +3,8 @@ on:
   workflow_dispatch:
     inputs:
       akce: { description: "gemini = ukázky hlasů Gemini (zdarma) · nahledy/ulozit = ElevenLabs Voice Design (placený tarif)", type: choice, options: [gemini, nahledy, ulozit], default: gemini }
-      hlasy: { description: "Gemini hlasy oddělené čárkou (nepovinné)", required: false }
+      hlasy: { description: "Gemini hlasy oddělené čárkou (výchozí Sadaltager)", required: false }
+      tempa: { description: "Tempa oddělená čárkou, např. 1,1.12,1.25", required: false }
       popis: { description: "Popis hlasu (anglicky, nepovinné)", required: false }
       id: { description: "generated_voice_id vybrané ukázky (jen pro ulozit)", required: false }
 permissions: { contents: write, actions: write }
@@ -22,12 +23,14 @@ jobs:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           HLASY: ${{ inputs.hlasy }}
+          TEMPA: ${{ inputs.tempa }}
           GH_TOKEN: ${{ github.token }}
           POPIS: ${{ inputs.popis }}
           VID: ${{ inputs.id }}
         run: |
           if [ "${{ inputs.akce }}" = "gemini" ]; then
             [ -n "$HLASY" ] || unset HLASY
+            [ -n "$TEMPA" ] || unset TEMPA
             node tools/hlas/gemini.js nahledy --out out
           elif [ "${{ inputs.akce }}" = "ulozit" ]; then
             node tools/hlas/hlas.js ulozit --id "$VID" --out out
