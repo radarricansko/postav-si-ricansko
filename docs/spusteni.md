@@ -21,7 +21,7 @@ Scénář, hlas a popisek dílu 1 i dalších šesti dílů jsou v `pribeh-hry.m
 
 1. **9:00** vyjde naplánovaný reel. Popisek musí obsahovat `#PostavSiŘíčansko`, podle něj se díl pozná. Do půl hodiny se mapa na webu překlopí sama.
 2. **17:00** uzávěrka. Výsledky jsou v `tools/ig/navrhy/DATUM.json`, stačí napsat Claudovi „co vyhrálo“.
-3. **17:00–20:00** výběr vítěze (Maty schvaluje), stavba do mapy, kontrola náhledu `…/postav-si-ricansko/?data=world-dil.json`, nový render videa (Actions → „Denní reel a klipy“).
+3. **17:00–20:00** výběr vítěze (Maty schvaluje), stavba do mapy, kontrola náhledu `…/postav-si-ricansko/?data=world-dil.json`. Scénář dílu je `tools/video/dily/dil-N.json`, čísla a jména se do něj dosadí sama; render: Actions → „Denní reel a klipy“ → `dil` = číslo.
 4. **Do 20:00** reel naplánovat v Instagramu na 9:00.
 
 ## 5. Před spuštěním
