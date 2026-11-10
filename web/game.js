@@ -308,7 +308,8 @@ function treeGeo(kind,leaf){const parts=[];const col=(g,c)=>{const n=g.attribute
  else{const a=new T.IcosahedronGeometry(.95,0);a.translate(0,1.75,0);const b=new T.IcosahedronGeometry(.62,0);b.translate(.42,2.25,.2);[a,b].forEach(g=>parts.push(col(g,leaf)))}
  parts.forEach(g=>{g.deleteAttribute("uv");g.setAttribute("uv",new T.BufferAttribute(new Float32Array(g.attributes.position.count*2),2))});return mergeGeos(parts.map(g=>g.index?g:g))}
 const treeMat=new T.MeshLambertMaterial({vertexColors:true});
-const TREEK=[[0,"#2f6a3a"],[0,"#3d7d3f"],[1,"#4f8f3c"],[1,"#6aa046"]];const FOREST=TREEK.map(([k,c])=>{const m=new T.InstancedMesh(treeGeo(k,c),treeMat,40000);m.count=0;m.castShadow=true;m.receiveShadow=true;m.frustumCulled=false;scene.add(m);return m});
+const TREEK=[[0,"#2f6a3a"],[0,"#3d7d3f"],[1,"#4f8f3c"],[1,"#6aa046"]];// les po dlaždicích: mimo záběr se stromy vůbec nekreslí (rychlejší mobil i render videa)
+const FTILE=480,TREEGEO=TREEK.map(([k,c])=>{const g=treeGeo(k,c);g.boundingSphere=new T.Sphere(new T.Vector3(0,6,0),FTILE*.75+24);return g});let FOREST=[],forestShadow=true;
 let forestPts=null;
 function sampleForest(){const r=rng(9);forestPts=[];const sp=(S>.15?13:7.2)/S;
  LAND.F.forEach(a=>{const p=polyFromFlat(a);const b=bbox(p);for(let x=b[0];x<b[2];x+=sp)for(let y=b[1];y<b[3];y+=sp){const px=x+r()*sp*.8,py=y+r()*sp*.8;if(inPoly(px,py,p))forestPts.push(px,py,r()<.62?0:1,r())}});
@@ -317,11 +318,13 @@ function sampleForest(){const r=rng(9);forestPts=[];const sp=(S>.15?13:7.2)/S;
 const GREENS=["#3f7a3a","#4b8a3e","#57943f","#35703a","#6a9a45","#2f6436"].map(c=>new T.Color(c));
 const M4=new T.Matrix4(),Q=new T.Quaternion(),V=new T.Vector3(),SC=new T.Vector3(),UP=new T.Vector3(0,1,0);
 let roadHash=null;
-function placeForest(){const cnt=[0,0,0,0];const tcs=TOWNS.map(t=>[tc(t),t.R+2.5,t]);if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);tcs.push([{x:tmp2[0],z:tmp2[1]},(NAMESTI.HZ||NAMESTI.H)*(CENTER.scale||1)*1.45])}
+function placeForest(){FOREST.forEach(m=>{scene.remove(m);m.dispose&&m.dispose()});FOREST=[];const B=new Map();const tcs=TOWNS.map(t=>[tc(t),t.R+2.5,t]);if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);tcs.push([{x:tmp2[0],z:tmp2[1]},(NAMESTI.HZ||NAMESTI.H)*(CENTER.scale||1)*1.45])}
  for(let i=0;i<forestPts.length;i+=4){F(forestPts[i],forestPts[i+1],tmp2);const X=tmp2[0],Z=tmp2[1];let bad=false;
   for(const [c,rad,tw] of tcs){if((c.x-X)**2+(c.z-Z)**2<rad*rad){if(tw&&tw.ZH&&tw.ZH.near(X-c.x,Z-c.z,17)===null&&(X-c.x-tw.lm.x)**2+(Z-c.z-tw.lm.z)**2>(tw.lm.r+16)**2&&!tw.slots.some(q=>q.big&&(q.x-X+c.x)**2+(q.z-Z+c.z)**2<(q.big+6)**2))continue;bad=true;break}}if(bad)continue;if(roadHash&&roadHash.near(X,Z,3.2)!==null)continue;
-  const s=forestPts[i+3];const k=forestPts[i+2]*2+(s*997%1<.5?0:1);const m=FOREST[k];if(cnt[k]>=40000)continue;Q.setFromAxisAngle(UP,s*6.28);V.set(X,0,Z);const h=S>.15?2.3+s*1.6:1.25+s*.9;SC.set(h,h*(0.9+s*.3),h);M4.compose(V,Q,SC);m.setMatrixAt(cnt[k],M4);cnt[k]++}
- FOREST.forEach((m,k)=>{m.count=cnt[k];m.instanceMatrix.needsUpdate=true})}
+  const s=forestPts[i+3];const k=forestPts[i+2]*2+(s*997%1<.5?0:1);const tx=Math.floor(X/FTILE),tz=Math.floor(Z/FTILE),key=k+":"+tx+":"+tz;let a=B.get(key);if(!a)B.set(key,a={k,tx,tz,d:[]});a.d.push(X,Z,s)}
+ B.forEach(a=>{const n=a.d.length/3,cx=(a.tx+.5)*FTILE,cz=(a.tz+.5)*FTILE;const m=new T.InstancedMesh(TREEGEO[a.k],treeMat,n);m.position.set(cx,0,cz);
+  for(let i=0;i<n;i++){const s=a.d[i*3+2];Q.setFromAxisAngle(UP,s*6.28);V.set(a.d[i*3]-cx,0,a.d[i*3+1]-cz);const h=S>.15?2.3+s*1.6:1.25+s*.9;SC.set(h,h*(0.9+s*.3),h);M4.compose(V,Q,SC);m.setMatrixAt(i,M4)}
+  m.castShadow=forestShadow;m.receiveShadow=true;m.updateMatrixWorld();scene.add(m);FOREST.push(m)})}
 
 /* ---------- silnice: vykreslení ---------- */
 let roadGroup=new T.Group();scene.add(roadGroup);let carPaths=[],railPath=null;
@@ -732,7 +735,7 @@ let last=performance.now();const frameCbs=[];
 /* automatické snížení kvality, když se to seká (slabší telefony) */
 const PERF={acc:0,n:0,lvl:0,t0:performance.now()};
 function perfTick(dt,now){if(aspectLock||PERF.lvl>=3||QS.get("perf")==="0")return;PERF.acc+=dt;PERF.n++;if(now-PERF.t0<2500)return;const ms=PERF.acc/PERF.n*1000;PERF.acc=0;PERF.n=0;PERF.t0=now;
- if(ms>38){PERF.lvl++;if(PERF.lvl===1){R.setPixelRatio(1);R.setSize(innerWidth,innerHeight);POST.resize()}else if(PERF.lvl===2){POST.on=false}else{sun.shadow.mapSize.set(1024,1024);sun.shadow.map&&sun.shadow.map.dispose();sun.shadow.map=null;FOREST.forEach(m=>m.castShadow=false)}}}
+ if(ms>38){PERF.lvl++;if(PERF.lvl===1){R.setPixelRatio(1);R.setSize(innerWidth,innerHeight);POST.resize()}else if(PERF.lvl===2){POST.on=false}else{sun.shadow.mapSize.set(1024,1024);sun.shadow.map&&sun.shadow.map.dispose();sun.shadow.map=null;forestShadow=false;FOREST.forEach(m=>m.castShadow=false)}}}
 function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const dt=Math.min(.05,rawDt);last=now;if(ready)perfTick(rawDt,now);
  if(animS){const a=Math.min(1,(now-animS.t0)/1600),e=a<.5?2*a*a:1-Math.pow(-2*a+2,2)/2;const prev=S;S=animS.from+(animS.to-animS.from)*e;const f=S/prev;ctr.target.x*=f;ctr.target.z*=f;cam.position.x*=f;cam.position.z*=f;
   if(fly){fly.from.x*=f;fly.from.z*=f;fly.to.x*=f;fly.to.z*=f;fly.cf.x*=f;fly.cf.z*=f;fly.ct.x*=f;fly.ct.z*=f}
@@ -742,7 +745,7 @@ function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const
  if(orbitSpeed){const off=cam.position.clone().sub(ctr.target);off.applyAxisAngle(UP,orbitSpeed*dt);cam.position.copy(ctr.target).add(off)}
  if(!fly)keyMove(dt);ctr.update();moveCars(dt);
  const dist=cam.position.distanceTo(ctr.target);updClouds(now,dist);cam.near=Math.max(.8,dist*.02);cam.far=Math.max(3000,dist*12);cam.updateProjectionMatrix();
- FOREST.forEach(m=>m.castShadow=PERF.lvl<3&&dist<420*S/0.09);scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
+ {const fs=PERF.lvl<3&&dist<420*S/0.09;if(fs!==forestShadow){forestShadow=fs;FOREST.forEach(m=>m.castShadow=fs)}}scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
  const sh=Math.min(Math.max(dist*.9,60),700);const sc=sun.shadow.camera;if(Math.abs(sc.right-sh)>2){sc.left=-sh;sc.right=sh;sc.top=sh;sc.bottom=-sh;sc.near=1;sc.far=sh*4;sc.updateProjectionMatrix()}
  sun.position.copy(ctr.target).addScaledVector(SUNDIR,sh*1.8);sun.target.position.copy(ctr.target);
  if(ring.visible){const k=1+.08*Math.sin(now/180);ring.scale.set(k,1,k)}

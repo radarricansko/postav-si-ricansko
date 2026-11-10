@@ -2176,7 +2176,7 @@
   function enterScene(sc) {
     var S = SCENES[sc.type];
     if (S && S.enter) try { S.enter(sc, R); } catch (e) { console.warn('[REEL] enter', sc.type, e); }
-    if (sc.type !== 'hook' && sc.type !== 'outro') AU.whoosh(-0.05, 0.5);
+    if (sc.type !== 'hook' && sc.type !== 'outro' && sc.idx > 0) AU.whoosh(-0.05, 0.5);
     if (R.tts && sc.vo) {
       var idx = sc.idx;
       R.live = { scene: idx, started: false, char: null, ended: false };
