@@ -8,9 +8,9 @@ if(ADMIN)return;
 const IG="https://www.instagram.com/radar_ricansko/";
 const START=new Date(2026,10,16);// den 1 = po 16. 11. 2026
 const dayDate=d=>{const x=new Date(START);x.setDate(x.getDate()+d-1);return x.toLocaleDateString("cs-CZ",{weekday:"short",day:"numeric",month:"numeric"})};
-const TIERN={wood:"Dřevěná liga",silver:"Stříbrná liga",gold:"Zlatá liga",plat:"Platinová liga"};
+const TIERN={wood:"Osada",silver:"Ves",gold:"Městys",plat:"Město"};
 const TIERC={wood:"#a8723e",silver:"#8d97a8",gold:"#d99a00",plat:"#3fb4e6"};
-const nextTier=n=>n<20?{to:20,lab:"do stříbrné ligy"}:n<50?{to:50,lab:"do zlaté ligy"}:n<100?{to:100,lab:"do platinové ligy"}:null;
+const nextTier=n=>n<20?{to:20,lab:"do vsi"}:n<50?{to:50,lab:"do městyse"}:n<100?{to:100,lab:"do města"}:null;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const plural=(n,a,b,c)=>n===1?a:n>=2&&n<=4?b:c;
 /* příběh po dnech (scénář), doplněný o automatické hlášení z dat */
@@ -33,7 +33,7 @@ const root=document.createElement("div");root.id="pui";root.innerHTML=`
   <span class="chip"><b id="kPop">0</b>obyvatel</span>
   <span class="chip"><b id="kAlive">0<i id="kTot"></i></b>oživených obcí</span>
   <button id="pCrown" class="chip crown" hidden></button>
-  <button id="pCenter" class="chip center" title="Náměstí sjednocení">⛪ Náměstí</button>
+  <button id="pCenter" class="chip center" title="Střed nového státu">⛪ Náměstí sjednocení</button>
   <div class="pSearch"><input id="pQ" type="search" placeholder="Najdi svůj domek…" autocomplete="off" spellcheck="false"><div id="pRes"></div></div>
  </div>
 </div>
@@ -43,7 +43,7 @@ const root=document.createElement("div");root.id="pui";root.innerHTML=`
  ${TABS.map(t=>`<div id="pane-${t}" class="pPane"${t==="rank"?"":" hidden"}></div>`).join("")}
 </div>
 <div id="pTown" class="glass" hidden></div>
-<a id="pCta" href="${IG}" target="_blank" rel="noopener"><span class="dot"></span><span class="long"><b>Chceš domek?</b> Sleduj @radar_ricansko a napiš obec do komentářů</span><span class="short"><b>Chceš domek?</b> Napiš svou obec na IG</span><span class="arr">→</span></a>
+<a id="pCta" href="${IG}" target="_blank" rel="noopener"><span class="dot"></span><span class="long"><b>Chceš domek?</b> Sleduj @radar_ricansko a napiš svou obec pod nejnovější díl</span><span class="short"><b>Chceš domek?</b> Napiš obec pod nejnovější díl</span><span class="arr">→</span></a>
 <nav id="pNav">${TABS.map(t=>`<button data-s="${t}"><i>${TABI[t]}</i><span>${TABN[t]}</span></button>`).join("")}</nav>`;
 document.body.appendChild(root);
 
@@ -64,7 +64,7 @@ function render(t){if(t==="rank")renderRank();else if(t==="story")renderStory();
 function renderRank(){const r=GAME.ranking();const rv=GAME.revive();$("pane-rank").innerHTML=`<div class="paneHead"><b>Žebříček obcí</b><small>podle počtu obyvatel · zeleně přírůstek za 7 dní</small></div>`+r.map((t,i)=>{
  const alive=t.players>=rv;const nt=alive?nextTier(t.players):{to:rv,lab:"do oživení"};const pct=nt?Math.min(100,t.players/nt.to*100):100;
  return`<button class="rk${alive?"":" dead"}${t.crown?" crowned":""}" data-n="${esc(t.name)}"><span class="pos">${i+1}</span>${erbImg(t.erbUrl)}<span class="nm"><b>${t.crown?"👑 ":""}${esc(t.name)}</b>
- <span class="bar"><i style="width:${pct}%;background:${alive?TIERC[t.tier]:"#b8a990"}"></i></span><small>${alive?(nt?`${t.players} obyvatel · ${nt.to-t.players} ${nt.lab}`:`${t.players} obyvatel · platinová liga`):(t.players?`🏚️ opuštěná · ${t.players}/${rv} obyvatel`:`🏚️ opuštěná · buď první`)}</small></span>${t.week?`<span class="wk">+${t.week}</span>`:""}</button>`}).join("");
+ <span class="bar"><i style="width:${pct}%;background:${alive?TIERC[t.tier]:"#b8a990"}"></i></span><small>${alive?(nt?`${t.players} obyvatel · ${nt.to-t.players} ${nt.lab}`:`${t.players} obyvatel · město`):(t.players?`🏚️ opuštěná · ${t.players}/${rv} obyvatel`:`🏚️ opuštěná · buď první`)}</small></span>${t.week?`<span class="wk">+${t.week}</span>`:""}</button>`}).join("");
  $("pane-rank").querySelectorAll(".rk").forEach(b=>b.onclick=()=>{closeSheets();GAME.focusTown(b.dataset.n)})}
 
 /* ---------- příběh po dnech ---------- */
@@ -113,13 +113,13 @@ function renderInfo(){if(infoDone)return;infoDone=true;const rv=GAME.revive();co
  $("pane-info").innerHTML=`<div class="paneHead"><b>Jak hrát</b></div>
  <p class="lead">Co kdyby se Říčansko osamostatnilo? 52 obcí, jeden nový stát a uprostřed Náměstí sjednocení se sochou 52 erbů. <b>Kdo se přidá, dostane domek se svým nickem</b> a rozsvítí erb své obce.</p>
  <ol class="steps"><li><b>Sleduj @radar_ricansko</b><span>Hra běží na Instagramu Radaru.</span></li>
- <li><b>Napiš do komentářů svou obec</b><span>Pod herní příspěvek. Stačí název, třeba „Mukařov“.</span></li>
- <li><b>Najdi svůj domek</b><span>Do 2 hodin vyroste na mapě. Hledej podle nicku.</span></li></ol>
+ <li><b>Napiš svou obec pod nejnovější díl</b><span>Stačí název, třeba „Mukařov“. Jeden účet = jeden domek.</span></li>
+ <li><b>Ráno v 9 najdi svůj domek</b><span>Mapa se mění jednou denně, s novým dílem. Kdo napíše do 17:00, je tam hned další ráno. Hledej podle nicku.</span></li></ol>
  <h5>🏚️ Opuštěné obce</h5><p>Pod ${rv} obyvatel je obec opuštěná: šedé domy, šedý erb. Každý nový obyvatel jeden dům opraví, při ${rv} obec <b>ožije</b>.</p>
- <h5>🛡️ Ligy obcí</h5><p>Rámeček erbu roste s počtem obyvatel.</p><div class="lgs">${frames}</div>
+ <h5>🛡️ Z osady město</h5><p>Obec roste s počtem obyvatel a s ní i rámeček erbu.</p><div class="lgs">${frames}</div>
  <h5>👑 Koruna</h5><p>Vznáší se nad obcí s <b>nejvíc obyvateli</b>. Kdo ji předběhne, ten ji vezme.</p>
  <h5>🏅 Zakladatelé</h5><p>Prvních 5 obyvatel každé obce jsou její zakladatelé.</p>
- <h5>🏗️ Nápad dne</h5><p>Napiš pod reel, co má nový stát postavit (metro, zoo, letiště…). Nejlajkovanější nápad se postaví i s cedulí a tvým nickem.</p>
+ <h5>🏗️ Nápad dne</h5><p>Napiš pod díl, co má nový stát postavit: „nápad - metro do Mukařova“. Hlasuje se lajky do 17:00, vítěz se postaví i s cedulí a tvým nickem.</p>
  <a class="cta" href="${IG}" target="_blank" rel="noopener">Hrát na Instagramu</a>
  <p class="fine">Nechceš být ve hře? Napiš nám DM a domek odstraníme. Hra je fikce a zábava: žádné skutečné osamostatnění ani slučování obcí, bez cen. Mapa © OpenStreetMap.</p>`}
 
@@ -129,7 +129,7 @@ GAME.onTownFocus=n=>{curTown=n;GAME.closeInfo();renderTown()};
 function renderTown(){document.body.classList.toggle("card-open",!!curTown||info.classList.contains("on"));if(!curTown)return;const t=GAME.townInfo(curTown);const rv=t.revive;const alive=t.players>=rv;const nt=nextTier(t.players);const el=$("pTown");el.hidden=false;
  const H=GAME.history();const ser=H.towns[t.name]||[];
  el.innerHTML=`<button class="x" id="pTownX" aria-label="Zavřít">×</button><div class="tHead">${erbImg(t.erbUrl,"erbL")}<div><h3>${esc(t.name)}</h3><span class="tier" style="--c:${alive?TIERC[t.tier]:"#9b8b6e"}">${alive?TIERN[t.tier]:"🏚️ Opuštěná obec"}</span></div></div>
- <div class="tStats"><div><b>${t.players}</b><span>obyvatel</span></div><div><b>${t.specials.length}</b><span>staveb</span></div><div><b>${alive?(nt?nt.to-t.players:"✓"):rv-t.players}</b><span>${alive?(nt?nt.lab:"max. liga"):"do oživení"}</span></div></div>
+ <div class="tStats"><div><b>${t.players}</b><span>obyvatel</span></div><div><b>${t.specials.length}</b><span>staveb</span></div><div><b>${alive?(nt?nt.to-t.players:"✓"):rv-t.players}</b><span>${alive?(nt?nt.lab:"už je město"):"do oživení"}</span></div></div>
  ${t.crown?`<p class="note gold">👑 <b>Koruna!</b> Největší obec Říčanska. Kdo ji předběhne?</p>`:""}
  ${alive?"":`<p class="note">🏚️ V obci stojí ${t.abandoned} ${plural(t.abandoned,"opuštěný dům","opuštěné domy","opuštěných domů")}. Každý nový obyvatel jeden opraví. Při ${rv} obyvatelích obec ožije!</p>`}
  ${t.linked&&t.linked.length?`<p class="note">🤝 Spojeno s: <b>${t.linked.map(esc).join(", ")}</b></p>`:""}
