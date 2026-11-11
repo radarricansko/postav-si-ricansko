@@ -1,7 +1,6 @@
 name: Denní reel a klipy
 on:
-  schedule:
-    - cron: "20 16 * * *"   # 17:20 Praha (zimní čas) – hned po uzávěrce, večer se ladí, ráno v 9 se vydává
+  # denní automatický běh je vypnutý: bral denní kvótu hlasu a díly se teď vyrábí přes dil.yml
   workflow_dispatch:
     inputs:
       day:
