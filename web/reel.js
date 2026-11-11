@@ -2606,13 +2606,17 @@
       return vc.waitReal(2).then(function () {
         // průchod scénami před `start` (enter efekty kamery), bez vykreslování
         // hrubě (po ~0,4 s), ale každá scéna se spustí přesně na svém prvním snímku, takže stav je stejný jako při souvislém renderu
-        if (t0 > 0) {
-          var skipN = Math.max(1, Math.round((o.skipStep || 400) / step)), nf = Math.round(t0 / step), enterAt = {};
-          script.scenes.forEach(function (sx) { enterAt[Math.ceil(sx.t0 / step - 1e-6)] = 1; });
-          for (var kf = 0; kf < nf; kf++) {
+        // Po každém zpracovaném snímku se nechají doběhnout mikroúlohy (then po skoku kamery), jinak by se odložené lety
+        // z dřívějších záběrů spustily až po průchodu a přebily plynulý záběr, kterým část začíná.
+        var skipN = Math.max(1, Math.round((o.skipStep || 400) / step)), nf = t0 > 0 ? Math.round(t0 / step) : 0, enterAt = {};
+        script.scenes.forEach(function (sx) { enterAt[Math.ceil(sx.t0 / step - 1e-6)] = 1; });
+        function pre(kf) {
+          for (; kf < nf; kf++) {
             if (kf % skipN && !enterAt[kf] && !enterAt[kf + 1] && kf < nf - 2) continue;   // i snímek těsně před střihem: plynulé záběry (cut:false) startují z polohy kamery v tu chvíli
             var tt = kf * step; vc.t = tt; var s0 = sceneAt(tt); if (s0.idx !== R.idx) { R.idx = s0.idx; enterScene(s0); } vc.fire(); vc.tick();
+            return (function (k2) { return Promise.resolve().then(function () {}).then(function () {}).then(function () {}).then(function () { return pre(k2 + 1); }); })(kf);
           }
+          return Promise.resolve();
         }
         function next() {
           if (i >= n) return Promise.resolve(i);
@@ -2627,7 +2631,7 @@
             return Promise.resolve(r).then(function (res) { i++; if (res === false) n = i; return next(); });
           });
         }
-        return next();
+        return pre(0).then(next);
       }).then(function (cnt) { done(); return cnt; }, function (e) { done(); throw e; });
     });
   }

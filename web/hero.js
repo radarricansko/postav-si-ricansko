@@ -61,7 +61,7 @@ function buildMan(){const g=new T.Group();g.visible=false;H.group.add(g);const m
  m.armL=limb(-.41,1.33,.18,.56,.2,M.jacket);m.armR=limb(.41,1.33,.18,.56,.2,M.jacket);[m.armL,m.armR].forEach(a=>{const h=new T.Mesh(new T.BoxGeometry(.17,.14,.19),M.skin);h.position.y=-.63;a.add(h)});
  const head=m.head=new T.Group();head.position.y=1.38;g.add(head);const hd=new T.Mesh(new T.IcosahedronGeometry(.3,1),M.skin);hd.position.y=.28;hd.castShadow=true;head.add(hd);
  const hair=new T.Mesh(new T.SphereGeometry(.325,8,5,0,Math.PI*2,0,Math.PI*.5),M.hair);hair.position.y=.3;hair.rotation.x=-.28;hair.castShadow=true;head.add(hair);
- box(head,.07,.09,.04,-.11,.27,.27,M.eye);box(head,.07,.09,.04,.11,.27,.27,M.eye);box(head,.16,.035,.04,0,.13,.27,M.eye)}
+ box(head,.07,.09,.04,-.11,.27,.27,M.eye);box(head,.07,.09,.04,.11,.27,.27,M.eye);box(head,.15,.04,.04,0,.11,.275,M.eye);box(head,.05,.04,.04,-.1,.135,.265,M.eye);box(head,.05,.04,.04,.1,.135,.265,M.eye)}   // úsměv: střed a zvednuté koutky
 
 H.place=function(x,z,ry,s){if(!H.group)return;H.group.position.set(x,0,z);H.group.rotation.y=ry||0;H.group.scale.setScalar(s||1);H.group.visible=true};
 H.start=function(now,o){o=o||{};H.T0=now;H.ms=o.ms||3200;H.parts.forEach(p=>{p.g.visible=false});if(H.lamp)H.lamp.intensity=0;H.group.visible=true};
