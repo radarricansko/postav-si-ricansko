@@ -58,7 +58,7 @@ async function splitTake(mp3,texts){const tmp=path.join(OUT,'take.mp3');fs.write
  if(texts.length===1){fs.unlinkSync(tmp);return[mp3]}
  let idx=rozdel(P,texts);if(!idx){console.log('hlas: málo pauz ('+P.sil.length+') na',texts.length,'vět');fs.unlinkSync(tmp);return null}
  const W=texts.map(slova),N=texts.length;let R=rezy(tmp,P,idx,N),ok=false,tr=[];
- for(let kolo=0;kolo<5&&R;kolo++){tr=[];for(const b of R.out)tr.push(slova(GEM&&GEM.prepis?await GEM.prepis(b):null));
+ const zacK=Date.now();for(let kolo=0;kolo<4&&R;kolo++){if(Date.now()-zacK>240000){console.log('hlas: kontrola střihu trvá dlouho, končím ji');ok=null;break}tr=await Promise.all(R.out.map(b=>GEM&&GEM.prepis?GEM.prepis(b):null));tr=tr.map(slova);
   if(tr.every(t=>!t.length)){console.log('hlas: přepis není k dispozici, střih neověřen');ok=null;break}
   let zmena=false;for(let i=0;i<N-1;i++){const hlava=W[i+1].slice(0,3),ocas=W[i].slice(-3);
    const pozde=shoda(hlava,tr[i].slice(-5))>=Math.min(2,hlava.length)&&shoda(hlava,W[i].slice(-5))<Math.min(2,hlava.length);   // začátek další věty je už v tomhle kusu
