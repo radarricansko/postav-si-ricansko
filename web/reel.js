@@ -1704,8 +1704,19 @@
     enter: function (s) {
       gcall('orbit', 0); gcall('camFree', true);
       var c = s.cam || {}, T = camPoint(c.at), from = camPose(T, c.from || [400, 0.7, 0]), to = camPose(T, c.to || c.from || [400, 0.7, 0]);
-      var p = gcall('flyTo', from, 0);   // střih: kamera skočí hned, pak pomalu jede do cílové pozice
-      if (p && p.then) p.then(function () { gcall('flyTo', to, Math.max(600, s.dur * 1.25)); });
+      var p = gcall('flyTo', from, 0);   // střih: kamera skočí hned, pak jede do cílové pozice
+      if (c['in']) {                     // rychlý nájezd (ms) a potom pomalý dojezd o kousek blíž
+        var bliz = camPose(T, [c.to[0] * 0.9, c.to[1] * 0.96, (c.to[2] || 0) + 0.12, c.to[3]]);
+        p.then(function () { return gcall('flyTo', to, c['in'], 'out'); }).then(function () { gcall('flyTo', bliz, Math.max(800, s.dur * 1.4), 'lin'); });
+        AU.whoosh(0.02, 0.7);
+      } else if (p && p.then) p.then(function () { gcall('flyTo', to, Math.max(600, s.dur * 1.25)); });
+      // postavičky jdou ke svým domkům (jmenovky kreslí draw), vlajky vyjíždějí na stožáry
+      if (s.walk) for (var wi = 0; wi < (s.walk.n || 1); wi++) (function (k) {
+        var at = (s.walk.at || 200) + k * (s.walk.every || 500), ms = s.walk.ms || 2200;
+        later(function () { gcall('walkIn', s.walk.town, { ms: ms, nick: (s.walk.nicks || [])[k] || '', hold: s.walk.hold }); }, at);
+        AU.pop((at + ms) / 1000 + 0.03, 520 + k * 70);
+      })(wi);
+      if (s.flags) later(function () { gcall('raiseFlags', s.flags.ms || 1800); }, s.flags.at || 100);
       if (s.add) for (var i = 0; i < (s.add.n || 1); i++) (function (i2) {
         later(function () { gcall('addPlayers', s.add.town, [{}]); }, (s.add.at || 500) + i2 * (s.add.every || 260));
         AU.pop(((s.add.at || 500) + i2 * (s.add.every || 260)) / 1000 + 0.05, 520 + i2 * 70);
@@ -1718,13 +1729,25 @@
       // čitelnost: jemný přechod nahoře a dole, ať je mapa vidět
       var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(10,18,51,0.55)'); gr.addColorStop(0.3, 'rgba(10,18,51,0.08)'); gr.addColorStop(0.62, 'rgba(10,18,51,0.05)'); gr.addColorStop(1, 'rgba(10,18,51,0.62)');
       g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      // jmenovky nad postavičkami (a chvíli nad hotovým domkem)
+      if (s.walk && G() && G().walkers) G().walkers().forEach(function (w) {
+        if (!w.nick || !w.vis) return; var tx = w.x * W, ty = w.y * H - (w.arrived ? 30 : 60);
+        g.save(); g.globalAlpha = oa; g.translate(clamp(tx, 150, W - 150), clamp(ty, SAFE_TOP + 120, H - SAFE_BOTTOM - 60)); bf(g, 40, 700);
+        var tw2 = g.measureText(w.nick).width + 48; g.fillStyle = C.acc; rr(g, -tw2 / 2, -36, tw2, 72, 36); g.fill();
+        g.beginPath(); g.moveTo(-14, 34); g.lineTo(14, 34); g.lineTo(0, 56); g.closePath(); g.fill();
+        g.fillStyle = C.ink; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(w.nick, 0, 2); g.restore();
+      });
       (s.ui || []).forEach(function (u) {
         var at = u.at || 0, p = prog(lt, at, at + POP); if (p <= 0) return;
         var x = u.x == null ? W / 2 : u.x, y = u.y == null ? 620 : u.y;
         if (u.k === 'title') kLine(g, up(u.text), x, y, u.size || 96, lt, at, { out: s.last ? 1e9 : out, stagger: 55, maxW: u.maxW || 940, box: u.box, solid: u.solid });
         else if (u.k === 'chip') chip(g, u.text, x, y, { size: u.size || 36, solid: !!u.solid, scale: popS(p), alpha: popA(p) * oa });
         else if (u.k === 'stamp') stamp(g, u.text, x, y, { size: u.size || 64, p: p, alpha: oa, rot: u.rot == null ? -0.06 : u.rot });
-        else if (u.k === 'num') numCard(g, x, y, u.w || 400, u.h || 190, u.num, u.label, { p: p, alpha: oa, numSize: u.numSize || 96, labelSize: 28 });
+        else if (u.k === 'num') {
+          var nv = String(u.num), nn = /^\d[\d ]*$/.test(nv) ? parseInt(nv.replace(/ /g, ''), 10) : null;   // čísla se roztočí od nuly
+          if (nn != null && nn > 1 && u.count !== false) nv = fmt(Math.round(nn * E.outCubic(prog(lt, at + 80, at + 80 + (u.countMs || 750)))));
+          numCard(g, x, y, u.w || 400, u.h || 190, nv, u.label, { p: p, alpha: oa, numSize: u.numSize || 96, labelSize: 28 });
+        }
         else if (u.k === 'tag') {            // jmenovka nad domkem
           g.save(); g.globalAlpha = popA(p) * oa; g.translate(x, y - (1 - E.outBack(p)) * -30); bf(g, u.size || 44, 700);
           var tw = g.measureText(u.text).width + 56; g.fillStyle = C.acc; rr(g, -tw / 2, -40, tw, 80, 40); g.fill();
@@ -1754,7 +1777,7 @@
   function scriptFromShots(def, opts) {
     opts = opts || {};
     var scenes = (def.shots || []).map(function (sh, i, all) {
-      var s = { type: 'shot', role: 'content', vo: sh.vo || '', cam: sh.cam, ui: sh.ui || [], add: sh.add || null, voStart: sh.voStart == null ? 60 : sh.voStart, noSubs: !!sh.noSubs, last: i === all.length - 1 };
+      var s = { type: 'shot', role: 'content', vo: sh.vo || '', cam: sh.cam, ui: sh.ui || [], add: sh.add || null, walk: sh.walk || null, flags: sh.flags || null, voStart: sh.voStart == null ? 60 : sh.voStart, noSubs: !!sh.noSubs, last: i === all.length - 1 };
       if (sh.dur) s.durFixed = sh.dur;
       (s.ui || []).forEach(function (u) { if (u.k === 'end' && !u.handle) u.handle = opts.handle || ''; if (u.k === 'flag' && G() && G().stat && G().stat().svg) s.assets = { flag: G().stat().svg }; });
       return s;

@@ -36,7 +36,12 @@ async function tts(text,opt={}){if(!KEY)return null;const voice=opt.voice||proce
  return null}
 /* Přepis krátkého zvuku zpět na text (kontrola, že střih hlasu sedí na věty). Vrací text nebo null. */
 const PREPIS_MODELY=(process.env.GEMINI_ASR_MODEL?[process.env.GEMINI_ASR_MODEL]:[]).concat(['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-2.0-flash']);let PREPIS_MODEL=null;
-async function prepis(mp3){if(!KEY||!mp3)return null;for(const m of(PREPIS_MODEL?[PREPIS_MODEL]:PREPIS_MODELY)){for(let a=0;a<4;a++){let r;try{r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`,{method:'POST',headers:{'x-goog-api-key':KEY,'content-type':'application/json'},
+// aktuální textové modely se mění; když žádný z vyjmenovaných neexistuje, vezme se nejnovější „flash“ ze seznamu modelů
+async function prepisModely(){try{const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=300',{headers:{'x-goog-api-key':KEY}});const j=await r.json();
+  const ver=n=>{const m=n.match(/gemini-(\d+(?:\.\d+)?)/);return m?+m[1]:0};
+  return (j.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent')).map(m=>m.name.replace('models/','')).filter(n=>/^gemini-[\d.]+-flash(-lite)?(-latest)?$/.test(n)).sort((a,b)=>ver(b)-ver(a)||a.length-b.length)}catch(e){return[]}}
+async function prepis(mp3){if(!KEY||!mp3)return null;if(!PREPIS_MODEL&&!prepis.hledano){prepis.hledano=1;const nove=await prepisModely();if(nove.length){console.log('prepis: modely',nove.slice(0,4).join(', '));PREPIS_MODELY.unshift(...nove.slice(0,3))}}
+ for(const m of(PREPIS_MODEL?[PREPIS_MODEL]:[...new Set(PREPIS_MODELY)])){for(let a=0;a<4;a++){let r;try{r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`,{method:'POST',headers:{'x-goog-api-key':KEY,'content-type':'application/json'},
    body:JSON.stringify({contents:[{parts:[{text:'Přepiš přesně, slovo od slova, co je v nahrávce řečeno česky. Vrať jen přepis, nic dalšího. Když v nahrávce nic nezazní, vrať prázdný řádek.'},{inlineData:{mimeType:'audio/mpeg',data:mp3.toString('base64')}}]}],generationConfig:{temperature:0}})})}catch(e){console.error('prepis: síť',e.message);await new Promise(z=>setTimeout(z,3000));continue}
    const t=await r.text();if(r.ok){let j=null;try{j=JSON.parse(t)}catch(e){}PREPIS_MODEL=m;const p=((((j||{}).candidates||[])[0]||{}).content||{}).parts||[];return p.map(x=>x.text||'').join(' ').trim()}
    if(r.status===429||r.status>=500){await new Promise(z=>setTimeout(z,6000*(a+1)));continue}console.error('prepis',m,r.status,t.slice(0,160).replace(/\s+/g,' '));break}}return null}

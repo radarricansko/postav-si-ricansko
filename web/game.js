@@ -431,7 +431,7 @@ function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.user
  const used=Math.min(t.items.length,t.slots.length);
  // lawn pod obcí (zakryje pole)
  // stožár se státní vlajkou u návsi každé živé obce
- if(t.players.length>=CONFIG.REVIVE){const lm=t.lm;const fp=flagpole(lm.x+Math.cos(lm.ry+.9)*(lm.r+.6),lm.z+Math.sin(lm.ry+.9)*(lm.r+.6),lm.type==="kaple"||lm.type==="pomnik"?8:10.5);fp.traverse(m=>{m.userData.tmp=1});g.add(fp)}
+ if(t.players.length>=CONFIG.REVIVE){const lm=t.lm;const fp=flagpole(lm.x+Math.cos(lm.ry+.9)*(lm.r+.6),lm.z+Math.sin(lm.ry+.9)*(lm.r+.6),lm.type==="kaple"||lm.type==="pomnik"?8:10.5);fp.traverse(m=>{m.userData.tmp=1});g.add(fp);t.flagObj=fp}else t.flagObj=null;
  // trávník jen pod zastavěnými bloky (ne velký kruh): čtverec kolem každého bloku + kruh kolem návsi
  {const lp=[],li=[];const fan=(pts)=>{const b=lp.length/3;let cx=0,cz=0;pts.forEach(q=>{cx+=q.x;cz+=q.z});cx/=pts.length;cz/=pts.length;lp.push(cx,.044,cz);pts.forEach(q=>lp.push(q.x,.044,q.z));for(let i=0;i<pts.length;i++)li.push(b,b+1+(i+1)%pts.length,b+1+i)};
   const circ=(x,z,r)=>{const a=[];for(let i=0;i<28;i++){const an=i/28*6.283;a.push({x:x+Math.cos(an)*r,z:z+Math.sin(an)*r})}fan(a)};
@@ -578,7 +578,7 @@ function applyStat(st){const nazev=(st&&st.nazev?String(st.nazev):"").slice(0,40
  if(svg){const im=new Image();im.onload=()=>{const c=FLAG_TEX.image,x=c.getContext("2d");x.clearRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);FLAG_TEX.needsUpdate=true;FLAG_MAT.visible=true};im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)}else FLAG_MAT.visible=false;
  if(window.GAME&&GAME.onStat)GAME.onStat({nazev,svg})}
 function flagpole(x,z,h){const o=new T.Group();const pole=new T.Mesh(new T.CylinderGeometry(.11,.14,h,8),POLE_MAT);pole.position.y=h/2;pole.castShadow=true;o.add(pole);const knob=new T.Mesh(new T.SphereGeometry(.24,10,8),POLE_MAT);knob.position.y=h+.1;o.add(knob);
- const fl=new T.Mesh(new T.PlaneGeometry(h*.42,h*.28,6,1),FLAG_MAT);const pa=fl.geometry.attributes.position;for(let i=0;i<pa.count;i++)pa.setZ(i,Math.sin(pa.getX(i)*1.7)*.16);fl.geometry.computeVertexNormals();fl.position.set(h*.21+.12,h-h*.16,0);fl.castShadow=true;o.add(fl);o.position.set(x,0,z);o.rotation.y=.6;return o}
+ const fl=new T.Mesh(new T.PlaneGeometry(h*.42,h*.28,6,1),FLAG_MAT);const pa=fl.geometry.attributes.position;for(let i=0;i<pa.count;i++)pa.setZ(i,Math.sin(pa.getX(i)*1.7)*.16);fl.geometry.computeVertexNormals();fl.position.set(h*.21+.12,h-h*.16,0);fl.userData.top=h-h*.16;fl.userData.low=h*.2;fl.castShadow=true;o.add(fl);o.userData.flag=fl;o.position.set(x,0,z);o.rotation.y=.6;return o}
 async function pollWorld(){const w=await fetchWorld();if(!w)return;if(!QS.get("stat"))applyStat(w.stat);if(w.revize!==undefined&&w.revize===WORLD_REV)return;WORLD_REV=w.revize;const before=POP;const ch=applyEvents(worldEvents(w),true);if(w.den_hry)DAY=w.den_hry;
  if(ch.size){refreshAll([...ch]);if(POP>before)toast(`+${POP-before} nových obyvatel`,[...ch].map(t=>t.n).slice(0,3).join(" · "))}else updateUI()}
 /* názvy staveb z komentářů: filtr sprostých slov + délka; nevhodné -> výchozí název kategorie */
@@ -712,7 +712,7 @@ function closeInfo(){$("info").classList.remove("on");ring.visible=false}
 
 /* ---------- kamera ---------- */
 let fly=null;
-function flyTo(target,pos,ms=1500){if(ms<=1){fly=null;ctr.target.copy(target);cam.position.copy(pos);return Promise.resolve()}return new Promise(ok=>{fly={from:ctr.target.clone(),to:target.clone(),cf:cam.position.clone(),ct:pos.clone(),t0:performance.now(),ms,ok}})}
+function flyTo(target,pos,ms=1500,ease){if(ms<=1){fly=null;ctr.target.copy(target);cam.position.copy(pos);return Promise.resolve()}return new Promise(ok=>{fly={from:ctr.target.clone(),to:target.clone(),cf:cam.position.clone(),ct:pos.clone(),t0:performance.now(),ms,ok,ease}})}
 function flyToLocal(t,s,dist){const c=tc(t);const target=new T.Vector3(c.x+s.x,1.5,c.z+s.z);const az=ctr.getAzimuthalAngle();const el=.62;const pos=target.clone().add(new T.Vector3(Math.sin(az)*Math.cos(el),Math.sin(el),Math.cos(az)*Math.cos(el)).multiplyScalar(dist));return flyTo(target,pos,1300)}
 function focusTown(t,ms,quiet){sel.value=t.n;if(!quiet&&window.GAME&&GAME.onTownFocus)GAME.onTownFocus(t.n);const c=tc(t);const d=Math.max(60,t.R*2.6);const az=ctr.getAzimuthalAngle();return flyTo(new T.Vector3(c.x,0,c.z),new T.Vector3(c.x+Math.sin(az)*d*.62,d*.72,c.z+Math.cos(az)*d*.62),ms||1500)}
 function overview(ms){const b=regionBox();const c=new T.Vector3((b[0]+b[2])/2,0,(b[1]+b[3])/2);const d=Math.max(b[2]-b[0],b[3]-b[1])*.78;return flyTo(c,new T.Vector3(c.x+d*.18,d*.82,c.z+d*.62),ms||1800)}
@@ -736,12 +736,35 @@ let last=performance.now();const frameCbs=[];
 const PERF={acc:0,n:0,lvl:0,t0:performance.now()};
 function perfTick(dt,now){if(aspectLock||PERF.lvl>=3||QS.get("perf")==="0")return;PERF.acc+=dt;PERF.n++;if(now-PERF.t0<2500)return;const ms=PERF.acc/PERF.n*1000;PERF.acc=0;PERF.n=0;PERF.t0=now;
  if(ms>38){PERF.lvl++;if(PERF.lvl===1){R.setPixelRatio(1);R.setSize(innerWidth,innerHeight);POST.resize()}else if(PERF.lvl===2){POST.on=false}else{sun.shadow.mapSize.set(1024,1024);sun.shadow.map&&sun.shadow.map.dispose();sun.shadow.map=null;forestShadow=false;FOREST.forEach(m=>m.castShadow=false)}}}
-function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const dt=Math.min(.05,rawDt);last=now;if(ready)perfTick(rawDt,now);
+/* ---------- oživení: postavičky jdou ke svému domku, prach při stavbě, vytažení vlajek ---------- */
+const FX={walkers:[],puffs:[],puffed:new Set(),flagT0:-1,flagMs:0};
+const WMAT=["#e4572e","#2f4aa8","#f2b134","#17bebb","#8e5bd6","#e84f8a"].map(c=>new T.MeshLambertMaterial({color:c})),WSKIN=new T.MeshLambertMaterial({color:"#f1c9a5"});
+const WBODY=new T.CylinderGeometry(.24,.34,.8,8);WBODY.translate(0,.56,0);const WHEAD=new T.SphereGeometry(.24,10,8);WHEAD.translate(0,1.18,0);
+function spawnWalker(t,idx,o){const q=t.slots[idx];if(!q||q.big||q.sx===undefined)return null;const dx=q.x-q.sx,dz=q.z-q.sz,l=Math.hypot(dx,dz)||1,far=o.dist||10,side=(idx%2?1:-1);
+ const path=[{x:q.sx-dz/l*far*side,z:q.sz+dx/l*far*side},{x:q.sx,z:q.sz},{x:q.x-dx/l*2.1,z:q.z-dz/l*2.1}];
+ const g=new T.Group();const b=new T.Mesh(WBODY,WMAT[(idx*7+t.n.length)%WMAT.length]),h=new T.Mesh(WHEAD,WSKIN);b.castShadow=true;h.castShadow=true;g.add(b,h);const sc=o.scale||1.3;g.scale.setScalar(sc);g.position.set(path[0].x,0,path[0].z);t.group.add(g);
+ const w={g,t,idx,path,q,sc,t0:performance.now(),ms:o.ms||2200,nick:o.nick||"",hold:o.hold==null?1400:o.hold,arrived:false,x:path[0].x,z:path[0].z,y:2.6};FX.walkers.push(w);return w}
+function fxTick(now){
+ for(let i=FX.walkers.length-1;i>=0;i--){const w=FX.walkers[i],a=(now-w.t0)/w.ms;
+  if(a>=1&&!w.arrived){w.arrived=true;w.x=w.q.x;w.z=w.q.z;w.y=6.2;addPlayers(w.t,1)}
+  if(a>=1+w.hold/w.ms){w.t.group.remove(w.g);FX.walkers.splice(i,1);continue}
+  if(a<1){const L1=Math.hypot(w.path[1].x-w.path[0].x,w.path[1].z-w.path[0].z),L2=Math.hypot(w.path[2].x-w.path[1].x,w.path[2].z-w.path[1].z),d=Math.max(0,a)*(L1+L2);const k=d<L1?0:1,f=k?(d-L1)/L2:d/L1,A=w.path[k],B=w.path[k+1];
+   w.x=A.x+(B.x-A.x)*f;w.z=A.z+(B.z-A.z)*f;w.g.position.set(w.x,Math.abs(Math.sin(now/85))*.13,w.z);w.g.rotation.y=Math.atan2(B.x-A.x,B.z-A.z);w.g.rotation.z=Math.sin(now/85)*.07}
+  else w.g.scale.setScalar(w.sc*Math.max(.001,1-(a-1)*w.ms/220))}
+ // prach: jednou u každého domku, který právě roste
+ if(born.size&&born.size<40)born.forEach((tm,key)=>{if(now<tm||FX.puffed.has(key))return;FX.puffed.add(key);const [n,i]=key.split("#"),t=byName[n],q=t&&t.slots[+i];if(!q||FX.puffs.length>60)return;
+  for(let k=0;k<5;k++){const sp=new T.Sprite(new T.SpriteMaterial({map:fogTex,transparent:true,depthWrite:false,opacity:.75,color:0xe9dcc3}));const an=k/5*6.283+(+i),r=1.6+(k%2)*.9;sp.position.set(q.x+Math.cos(an)*r,.7,q.z+Math.sin(an)*r);sp.scale.set(1.4,1.1,1);t.group.add(sp);FX.puffs.push({sp,t,t0:tm,dx:Math.cos(an),dz:Math.sin(an)})}});
+ if(FX.puffed.size&&!born.size)FX.puffed.clear();
+ for(let i=FX.puffs.length-1;i>=0;i--){const p=FX.puffs[i],a=(now-p.t0)/750;if(a>=1){p.t.group.remove(p.sp);p.sp.material.dispose();FX.puffs.splice(i,1);continue}if(a<0)continue;const e=1-Math.pow(1-a,2);p.sp.scale.set(1.4+e*3.4,1.1+e*2.4,1);p.sp.position.x+=p.dx*.03;p.sp.position.z+=p.dz*.03;p.sp.position.y=.7+e*1.3;p.sp.material.opacity=.75*(1-a)}
+ // vlajky: vyjedou na stožáry
+ if(FX.flagT0>=0){const a=Math.min(1,Math.max(0,(now-FX.flagT0)/FX.flagMs)),e=1-Math.pow(1-a,3);TOWNS.forEach(t=>{const fl=t.flagObj&&t.flagObj.userData.flag;if(fl)fl.position.y=fl.userData.low+(fl.userData.top-fl.userData.low)*e});if(a>=1)FX.flagT0=-1}}
+const _wv=new T.Vector3();
+function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const dt=Math.min(.05,rawDt);last=now;if(ready){perfTick(rawDt,now);fxTick(now)}
  if(animS){const a=Math.min(1,(now-animS.t0)/1600),e=a<.5?2*a*a:1-Math.pow(-2*a+2,2)/2;const prev=S;S=animS.from+(animS.to-animS.from)*e;const f=S/prev;ctr.target.x*=f;ctr.target.z*=f;cam.position.x*=f;cam.position.z*=f;
   if(fly){fly.from.x*=f;fly.from.z*=f;fly.to.x*=f;fly.to.z*=f;fly.cf.x*=f;fly.cf.z*=f;fly.ct.x*=f;fly.ct.z*=f}
   if(a>=1){animS=null;relayout(true)}else relayout(false)}
  if(born.size){placeHouses(now);TOWNS.forEach(t=>(t.specialObjs||[]).forEach(o=>{if(o.userData.grow){const a=(now-o.userData.grow)/700;const k=a<0?.01:a<1?(a<.7?a/.7*1.1:1.1-(a-.7)/.3*.1):1;o.scale.setScalar(Math.max(.01,k));if(a>=1){o.userData.grow=0;born.delete(o.userData.ref.t.n+"#"+o.userData.ref.idx)}}}))}
- if(fly){const a=Math.min(1,(now-fly.t0)/fly.ms),e=a<.5?4*a*a*a:1-Math.pow(-2*a+2,3)/2;ctr.target.lerpVectors(fly.from,fly.to,e);cam.position.lerpVectors(fly.cf,fly.ct,e);if(a>=1){const ok=fly.ok;fly=null;ok&&ok()}}
+ if(fly){const a=Math.min(1,(now-fly.t0)/fly.ms),e=fly.ease==="out"?1-Math.pow(1-a,3):fly.ease==="lin"?a:a<.5?4*a*a*a:1-Math.pow(-2*a+2,3)/2;ctr.target.lerpVectors(fly.from,fly.to,e);cam.position.lerpVectors(fly.cf,fly.ct,e);if(a>=1){const ok=fly.ok;fly=null;ok&&ok()}}
  if(orbitSpeed){const off=cam.position.clone().sub(ctr.target);off.applyAxisAngle(UP,orbitSpeed*dt);cam.position.copy(ctr.target).add(off)}
  if(!fly)keyMove(dt);ctr.update();moveCars(dt);
  const dist=cam.position.distanceTo(ctr.target);updClouds(now,dist);cam.near=Math.max(.8,dist*.02);cam.far=Math.max(3000,dist*12);cam.updateProjectionMatrix();
@@ -767,12 +790,16 @@ window.GAME={canvas,THREE:T,
  state:()=>({day:DAY,totalPlayers:POP,towns:TOWNS.map(t=>{const c=tc(t);return{name:t.n,players:t.players.length,abandoned:abandonedN(t),revive:CONFIG.REVIVE,open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl||null,erbSvg:(()=>{const d=ERB.E.find(e=>e[0]===t.n);return d?ERB.erb(d,tierOf(t.players.length)):''})(),center:{x:c.x,y:0,z:c.z},lm:{x:c.x+t.lm.x,y:0,z:c.z+t.lm.z,r:t.lm.r},radius:t.R,
   houses:t.items.map((it,i)=>{const s=t.slots[i];return s&&it.k==="h"?{id:t.n+"#"+i,owner:it.p.nick,no:it.p.no,x:c.x+s.x,y:0,z:c.z+s.z}:null}).filter(Boolean)}})}),
  setAspect:(w,h)=>{aspectLock=!!w;if(w){const k=Math.min(1,+QS.get("render")||1);R.setPixelRatio(1);R.setSize(Math.round(w*k),Math.round(h*k),false);cam.aspect=w/h}else{R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight}cam.updateProjectionMatrix();POST.resize()},
- flyTo:(o,ms)=>flyTo(new T.Vector3(o.target.x,o.target.y,o.target.z),new T.Vector3(o.pos.x,o.pos.y,o.pos.z),ms),
+ flyTo:(o,ms,ease)=>flyTo(new T.Vector3(o.target.x,o.target.y,o.target.z),new T.Vector3(o.pos.x,o.pos.y,o.pos.z),ms,ease),
  focusTown:(n,ms,quiet)=>focusTown(byName[n],ms,quiet),
  focusHouse:(id,ms)=>{const [n,i]=id.split("#");const t=byName[n];const s=t.slots[+i];return s?flyToLocal(t,s,22):Promise.resolve()},
  overview:ms=>overview(ms),orbit:s=>{orbitSpeed=s||0},
  // pro videa: kamera smí níž a blíž (záběry z ulice); slot = místo i-tého domku obce ve světě
- stat:()=>({nazev:STAT.nazev,svg:STAT.svg}),specialPos:n=>{const t=byName[n];if(!t)return null;for(let i=t.items.length-1;i>=0;i--)if(t.items[i].k==="s"&&t.slots[i]){const c=tc(t),q=t.slots[i];return{x:c.x+q.x,y:0,z:c.z+q.z,r:q.big||6}}return null},camFree:on=>{ctr.maxPolarAngle=on?1.5:1.32;ctr.minDistance=on?4:14},slot:(n,i)=>{const t=byName[n];if(!t)return null;const c=tc(t);const q=t.slots[i]||itemPos(t,i)||t.lm;return{x:c.x+q.x,y:0,z:c.z+q.z}},
+ stat:()=>({nazev:STAT.nazev,svg:STAT.svg}),
+ // videa: postavička dojde k dalšímu volnému domku obce a ten se postaví; walkers() = kde jsou na obrazovce (0–1), pro jmenovky
+ walkIn:(n,o)=>{const t=byName[n];if(!t)return false;const idx=t.items.length+FX.walkers.filter(w=>w.t===t&&!w.arrived).length;const w=spawnWalker(t,idx,o||{});if(!w){addPlayers(t,1);return false}return true},
+ walkers:()=>FX.walkers.map(w=>{const c=tc(w.t);_wv.set(c.x+w.x,w.y,c.z+w.z).project(cam);return{nick:w.nick,x:(_wv.x+1)/2,y:(1-_wv.y)/2,vis:_wv.z<1,arrived:w.arrived}}),
+ raiseFlags:ms=>{FX.flagMs=ms||1800;FX.flagT0=performance.now();TOWNS.forEach(t=>{const fl=t.flagObj&&t.flagObj.userData.flag;if(fl)fl.position.y=fl.userData.low})},specialPos:n=>{const t=byName[n];if(!t)return null;for(let i=t.items.length-1;i>=0;i--)if(t.items[i].k==="s"&&t.slots[i]){const c=tc(t),q=t.slots[i];return{x:c.x+q.x,y:0,z:c.z+q.z,r:q.big||6}}return null},camFree:on=>{ctr.maxPolarAngle=on?1.5:1.32;ctr.minDistance=on?4:14},slot:(n,i)=>{const t=byName[n];if(!t)return null;const c=tc(t);const q=t.slots[i]||itemPos(t,i)||t.lm;return{x:c.x+q.x,y:0,z:c.z+q.z}},
  addPlayers:(n,list,quiet)=>{const t=byName[n];if(t){addPlayers(t,(list&&list.length)||1);if(quiet){born.clear();placeHouses(performance.now())}}},
  links:()=>[...LINKS].map(k=>k.split('|')),linkSegs:()=>LINKSEG,buildSpecial:n=>buildSpecial(byName[n]),dbgItems:n=>byName[n].items.map((it,i)=>({k:it.k,id:it.id,pos:it.pos||null,slot:!!byName[n].slots[i]})),buildSpecialId:(n,id,text)=>{const t=byName[n];if(!t)return;const idx=addItem(t,{k:"s",id,text:text||id,author:"admin",day:DAY});born.set(t.n+"#"+idx,performance.now());refreshAll([t]);const s=itemPos(t,idx);if(s)flyToLocal(t,s,30)},
  dbg:n=>{const t=byName[n];return {lm:[t.lm.x|0,t.lm.z|0,t.lm.type],R:t.R|0,pat:t.plan.pat,blocks:t.usedB.length,Rb:t.Rb|0,cuts:(t.cutsOk||[]).length,slots:t.slots.slice(0,Math.min(t.items.length,t.slots.length)).map(s=>Math.round(Math.hypot(s.x,s.z))).join(",")}},select:(n,idx)=>selectItem(byName[n],idx),closeInfo:()=>closeInfo(),
