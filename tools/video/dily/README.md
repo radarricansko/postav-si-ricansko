@@ -11,7 +11,14 @@ Každý díl je jeden soubor `dil-N.json`: seznam záběrů. Jedna věta Pana Ra
 - `vo` = co řekne hlas (z toho se dělají i titulky; `noSubs: true` je vypne, když je věta už na obraze).
 - `cam.at` = kam kamera míří: `center` (Náměstí sjednocení), `lm:Obec` (náves), `slot:Obec:0` (domek), `stavba:Obec` (poslední stavba). `from` → `to` = [vzdálenost, výška úhlu, směr], kamera mezi nimi pomalu jede.
 - `ui` = co je přes obraz: `title`, `chip`, `stamp`, `num`, `bubble` (komentář), `tag` (jmenovka), `flag` (státní vlajka), `end` (závěrečná karta). `at` = kdy naskočí (ms od začátku záběru).
-- `add` = přistaví domky během záběru. `kdyz: "klíč"` = záběr se vypustí, když údaj chybí.
+- `cam.in` = rychlý nájezd kamery (ms), potom pomalý dojezd. Bez něj kamera jede plynule celou dobu.
+- `walk` = postavičky s jmenovkou dojdou ke svému domku a ten se postaví: `{ "town": "Mukařov", "n": 4, "at": 150, "every": 420, "ms": 1700, "nicks": ["@bara", …] }`.
+- `flags` = státní vlajky vyjedou na stožáry: `{ "at": 150, "ms": 1700 }`.
+- `add` = domky jen naskočí (bez postaviček). `kdyz: "klíč"` = záběr se vypustí, když údaj chybí.
+- Čísla v kartách `num` se sama roztočí od nuly.
+- `"hudba": "lofi"` na začátku scénáře = podkres dílu (`lofi`, `funk`, `minimal`, `trap`, `puvodni`, `bez`).
+
+Hlas: každá věta se namlouvá zvlášť, takže záběr trvá přesně tak dlouho jako jeho věta.
 
 ## Proměnné `{{…}}`
 
