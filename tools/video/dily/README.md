@@ -18,7 +18,7 @@ Každý díl je jeden soubor `dil-N.json`: seznam záběrů. Jedna věta Pana Ra
 - Čísla v kartách `num` se sama roztočí od nuly.
 - `"hudba": "lofi"` na začátku scénáře = podkres dílu (`lofi`, `funk`, `minimal`, `trap`, `puvodni`, `bez`).
 
-Hlas: každá věta se namlouvá zvlášť, takže záběr trvá přesně tak dlouho jako jeho věta.
+Hlas: celý text se namluví na jeden zátah s dlouhými pauzami mezi řádky, podle nich se rozstříhá na záběry a ticho se ořízne. Bezplatný tarif Gemini má malý denní strop dotazů, proto jeden dotaz na díl. S placeným tarifem jde zapnout přesnější režim (proměnná `HLAS_REZIM` = `vety`, každá věta zvlášť).
 
 ## Proměnné `{{…}}`
 

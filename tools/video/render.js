@@ -46,7 +46,8 @@ function pauzy(tmp){const r=spawnSync('ffmpeg',['-hide_banner','-i',tmp,'-af','s
  const sil=[];const re=/silence_start: ([\d.]+)[\s\S]*?silence_end: ([\d.]+)/g;let m;while((m=re.exec(log)))sil.push([+m[1],+m[2]]);
  let s0=0,s1=total;if(sil.length&&sil[0][0]<.05)s0=sil[0][1];if(sil.length&&sil[sil.length-1][1]>total-.05)s1=sil[sil.length-1][0];
  return{total,s0,s1,sil:sil.filter(([a,b])=>(a+b)/2>s0+.25&&(a+b)/2<s1-.25)}}
-function rozdel(P,texts){const N=texts.length,M=P.sil.length;if(M<N-1)return null;const len=texts.map(t=>t.replace(/[^\p{L}\p{N}]/gu,'').length+3),sum=len.reduce((a,b)=>a+b,0),sp=P.s1-P.s0;const ex=len.map(l=>sp*l/sum);
+function rozdel(P,texts){const N=texts.length,M=P.sil.length;if(M<N-1)return null;
+ {const podle=P.sil.map(([a,b],j)=>[b-a,j]).sort((x,y)=>y[0]-x[0]);const kratsi=podle[N-1]?podle[N-1][0]:0;if(podle[N-2][0]>=.35&&podle[N-2][0]>=kratsi*1.5){console.log('hlas: hranice podle dlouhých pauz (nejkratší z nich',podle[N-2][0].toFixed(2),'s, další pauza',kratsi.toFixed(2),'s)');return podle.slice(0,N-1).map(x=>x[1]).sort((a,b)=>a-b)}}const len=texts.map(t=>t.replace(/[^\p{L}\p{N}]/gu,'').length+3),sum=len.reduce((a,b)=>a+b,0),sp=P.s1-P.s0;const ex=len.map(l=>sp*l/sum);
  const mid=P.sil.map(([a,b])=>(a+b)/2),pl=P.sil.map(([a,b])=>b-a);const cena=(od,doo,i)=>{const d=doo-od;return (d-ex[i])**2/ex[i]};
  // dp[i][j] = nejlepší cena, když i-tý střih (konec i-té věty) je na pauze j
  const dp=[],bk=[];for(let i=0;i<N-1;i++){dp.push(new Array(M).fill(Infinity));bk.push(new Array(M).fill(-1));for(let j=i;j<M-(N-2-i);j++){const bonus=-1.1*Math.min(pl[j],.6);
@@ -58,7 +59,7 @@ async function splitTake(mp3,texts){const tmp=path.join(OUT,'take.mp3');fs.write
  if(texts.length===1){fs.unlinkSync(tmp);return[mp3]}
  let idx=rozdel(P,texts);if(!idx){console.log('hlas: málo pauz ('+P.sil.length+') na',texts.length,'vět');fs.unlinkSync(tmp);return null}
  const W=texts.map(slova),N=texts.length;let R=rezy(tmp,P,idx,N),ok=false,tr=[];
- const zacK=Date.now();for(let kolo=0;kolo<4&&R;kolo++){if(Date.now()-zacK>240000){console.log('hlas: kontrola střihu trvá dlouho, končím ji');ok=null;break}tr=await Promise.all(R.out.map(b=>GEM&&GEM.prepis?GEM.prepis(b):null));tr=tr.map(slova);
+ const zacK=Date.now();if(process.env.HLAS_KONTROLA!=='1'){ok=null}else for(let kolo=0;kolo<4&&R;kolo++){if(Date.now()-zacK>240000){console.log('hlas: kontrola střihu trvá dlouho, končím ji');ok=null;break}tr=await Promise.all(R.out.map(b=>GEM&&GEM.prepis?GEM.prepis(b):null));tr=tr.map(slova);
   if(tr.every(t=>!t.length)){console.log('hlas: přepis není k dispozici, střih neověřen');ok=null;break}
   let zmena=false;for(let i=0;i<N-1;i++){const hlava=W[i+1].slice(0,3),ocas=W[i].slice(-3);
    const pozde=shoda(hlava,tr[i].slice(-5))>=Math.min(2,hlava.length)&&shoda(hlava,W[i].slice(-5))<Math.min(2,hlava.length);   // začátek další věty je už v tomhle kusu
@@ -95,8 +96,9 @@ function orez(mp3){const a=path.join(OUT,'v-in.mp3'),b=path.join(OUT,'v-out.mp3'
  const VIN=arg('voice-in'),VOUT=arg('voice-out'),PART=arg('part'),MUX=process.argv.includes('--mux');const vin=VIN&&fs.existsSync(VIN)?JSON.parse(fs.readFileSync(VIN,'utf8')):null;
  const segs=script.vo.segments||[];let voiced=0;if((vin||process.env.ELEVENLABS_API_KEY||process.env.GEMINI_API_KEY)&&segs.length&&!SHEET){let clips=vin?vin.clips||[]:[];if(vin){voiced=clips.filter(Boolean).length;ttsVia=vin.via||''}
   if(!vin){
-  /* díl: každá věta se namluví zvlášť (záběr = věta, nic nepřeteče). HLAS_REZIM=zatah = celé najednou a střih podle pauz. */
-  if(def&&process.env.GEMINI_API_KEY&&GEM&&process.env.HLAS_REZIM==='zatah'){const take=await GEM.tts(segs.map(s=>s.text).join('\n'),{zive:true,tempo:+process.env.GEMINI_TEMPO||1.06});const parts=take?await splitTake(take,segs.map(s=>s.text)):null;if(parts){clips=parts.map(b=>b.toString('base64'));voiced=parts.length;ttsVia='Gemini (jeden zátah)'}}
+  /* díl: celý text na jeden zátah (1 dotaz, šetří denní kvótu) s dlouhými pauzami mezi řádky, podle nich se stříhá a ticho se pak ořízne.
+     HLAS_REZIM=vety = každá věta zvlášť (přesné, ale 8–9 dotazů na díl; chce placený tarif). */
+  if(def&&process.env.GEMINI_API_KEY&&GEM&&process.env.HLAS_REZIM!=='vety'){const take=await GEM.tts(segs.map(s=>s.text).join('\n'),{zive:true,pozice:'zatah',tempo:+process.env.GEMINI_TEMPO||1.06});const parts=take?await splitTake(take,segs.map(s=>s.text)):null;if(parts){clips=parts.map(b=>orez(b).toString('base64'));voiced=parts.length;ttsVia='Gemini (jeden zátah)'}}
   if(!clips.length){const gem=def&&process.env.GEMINI_API_KEY&&GEM;const delky=[];for(let i=0;i<segs.length;i++){const s=segs[i];let buf=gem?await GEM.tts(s.text,{zive:true,pozice:i===0?'prvni':i===segs.length-1?'posledni':'stred',tempo:+process.env.GEMINI_TEMPO||1.06}):await tts(s.text);if(buf&&gem)buf=orez(buf);clips.push(buf?buf.toString('base64'):null);if(buf){voiced++;delky.push((buf.length/20000).toFixed(1))}}if(gem&&voiced){ttsVia='Gemini (po větách)';console.log('hlas: věty zvlášť, délky ~',delky.join(' '),'s')}}}
   if(VOUT){fs.writeFileSync(VOUT,JSON.stringify({clips,via:ttsVia}));console.log('hlas uložen:',VOUT,'segmentů',voiced,'/',segs.length,ttsVia);await b.close();srv.close();return}
   if(clips.some(Boolean))  await p.evaluate(async clips=>{const blobs=clips.map(c=>c?new Blob([Uint8Array.from(atob(c),ch=>ch.charCodeAt(0))],{type:'audio/mpeg'}):null);await REEL.setVoiceSegments(window.__script,blobs,{padMs:window.__script.hook==='dil'?140:80})},clips);

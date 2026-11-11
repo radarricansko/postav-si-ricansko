@@ -42,6 +42,7 @@ jobs:
           ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID || 'kOWmvbNszhdJeaeyEzJB' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_VOICE: ${{ vars.GEMINI_VOICE || 'Sadaltager' }}
+          HLAS_REZIM: ${{ vars.HLAS_REZIM }}   # prázdné = jeden zátah (1 dotaz); vety = každá věta zvlášť (přesnější, víc dotazů)
           GEMINI_TEMPO: ${{ inputs.dil && '1.06' || vars.GEMINI_TEMPO || '1.12' }}
         run: node tools/video/render.js ${{ inputs.dil && format('--dil {0}', inputs.dil) || '' }} --data "$([ -f world-dil.json ] && echo world-dil.json || echo world.json)" --out out ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
       - name: Náhled (6 snímků) do větve previews

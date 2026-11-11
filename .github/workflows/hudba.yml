@@ -20,6 +20,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_VOICE: ${{ vars.GEMINI_VOICE || 'Sadaltager' }}
+          HLAS_REZIM: ${{ vars.HLAS_REZIM }}   # prázdné = jeden zátah (1 dotaz); vety = každá věta zvlášť (přesnější, víc dotazů)
           GEMINI_TEMPO: "1.06"
         run: node tools/video/render.js --dil "${{ inputs.dil || '1' }}" --data tools/video/dily/zkouska-svet.json --navrhy tools/video/dily/zkouska-navrhy.json --audio-only --musics "${{ inputs.styly || 'lofi,funk,minimal,trap,puvodni,bez' }}" --scale 0.3 --out out
       - name: Do větve previews
