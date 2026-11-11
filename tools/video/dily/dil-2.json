@@ -85,14 +85,14 @@
    "ui": [
     {
      "k": "flag",
-     "y": 600,
-     "w": 600,
+     "y": 520,
+     "w": 460,
      "at": 150
     },
     {
      "k": "chip",
      "text": "navrhl {{hlas_vlajka_autor}}",
-     "y": 870,
+     "y": 730,
      "at": 900,
      "size": 40
     }
