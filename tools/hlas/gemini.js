@@ -7,7 +7,7 @@ const KEY=process.env.GEMINI_API_KEY;
 const STYLE='Čti česky svižně a plynule, v rychlém tempu jako vypravěč krátkého videa na sociálních sítích, bez dlouhých pauz mezi větami. Hlas staršího klidného vypravěče s lehkým tajemnem a jiskrou:';
 const MODELS=(process.env.GEMINI_TTS_MODEL?[process.env.GEMINI_TTS_MODEL]:[]).concat(['gemini-3.1-flash-tts-preview','gemini-2.5-pro-preview-tts','gemini-2.5-flash-preview-tts']);
 /* „režijní“ prompt podle dokumentace Gemini TTS: profil hlasu, scéna, poznámky režiséra, přepis. V přepisu fungují značky jako [excited], [laughs]. */
-const ZIVE=text=>`# AUDIO PROFILE: Pan Radar
+const ZIVE=(text,pozice)=>`# AUDIO PROFILE: Pan Radar
 Vypravěč krátkých videí regionálního média pro mladé lidi z Říčanska. Chlap, který má celý kraj přečtený, baví ho to a je to na něm slyšet. Rodilý mluvčí češtiny.
 
 ## SCENE
@@ -17,7 +17,7 @@ Reel na Instagram, pětadvacet sekund. Diváci jsou studenti, kteří video pust
 Language: Czech (cs). Native Czech pronunciation: correct vowel length (á, é, í, ó, ú, ů, ý), clean "ř", "ch" and "ě", stress always on the first syllable of each word, natural Czech sentence melody. Never an English or Slavic-foreign accent.
 Style: energetic, amused, slightly ironic, like a radio host who is clearly enjoying the story. Big intonation, punch on the key words, a grin in the voice. Never a news reader, never monotone.
 Pacing: fast and tight, no long pauses between sentences, a tiny beat only before a punchline. Questions go clearly up.
-
+${pozice?`Continuity: this is ${pozice==='prvni'?'the opening line':pozice==='posledni'?'the closing line':'a line from the middle'} of one continuous fast narration recorded line by line. Same voice, same energy, same pitch and same speed on every line. ${pozice==='prvni'?'Start with a hook.':pozice==='posledni'?'Land the ending firmly.':'Do not sound like a new beginning and do not let the voice drop at the end: the narration continues right after.'} Read only the transcript, nothing else.\n`:''}
 #### TRANSCRIPT
 ${text}`;
 let MODEL=null;
@@ -26,7 +26,7 @@ async function call(model,text,voice){let r;try{r=await fetch(`https://generativ
  const t=await r.text();let j=null;try{j=JSON.parse(t)}catch(e){}return{ok:r.ok,status:r.status,j,t}}
 async function findModels(){try{const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':KEY}});const j=await r.json();return (j.models||[]).map(m=>m.name.replace('models/','')).filter(n=>/tts/i.test(n))}catch(e){return[]}}
 function toMp3(pcm,rate,tempo){const af=(tempo&&Math.abs(tempo-1)>.01?'atempo='+tempo+',':'')+'loudnorm=I=-16:TP=-1.5';const r=spawnSync('ffmpeg',['-v','error','-f','s16le','-ar',String(rate),'-ac','1','-i','pipe:0','-af',af,'-ar','44100','-b:a','160k','-f','mp3','pipe:1'],{input:pcm,maxBuffer:1<<28});if(r.status!==0)console.error('ffmpeg selhal:',r.error?r.error.message:String(r.stderr).slice(0,200));return r.status===0?r.stdout:null}
-async function tts(text,opt={}){if(!KEY)return null;const voice=opt.voice||process.env.GEMINI_VOICE||'Sadaltager';const tempo=opt.tempo||+process.env.GEMINI_TEMPO||1;const full=opt.zive?ZIVE(text):(opt.style===''?'':(opt.style||STYLE)+' ')+text;
+async function tts(text,opt={}){if(!KEY)return null;const voice=opt.voice||process.env.GEMINI_VOICE||'Sadaltager';const tempo=opt.tempo||+process.env.GEMINI_TEMPO||1;const full=opt.zive?ZIVE(text,opt.pozice):(opt.style===''?'':(opt.style||STYLE)+' ')+text;
  if(opt.model)MODEL=null;let list=opt.model?[opt.model]:MODEL?[MODEL]:MODELS;for(let pass=0;pass<2;pass++){for(const m of list){for(let a=0;a<5;a++){const r=await call(m,full,voice);
     if(r.ok){const p=(((r.j.candidates||[])[0]||{}).content||{}).parts||[];const d=p.find(x=>x.inlineData);if(!d){console.error('gemini: bez zvuku',String(r.t).slice(0,200));break}
      MODEL=m;const rate=+((d.inlineData.mimeType||'').match(/rate=(\d+)/)||[])[1]||24000;return toMp3(Buffer.from(d.inlineData.data,'base64'),rate,tempo)}
