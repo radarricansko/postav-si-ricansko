@@ -401,7 +401,7 @@ function initInstanced(){const hr=MODELS.b.r;[...HOUSE,ABAND,GARDEN,DRIVE,YARD,L
 const born=new Map();
 function abandonedN(t){return Math.max(0,CONFIG.REVIVE-t.players.length)}
 function placeHouses(now){{let tot=0;TOWNS.forEach(t=>{tot+=t.items.length});if(tot>MAXH){MAXH=Math.ceil(tot*1.4/4000)*4000;initInstanced()}}const cnt=[0,0,0,0];let gi=0,di=0,yi=0,li=0,ai=0;houseRef.forEach(a=>a.length=0);
- TOWNS.forEach(t=>{const ab=abandonedN(t);if(ab){const c=tc(t);const base=t.items.length;for(let k=0;k<ab;k++){const s=base+k<capN(t)?t.slots[base+k]:null;if(!s)break;const w=hashStr(t.n+k)%1000/1000;
+ TOWNS.forEach(t=>{const ab=t.noAband?0:abandonedN(t);if(ab){const c=tc(t);const base=t.items.length;for(let k=0;k<ab;k++){const s=base+k<capN(t)?t.slots[base+k]:null;if(!s)break;const w=hashStr(t.n+k)%1000/1000;
    Q.setFromEuler(new T.Euler((w-.5)*.24,s.ry-Math.PI/2+(w-.5)*.3,(w-.3)*.2));V.set(c.x+s.x,-.55-w*.3,c.z+s.z);SC.set(HOUSE_S*.96,HOUSE_S*(.72+w*.12),HOUSE_S*.96);M4.compose(V,Q,SC);ABAND.setMatrixAt(ai++,M4)}}});
  if(ABAND){ABAND.count=ai;ABAND.instanceMatrix.needsUpdate=true}
  TOWNS.forEach(t=>{if(!t.items.length)return;const c=tc(t);t.items.forEach((it,idx)=>{const s=idx<capN(t)?t.slots[idx]:null;if(!s)return;
@@ -776,7 +776,7 @@ function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const
   if(t.fog)t.fog.children.forEach((s,k)=>{s.position.y+=Math.sin(now/1500+s.userData.ph)*.004;s.material.rotation=Math.sin(now/3000+k)*.2});
   const c=tc(t);v.set(c.x+t.lm.x,(t.erb?(t.lm.type==="pomnik"?9:17)+8:10),c.z+t.lm.z).project(cam);const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;
   const far=cam.position.distanceTo(c);const show=vis&&(t.open?far<2600*S/0.09:far<900*S/0.09);t.lbl.style.display=show?"":"none";if(show){t.lbl.style.left=(v.x*.5+.5)*innerWidth+"px";t.lbl.style.top=(-v.y*.5+.5)*innerHeight+"px";t.lbl.style.fontSize=(t.open?13:11)+"px"}});
- SIGNS.forEach(s=>s.g&&s.g.lookAt(cam.position.x,s.g.position.y,cam.position.z));updCenterMarks(now);if(window.NAMESTI)NAMESTI.update(now);
+ SIGNS.forEach(s=>s.g&&s.g.lookAt(cam.position.x,s.g.position.y,cam.position.z));updCenterMarks(now);if(window.NAMESTI)NAMESTI.update(now);if(window.HERO)HERO.update(now);
  TOWNS.forEach(t=>(t.specialObjs||[]).forEach(o=>{o.getWorldPosition(v);const d=cam.position.distanceTo(v);let l=o.userData.lbl;const show=d<95;if(!show){if(l)l.style.display="none";return}
   if(!l){const it=t.items[o.userData.ref.idx];const c=SPECIALS.CAT.find(x=>x.id===it.id);l=document.createElement("div");l.className="slbl";l.innerHTML=`<span>${c.emoji}</span>${String(it.text).replace(/</g,"&lt;")}`;l.onclick=()=>selectItem(t,o.userData.ref.idx);document.body.appendChild(l);o.userData.lbl=l}
   v.y+=5.2;v.project(cam);const vis=v.z<1&&Math.abs(v.x)<1&&Math.abs(v.y)<1;l.style.display=vis?"":"none";if(vis){l.style.left=(v.x*.5+.5)*innerWidth+"px";l.style.top=(-v.y*.5+.5)*innerHeight+"px";l.style.opacity=Math.min(1,(95-d)/25)}}));
@@ -800,6 +800,13 @@ window.GAME={canvas,THREE:T,
  walkIn:(n,o)=>{const t=byName[n];if(!t)return false;const idx=t.items.length+FX.walkers.filter(w=>w.t===t&&!w.arrived).length;const w=spawnWalker(t,idx,o||{});if(!w){addPlayers(t,1);return false}return true},
  walkers:()=>FX.walkers.map(w=>{const c=tc(w.t);_wv.set(c.x+w.x,w.y,c.z+w.z).project(cam);return{nick:w.nick,x:(_wv.x+1)/2,y:(1-_wv.y)/2,vis:_wv.z<1,arrived:w.arrived}}),
  raiseFlags:ms=>{FX.flagMs=ms||1800;FX.flagT0=performance.now();TOWNS.forEach(t=>{const fl=t.flagObj&&t.flagObj.userData.flag;if(fl)fl.position.y=fl.userData.low})},specialPos:n=>{const t=byName[n];if(!t)return null;for(let i=t.items.length-1;i>=0;i--)if(t.items[i].k==="s"&&t.slots[i]){const c=tc(t),q=t.slots[i];return{x:c.x+q.x,y:0,z:c.z+q.z,r:q.big||6}}return null},camFree:on=>{ctr.maxPolarAngle=on?1.5:1.32;ctr.minDistance=on?4:14},slot:(n,i)=>{const t=byName[n];if(!t)return null;const c=tc(t);const q=t.slots[i]||itemPos(t,i)||t.lm;return{x:c.x+q.x,y:0,z:c.z+q.z}},
+ // videa: detailní domek zblízka (web/hero.js) na místě i-tého domku obce, průčelím k ulici; body pro kameru jsou v místních souřadnicích domku
+ hero:(cmd,o)=>{if(!window.HERO)return null;o=o||{};if(!HERO.group)HERO.build({scene});const now=performance.now();
+  if(cmd==="place"){const t=byName[o.town];if(!t)return null;const q=t.slots[o.slot||0]||t.lm,c=tc(t);const ry=o.ry!=null?o.ry:(q.sx!==undefined?Math.atan2(q.sx-q.x,q.sz-q.z):0);TOWNS.forEach(x=>{x.noAband=false});t.noAband=true;placeHouses(now);HERO.place(c.x+q.x,c.z+q.z,ry,o.scale||1);HERO.town=t.n;if(o.built)HERO.show();return{x:c.x+q.x,z:c.z+q.z,ry}}
+  if(cmd==="build")return HERO.start(now,o);if(cmd==="show")return HERO.show();if(cmd==="walk")return HERO.walk(now,o);if(cmd==="times")return HERO.times(o.ms);
+  if(cmd==="hide"){HERO.hide();TOWNS.forEach(x=>{x.noAband=false});placeHouses(now);return}
+  if(cmd==="xf"){HERO.group.updateMatrixWorld(true);_wv.set(o.p[0],o.p[1],o.p[2]);HERO.group.localToWorld(_wv);return{x:_wv.x,y:_wv.y,z:_wv.z}}return null},
+ heroPts:()=>{if(window.HERO&&HERO.group)HERO.group.updateMatrixWorld(true);const P=window.HERO&&HERO.pts();if(!P)return null;const o={};for(const k in P){_wv.set(P[k].x,P[k].y,P[k].z).project(cam);o[k]={x:(_wv.x+1)/2,y:(1-_wv.y)/2,vis:_wv.z<1}}return o},
  addPlayers:(n,list,quiet)=>{const t=byName[n];if(t){addPlayers(t,(list&&list.length)||1);if(quiet){born.clear();placeHouses(performance.now())}}},
  links:()=>[...LINKS].map(k=>k.split('|')),linkSegs:()=>LINKSEG,buildSpecial:n=>buildSpecial(byName[n]),dbgItems:n=>byName[n].items.map((it,i)=>({k:it.k,id:it.id,pos:it.pos||null,slot:!!byName[n].slots[i]})),buildSpecialId:(n,id,text)=>{const t=byName[n];if(!t)return;const idx=addItem(t,{k:"s",id,text:text||id,author:"admin",day:DAY});born.set(t.n+"#"+idx,performance.now());refreshAll([t]);const s=itemPos(t,idx);if(s)flyToLocal(t,s,30)},
  dbg:n=>{const t=byName[n];return {lm:[t.lm.x|0,t.lm.z|0,t.lm.type],R:t.R|0,pat:t.plan.pat,blocks:t.usedB.length,Rb:t.Rb|0,cuts:(t.cutsOk||[]).length,slots:t.slots.slice(0,Math.min(t.items.length,t.slots.length)).map(s=>Math.round(Math.hypot(s.x,s.z))).join(",")}},select:(n,idx)=>selectItem(byName[n],idx),closeInfo:()=>closeInfo(),

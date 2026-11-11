@@ -85,7 +85,7 @@ function orez(mp3){const a=path.join(OUT,'v-in.mp3'),b=path.join(OUT,'v-out.mp3'
  const data=def&&def.data?def.data:arg('data','world.json');
  /* scénář dílu: {{proměnné}} z dat a z výsledků hlasování */
  if(def){const DD=require('./dil-data');const w=JSON.parse(fs.readFileSync(path.join(ROOT,data),'utf8'));const nav=arg('navrhy')?JSON.parse(fs.readFileSync(path.resolve(ROOT,arg('navrhy')),'utf8')):DD.posledniNavrhy();const r=DD.dosad(def,DD.promenne(w,nav,{dil:parseInt(DIL,10)||1}));def=r.def;if(r.chybi.length)console.log('POZOR: ve scénáři zůstalo nedosazeno:',r.chybi.join(', '))}const dayQ=arg('day')?`&den=${arg('day')}`:'';
- await p.goto(`${base}/index.html?admin=fofrburg96&perf=0&render=${arg('scale','0.5')}&data=${encodeURIComponent('/'+data)}${dayQ}${def?'&mlha=0':''}`);
+ await p.goto(`${base}/index.html?admin=fofrburg96&perf=0&render=${arg('scale','0.5')}&data=${encodeURIComponent('/'+data)}${dayQ}${def?'&mlha=0':''}${arg('query','')}`);
  await p.waitForFunction(()=>window.done===1,null,{timeout:180000});await p.waitForTimeout(2000);
  const info=await p.evaluate(()=>({day:GAME.info().day,pop:GAME.info().pop,hasReel:!!window.REEL}));console.log('hra:',info);if(!info.hasReel)throw new Error('REEL chybí');
  /* scénář */
@@ -98,8 +98,8 @@ function orez(mp3){const a=path.join(OUT,'v-in.mp3'),b=path.join(OUT,'v-out.mp3'
   if(!vin){
   /* díl: celý text na jeden zátah (1 dotaz, šetří denní kvótu) s dlouhými pauzami mezi řádky, podle nich se stříhá a ticho se pak ořízne.
      HLAS_REZIM=vety = každá věta zvlášť (přesné, ale 8–9 dotazů na díl; chce placený tarif). */
-  if(def&&process.env.GEMINI_API_KEY&&GEM&&process.env.HLAS_REZIM!=='vety'){const take=await GEM.tts(segs.map(s=>s.text).join('\n'),{zive:true,pozice:'zatah',tempo:+process.env.GEMINI_TEMPO||1.06});const parts=take?await splitTake(take,segs.map(s=>s.text)):null;if(parts){clips=parts.map(b=>orez(b).toString('base64'));voiced=parts.length;ttsVia='Gemini (jeden zátah)'}}
-  if(!clips.length){const gem=def&&process.env.GEMINI_API_KEY&&GEM;const delky=[];for(let i=0;i<segs.length;i++){const s=segs[i];let buf=gem?await GEM.tts(s.text,{zive:true,pozice:i===0?'prvni':i===segs.length-1?'posledni':'stred',tempo:+process.env.GEMINI_TEMPO||1.06}):await tts(s.text);if(buf&&gem)buf=orez(buf);clips.push(buf?buf.toString('base64'):null);if(buf){voiced++;delky.push((buf.length/20000).toFixed(1))}}if(gem&&voiced){ttsVia='Gemini (po větách)';console.log('hlas: věty zvlášť, délky ~',delky.join(' '),'s')}}}
+  if(def&&process.env.GEMINI_API_KEY&&GEM&&process.env.HLAS_REZIM!=='vety'){const take=await GEM.tts(segs.map(s=>s.text).join('\n'),{zive:true,pozice:'zatah',tempo:+(def&&def.tempo)||+process.env.GEMINI_TEMPO||1.06});const parts=take?await splitTake(take,segs.map(s=>s.text)):null;if(parts){clips=parts.map(b=>orez(b).toString('base64'));voiced=parts.length;ttsVia='Gemini (jeden zátah)'}}
+  if(!clips.length){const gem=def&&process.env.GEMINI_API_KEY&&GEM;const delky=[];for(let i=0;i<segs.length;i++){const s=segs[i];let buf=gem?await GEM.tts(s.text,{zive:true,pozice:i===0?'prvni':i===segs.length-1?'posledni':'stred',tempo:+(def&&def.tempo)||+process.env.GEMINI_TEMPO||1.06}):await tts(s.text);if(buf&&gem)buf=orez(buf);clips.push(buf?buf.toString('base64'):null);if(buf){voiced++;delky.push((buf.length/20000).toFixed(1))}}if(gem&&voiced){ttsVia='Gemini (po větách)';console.log('hlas: věty zvlášť, délky ~',delky.join(' '),'s')}}}
   if(VOUT){fs.writeFileSync(VOUT,JSON.stringify({clips,via:ttsVia}));console.log('hlas uložen:',VOUT,'segmentů',voiced,'/',segs.length,ttsVia);await b.close();srv.close();return}
   if(clips.some(Boolean))  await p.evaluate(async clips=>{const blobs=clips.map(c=>c?new Blob([Uint8Array.from(atob(c),ch=>ch.charCodeAt(0))],{type:'audio/mpeg'}):null);await REEL.setVoiceSegments(window.__script,blobs,{padMs:window.__script.hook==='dil'?140:80})},clips);
   console.log('hlas: segmentů',voiced,'/',segs.length)}else if(VOUT){fs.writeFileSync(VOUT,JSON.stringify({clips:[],via:''}));console.log('hlas: žádný klíč, video bude bez hlasu');await b.close();srv.close();return}else console.log('hlas: bez ElevenLabs (chybí ELEVENLABS_API_KEY) – video bude jen s hudbou, text je v .txt/.srt');
@@ -111,7 +111,7 @@ function orez(mp3){const a=path.join(OUT,'v-in.mp3'),b=path.join(OUT,'v-out.mp3'
   await b.close();srv.close();return}
  /* snímky */
  if(SHEET){const sd=path.join(OUT,'sheet');fs.rmSync(sd,{recursive:true,force:true});fs.mkdirSync(sd);await p.exposeFunction('__sheet',(i,b64)=>fs.writeFileSync(path.join(sd,String(i).padStart(3,'0')+'.jpg'),Buffer.from(b64,'base64')));
-  const n=await p.evaluate(()=>REEL.frames(window.__script,{fps:2,each:async(cv,t,i)=>{await window.__sheet(i,cv.toDataURL('image/jpeg',.8).slice(23))}}));console.log('náhledů:',n,'délka',(script.total/1000).toFixed(1),'s');await b.close();srv.close();return}
+  const n=await p.evaluate(([a,z,f])=>REEL.frames(window.__script,{fps:f,start:a||0,end:z||undefined,each:async(cv,t,i)=>{await window.__sheet(i,cv.toDataURL('image/jpeg',.8).slice(23))}}),[+arg('od',0)*1000,+arg('do',0)*1000,+arg('sfps',2)]);console.log('náhledů:',n,'délka',(script.total/1000).toFixed(1),'s');await b.close();srv.close();return}
  const fdir=path.join(OUT,'frames');if(!MUX){fs.rmSync(fdir,{recursive:true,force:true});fs.mkdirSync(fdir)}
  let n=0;const t0=Date.now();
  if(PART){ /* jen část k z P: hranice na začátcích záběrů, čísla snímků průběžná přes celé video */

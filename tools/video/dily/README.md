@@ -18,6 +18,18 @@ Každý díl je jeden soubor `dil-N.json`: seznam záběrů. Jedna věta Pana Ra
 - Čísla v kartách `num` se sama roztočí od nuly.
 - `"hudba": "lofi"` na začátku scénáře = podkres dílu (`lofi`, `funk`, `minimal`, `trap`, `puvodni`, `bez`).
 
+### Styl `v2` (díl 1 od 11. 11.): pořád se něco děje, málo střihů
+
+Na začátku scénáře `"styl": "v2"`: titulky naskakují slovo po slově (nejvýš tři najednou), vlevo nahoře štítek `badge` („DÍL 1“). `"tempo": 1.15` zrychlí hlas.
+
+- `"hero": { "town": "Říčany", "slot": 0 }` na začátku scénáře = detailní domek pro záběry zblízka (`web/hero.js`) na místě domku obce.
+- V záběru `"hero": { "build": { "at": 0, "ms": 3000 } }` = domek se složí po kouskách; `"walk": { "path": [[x,z],…], "ms": 2500, "wave": 2600, "face": [x,z] }` = panáček dojde a zamává. Souřadnice jsou místní: střed domku [0,0], dveře míří k +z, ulice je kolem z = 5.
+- `cam` u domku: `{ "hero": true, "p0": [x,y,z], "l0": […], "p": […], "l": […] }` = odkud a kam se kamera dívá (místní souřadnice domku).
+- `"cut": false` v `cam` = bez střihu, kamera plynule pokračuje z místa, kde je. `"hard": true` = ostrý střih bez zatmívačky (rychlé střídání).
+- `"head": "KOMENTÁŘ = DŮM"` = velký nadpis nahoře (`|` = nový řádek, `headColor`). Drží přes sousední záběry se stejným textem.
+- Záběr bez `vo` s `"dur": 2300` = tichý záběr (jen nadpis a obraz).
+- `ui`: `herotag` (jmenovka nad panáčkem `on: "man"` / domkem `on: "house"`, `badge` = zlatý štítek, `keep` = nezhasíná na konci záběru), `cards` (kartičky komentářů s lajky + `stamp`), `endq` (závěrečná karta s otázkou `q` a psaním komentáře `type`).
+
 Hlas: celý text se namluví na jeden zátah s dlouhými pauzami mezi řádky, podle nich se rozstříhá na záběry a ticho se ořízne. Bezplatný tarif Gemini má malý denní strop dotazů, proto jeden dotaz na díl. S placeným tarifem jde zapnout přesnější režim (proměnná `HLAS_REZIM` = `vety`, každá věta zvlášť).
 
 ## Proměnné `{{…}}`

@@ -53,9 +53,14 @@ Zápis hlasů v komentáři: `název - …`, `vlajka - symbol, barvy`, `nápad -
 
 Cíl: co nejvíc lidí, název a vlajka.
 
-**Pan Radar:** „Co kdyby se Říčansko osamostatnilo? Tak jo. Od dneška jsme stát. Dvaapadesát obcí, nula obyvatel, žádný název a žádná vlajka. To je trochu málo. Napiš do komentáře svou obec a máš tu domek se svým jménem. Prvních pět v každé obci jsou zakladatelé. Napořád. A rovnou rozhodni: jak se náš stát jmenuje a co bude na vlajce? Hlasuje se do pěti.“
+Stavba podle reelů @nahotovo_mesto (rozbor 11. 11.): háček je nabídka divákovi, v záběru se pořád něco děje, prostředek je bez hlasu.
 
-**Na obraze:** přelet nad prázdnou mapou → cedule obce bez domků → první domek s nickem → prázdný stožár. Titulky: `název - …` · `vlajka - symbol, barvy`.
+1. **0–10 s, nadpis „KOMENTÁŘ = DŮM“.** Pan Radar: „Napiš svou obec a postavím ti tam dům. Bude na něm tvoje jméno. A panáček, co v něm bydlí. Prvních pět v každé obci? Navždy zakladatelé.“ Na obraze se zblízka skládá domek, naskočí jmenovka, panáček dojde ke kameře a zamává.
+2. **10–22 s, bez hlasu.** Kamera vyletí nad Říčansko. Nadpisy: „CO KDYBY…“ → „ŘÍČANSKO SE OSAMOSTATNILO?“ → „52 OBCÍ“ (rychlé střídání návsí) → „0 OBYVATEL“ → „BEZ NÁZVU. BEZ VLAJKY.“
+3. **22–31 s.** Pan Radar: „Co bude dál, rozhodují komentáře. První úkol: náš stát nemá jméno ani vlajku. Napiš to pod video. Nejlajkovanější vyhrává.“ Na obraze kartičky komentářů s lajky, `název - …` · `vlajka - symbol, barvy`.
+4. **31–35 s, závěrečná karta.** „Jak se bude náš stát jmenovat?“, píše se komentář, „hlasuje se dnes do 17:00“.
+
+Původní verze (jedna věta = jeden záběr, přelety nad mapou) je v `tools/video/dily/dil-1-stare.json`.
 
 **Popisek:**
 > Co kdyby se Říčansko osamostatnilo? 🏴 Představ si, že jo. A že ho stavíš ty.

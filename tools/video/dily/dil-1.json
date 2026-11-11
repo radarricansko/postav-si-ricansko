@@ -1,10 +1,174 @@
 {
  "dil": 1,
- "title": "Postav si Říčansko · Díl 1: Říčansko vyhlásilo nezávislost",
+ "styl": "v2",
+ "badge": "DÍL 1",
+ "title": "Postav si Říčansko · Díl 1: Co kdyby se Říčansko osamostatnilo",
  "data": "tools/video/dily/prazdny-svet.json",
+ "hudba": "bez",
+ "hero": {
+  "town": "Říčany",
+  "slot": 0
+ },
  "shots": [
   {
-   "vo": "Co kdyby se Říčansko osamostatnilo?",
+   "vo": "Napiš svou obec a postavím ti tam dům.",
+   "head": "KOMENTÁŘ = DŮM",
+   "cam": {
+    "hero": true,
+    "p0": [
+     6,
+     3.2,
+     14
+    ],
+    "l0": [
+     0,
+     2.5,
+     0.5
+    ],
+    "p": [
+     8.5,
+     4.6,
+     17.5
+    ],
+    "l": [
+     0,
+     3.1,
+     1
+    ]
+   },
+   "hero": {
+    "build": {
+     "at": 0,
+     "ms": 3000
+    }
+   }
+  },
+  {
+   "vo": "Bude na něm tvoje jméno.",
+   "head": "KOMENTÁŘ = DŮM",
+   "cam": {
+    "hero": true,
+    "cut": false,
+    "p": [
+     5.5,
+     3.2,
+     13.5
+    ],
+    "l": [
+     0.4,
+     2.9,
+     1.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "herotag",
+     "on": "door",
+     "text": "@tvoje_jmeno",
+     "at": 250,
+     "dy": -30
+    }
+   ]
+  },
+  {
+   "vo": "A panáček, co v něm bydlí.",
+   "head": "KOMENTÁŘ = DŮM",
+   "cam": {
+    "hero": true,
+    "cut": false,
+    "p": [
+     5.0,
+     2.6,
+     11.5
+    ],
+    "l": [
+     0.95,
+     1.4,
+     3.6
+    ]
+   },
+   "hero": {
+    "walk": {
+     "at": 0,
+     "path": [
+      [
+       5.6,
+       5.1
+      ],
+      [
+       1.4,
+       5.1
+      ],
+      [
+       0.95,
+       3.3
+      ]
+     ],
+     "ms": 1900,
+     "wave": 2800,
+     "face": [
+      3.2,
+      12
+     ]
+    }
+   },
+   "ui": [
+    {
+     "k": "herotag",
+     "on": "man",
+     "text": "@tvoje_jmeno",
+     "at": 200,
+     "keep": true
+    }
+   ]
+  },
+  {
+   "vo": "Prvních pět v každé obci? Navždy zakladatelé.",
+   "head": "PRVNÍCH 5",
+   "headColor": "#F5C431",
+   "cam": {
+    "hero": true,
+    "cut": false,
+    "p": [
+     2.9,
+     2.15,
+     8.3
+    ],
+    "l": [
+     0.95,
+     1.6,
+     3.3
+    ]
+   },
+   "ui": [
+    {
+     "k": "herotag",
+     "on": "man",
+     "text": "@tvoje_jmeno",
+     "at": -1000,
+     "badge": "★ ZAKLADATEL",
+     "badgeAt": 1300
+    }
+   ]
+  },
+  {
+   "dur": 2400,
+   "head": "CO KDYBY…",
+   "cam": {
+    "at": "town:Říčany",
+    "cut": false,
+    "to": [
+     560,
+     0.95,
+     0.5
+    ],
+    "ms": 2700,
+    "ease": "io"
+   }
+  },
+  {
+   "dur": 2300,
+   "head": "ŘÍČANSKO SE|OSAMOSTATNILO?",
    "cam": {
     "at": "center",
     "from": [
@@ -13,293 +177,299 @@
      0.2
     ],
     "to": [
-     1200,
-     0.72,
+     1300,
+     0.75,
      0.45
     ]
    },
    "ui": [
     {
-     "k": "chip",
-     "text": "CO KDYBY…",
-     "y": 470,
-     "at": 80,
-     "solid": true
-    },
-    {
-     "k": "title",
-     "text": "Říčansko",
-     "y": 640,
-     "size": 150,
-     "at": 300
-    },
-    {
-     "k": "title",
-     "text": "se osamostatnilo?",
-     "y": 790,
-     "size": 84,
-     "at": 650
-    }
-   ],
-   "noSubs": true
-  },
-  {
-   "vo": "Tak jo. Od dneška jsme stát!",
-   "cam": {
-    "at": "center",
-    "from": [
-     260,
-     0.62,
-     0.1
-    ],
-    "to": [
-     100,
-     0.42,
-     0.6
-    ],
-    "in": 650
-   },
-   "ui": [
-    {
      "k": "stamp",
      "text": "NOVÝ STÁT",
-     "y": 520,
-     "size": 92,
-     "at": 700
+     "y": 760,
+     "size": 84,
+     "at": 900
     }
    ]
   },
   {
-   "vo": "Dvaapadesát obcí, nula obyvatel,",
+   "dur": 620,
+   "head": "52 OBCÍ",
    "cam": {
     "at": "lm:Mukařov",
     "from": [
-     190,
+     150,
      0.42,
      -1.1
     ],
     "to": [
-     84,
-     0.22,
-     -0.4
+     110,
+     0.34,
+     -0.8500000000000001
     ],
-    "in": 700
+    "hard": true
    },
    "ui": [
     {
-     "k": "num",
-     "num": "52",
-     "label": "obcí",
-     "x": 300,
-     "y": 560,
-     "at": 150
-    },
-    {
-     "k": "num",
-     "num": "0",
-     "label": "obyvatel",
-     "x": 780,
-     "y": 560,
-     "at": 1000
+     "k": "chip",
+     "text": "Mukařov",
+     "y": 640,
+     "size": 46,
+     "at": 0,
+     "solid": true
     }
    ]
   },
   {
-   "vo": "žádný název a žádná vlajka. To je trochu málo.",
+   "dur": 620,
+   "head": "52 OBCÍ",
    "cam": {
-    "at": "lm:Říčany",
+    "at": "lm:Ondřejov",
     "from": [
-     170,
-     0.5,
-     -1.1
+     150,
+     0.42,
+     0.4
     ],
     "to": [
-     70,
-     0.28,
-     -0.4
+     110,
+     0.34,
+     0.65
     ],
-    "in": 650
+    "hard": true
    },
    "ui": [
     {
      "k": "chip",
-     "text": "NÁZEV: ???",
-     "y": 500,
-     "at": 150,
-     "size": 54
-    },
-    {
-     "k": "chip",
-     "text": "VLAJKA: ???",
+     "text": "Ondřejov",
      "y": 640,
-     "at": 1100,
-     "size": 54
+     "size": 46,
+     "at": 0,
+     "solid": true
     }
    ]
   },
   {
-   "vo": "Napiš do komentáře svou obec a máš tu domek se svým jménem.",
+   "dur": 620,
+   "head": "52 OBCÍ",
    "cam": {
-    "at": "slot:Mukařov:0",
+    "at": "lm:Kamenice",
     "from": [
-     36,
+     150,
+     0.42,
+     1.6
+    ],
+    "to": [
+     110,
+     0.34,
+     1.85
+    ],
+    "hard": true
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "Kamenice",
+     "y": 640,
+     "size": 46,
+     "at": 0,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "dur": 620,
+   "head": "52 OBCÍ",
+   "cam": {
+    "at": "lm:Kostelec nad Černými lesy",
+    "from": [
+     150,
+     0.42,
+     -0.5
+    ],
+    "to": [
+     110,
+     0.34,
+     -0.25
+    ],
+    "hard": true
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "Kostelec nad Černými lesy",
+     "y": 640,
+     "size": 46,
+     "at": 0,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "dur": 1700,
+   "head": "0 OBYVATEL",
+   "headColor": "#F5C431",
+   "cam": {
+    "at": "slot:Mukařov:1",
+    "from": [
+     46,
      0.42,
      0.5
     ],
     "to": [
-     24,
-     0.32,
-     1.0
-    ]
-   },
-   "ui": [
-    {
-     "k": "bubble",
-     "author": "ty",
-     "text": "Mukařov",
-     "y": 420,
-     "w": 560,
-     "at": 250
-    }
-   ],
-   "walk": {
-    "town": "Mukařov",
-    "n": 1,
-    "at": 350,
-    "ms": 2300,
-    "nicks": [
-     "@tvoje_jmeno"
+     28,
+     0.3,
+     0.95
     ],
-    "hold": 2500
+    "hard": true
    }
   },
   {
-   "vo": "Prvních pět v každé obci jsou zakladatelé. Napořád.",
-   "cam": {
-    "at": "slot:Mukařov:2",
-    "from": [
-     46,
-     0.52,
-     1.0
-    ],
-    "to": [
-     58,
-     0.44,
-     1.6
-    ]
-   },
-   "ui": [
-    {
-     "k": "num",
-     "num": "5",
-     "label": "zakladatelů v každé obci",
-     "y": 520,
-     "w": 640,
-     "at": 200
-    },
-    {
-     "k": "stamp",
-     "text": "NAPOŘÁD",
-     "y": 760,
-     "size": 84,
-     "at": 2500
-    }
-   ],
-   "walk": {
-    "town": "Mukařov",
-    "n": 4,
-    "at": 150,
-    "every": 420,
-    "ms": 1700,
-    "nicks": [
-     "@bara",
-     "@kuba",
-     "@eliska",
-     "@vojta"
-    ],
-    "hold": 2200
-   }
-  },
-  {
-   "vo": "A rovnou rozhodni: jak se náš stát jmenuje? A co bude na vlajce?",
-   "cam": {
-    "at": "lm:Říčany",
-    "from": [
-     520,
-     0.85,
-     -0.5
-    ],
-    "to": [
-     300,
-     0.6,
-     0.1
-    ],
-    "in": 800
-   },
-   "ui": [
-    {
-     "k": "bubble",
-     "author": "ty",
-     "text": "název - …",
-     "y": 420,
-     "w": 640,
-     "at": 900
-    },
-    {
-     "k": "bubble",
-     "author": "ty",
-     "text": "vlajka - symbol, barvy",
-     "y": 720,
-     "w": 760,
-     "at": 2600,
-     "side": "right"
-    }
-   ]
-  },
-  {
-   "vo": "Hlasuje se do pěti.",
-   "noSubs": true,
-   "dur": 3400,
+   "dur": 2200,
+   "head": "BEZ NÁZVU.|BEZ VLAJKY.",
    "cam": {
     "at": "center",
     "from": [
-     700,
-     0.8,
-     1.2
+     190,
+     0.55,
+     -0.7
     ],
     "to": [
-     900,
-     0.85,
-     1.5
+     100,
+     0.36,
+     -0.2
+    ],
+    "in": 600
+   }
+  },
+  {
+   "vo": "Co bude dál, rozhodují komentáře.",
+   "cam": {
+    "at": "center",
+    "cut": false,
+    "to": [
+     130,
+     0.42,
+     0.5
     ]
    },
    "ui": [
     {
-     "k": "end",
-     "at": 0,
-     "lines": [
+     "k": "cards",
+     "at": 150,
+     "every": 300,
+     "y": 470,
+     "items": [
       {
-       "text": "Napiš svou obec",
-       "big": true,
-       "size": 104
+       "user": "ty",
+       "text": "Mukařov, název - Ladovsko",
+       "likes": 128
       },
       {
-       "text": "Hlasuj do 17:00",
-       "big": true,
-       "size": 88,
-       "solid": true
+       "user": "tvuj_soused",
+       "text": "Říčany, vlajka - zlatý les",
+       "likes": 94
       },
       {
-       "text": "Výsledek zítra v 9:00",
-       "size": 46
-      },
-      {
-       "text": "#PostavSiŘíčansko",
-       "size": 40
+       "user": "tvoje_babicka",
+       "text": "Hrusice, název - Říčanie",
+       "likes": 61
       }
-     ]
+     ],
+     "stamp": "ROZHODUJÍ LAJKY"
+    }
+   ]
+  },
+  {
+   "vo": "První úkol: náš stát nemá jméno ani vlajku.",
+   "head": "STÁT NEMÁ|JMÉNO",
+   "cam": {
+    "at": "center",
+    "from": [
+     60,
+     0.3,
+     1.4
+    ],
+    "to": [
+     44,
+     0.24,
+     1.9
+    ],
+    "in": 550
+   }
+  },
+  {
+   "vo": "Napiš to pod video.",
+   "cam": {
+    "at": "center",
+    "cut": false,
+    "to": [
+     70,
+     0.34,
+     2.4
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "název - …",
+     "y": 560,
+     "size": 64,
+     "at": 80,
+     "solid": true
+    },
+    {
+     "k": "chip",
+     "text": "vlajka - symbol, barvy",
+     "y": 700,
+     "size": 54,
+     "at": 420
+    }
+   ]
+  },
+  {
+   "vo": "Nejlajkovanější vyhrává.",
+   "head": "NEJVÍC LAJKŮ|VYHRÁVÁ",
+   "headColor": "acc",
+   "cam": {
+    "at": "center",
+    "from": [
+     900,
+     0.7,
+     0.2
+    ],
+    "to": [
+     1500,
+     0.85,
+     0.5
+    ]
+   }
+  },
+  {
+   "dur": 4300,
+   "cam": {
+    "at": "center",
+    "cut": false,
+    "to": [
+     1700,
+     0.9,
+     0.7
+    ]
+   },
+   "noSubs": true,
+   "ui": [
+    {
+     "k": "endq",
+     "at": 0,
+     "q": [
+      "Jak se bude náš stát",
+      "*jmenovat?"
+     ],
+     "type": "Mnichovice, název - …",
+     "user": "ty · právě teď",
+     "note": "hlasuje se dnes do 17:00"
     }
    ]
   }
- ]
+ ],
+ "tempo": 1.15
 }
