@@ -128,7 +128,8 @@ async function loadModels(){
  bl.forEach(l=>jobs.push(load("m/building-type-"+l+".json").then(g=>MODELS.b[l]=meshOf(g))));
  [["tree","m/tree-large.json"],["treeS","m/tree-small.json"],["lamp","r/light-square.json"],["dumpster","r/dumpster.json"],["planter","m/planter.json"]].forEach(([k,u])=>jobs.push(load(u).then(g=>{const m=meshOf(g);MODELS.p[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})));
  if(LAZYCARS)MODELS.carsLater=[];else jobs.push(loadCars());
- await Promise.all(jobs)}
+ await Promise.all(jobs);
+ if(V2){MODELS.p.tree.mat.color.set("#b5d3ae");MODELS.p.treeS.mat.color.set("#b5d3ae")}}// stromky u domků: tlumenější zelená, ať ladí s krajinou
 /* auta (půl MB) nejsou potřeba k prvnímu pohledu: hráčům se dotáhnou až po startu; admin a render je mají hned, ať je video stejné */
 const LAZYCARS=!QS.get("admin")&&!QS.get("render");
 function loadCars(){return Promise.all(["sedan","suv","taxi","van","firetruck","hatchback-sports","suv-luxury","delivery","truck"].map(k=>load("c/"+k+".json").then(g=>{const m=meshOf(g);MODELS.c[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})))}
@@ -803,7 +804,7 @@ addEventListener("resize",()=>{if(aspectLock)return;cam.aspect=innerWidth/innerH
 let orbitSpeed=0,aspectLock=false;
 
 /* ---------- API pro generátor reelů ---------- */
-window.GAME={canvas,THREE:T,dbg:()=>({scene,cam,ctr,sun,hemi,fill,ground,landMesh,waterMesh,MAT,PAL,POST,FOGC,R,lawnMats}),
+window.GAME={canvas,THREE:T,look:()=>({scene,cam,ctr,sun,hemi,fill,ground,landMesh,waterMesh,MAT,PAL,POST,FOGC,R,lawnMats}),
  state:()=>({day:DAY,totalPlayers:POP,towns:TOWNS.map(t=>{const c=tc(t);return{name:t.n,players:t.players.length,abandoned:abandonedN(t),revive:CONFIG.REVIVE,open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl||null,erbSvg:(()=>{const d=ERB.E.find(e=>e[0]===t.n);return d?ERB.erb(d,tierOf(t.players.length)):''})(),center:{x:c.x,y:0,z:c.z},lm:{x:c.x+t.lm.x,y:0,z:c.z+t.lm.z,r:t.lm.r},radius:t.R,
   houses:t.items.map((it,i)=>{const s=t.slots[i];return s&&it.k==="h"?{id:t.n+"#"+i,owner:it.p.nick,no:it.p.no,x:c.x+s.x,y:0,z:c.z+s.z}:null}).filter(Boolean)}})}),
  setAspect:(w,h)=>{aspectLock=!!w;if(w){const k=Math.min(1,+QS.get("render")||1);R.setPixelRatio(1);R.setSize(Math.round(w*k),Math.round(h*k),false);cam.aspect=w/h}else{R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight}cam.updateProjectionMatrix();POST.resize()},
