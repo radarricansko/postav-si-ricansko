@@ -32,6 +32,20 @@ Na začátku scénáře `"styl": "v2"`: titulky naskakují slovo po slově (nejv
 
 Hlas: celý text se namluví na jeden zátah s dlouhými pauzami mezi řádky, podle nich se rozstříhá na záběry a ticho se ořízne. Bezplatný tarif Gemini má malý denní strop dotazů, proto jeden dotaz na díl. S placeným tarifem jde zapnout přesnější režim (proměnná `HLAS_REZIM` = `vety`, každá věta zvlášť).
 
+## Režie v prohlížeči (rychlá výroba v plné kvalitě)
+
+Adresa: `…/postav-si-ricansko/?admin=KLÍČ&rezie=N` (N = číslo dílu, třeba `1`, `1b`, `7b`). Otevři v Chromu na počítači.
+
+- **Přehrát** = náhled v reálném čase.
+- **Vyrobit video** = snímek po snímku na grafice počítače: MP4 1080×1920, 30 snímků za vteřinu, se zvukem. Díl 1 trvá zhruba minutu (cloud 20–30 minut a poloviční rozlišení).
+- **Čisté záběry** = jen obraz hry bez textů, titulků a zvuku, pro vlastní střih.
+- **Hlas:** AI hlas / ztlumený (délky záběrů zůstávají podle AI hlasu, hodí se jako podklad pod vlastní voiceover) / bez hlasu (délky podle textu).
+- **Hudba:** vlastní podkresy nástroje (`lofi`, `funk`, `minimal`, `trap`, `puvodni`, `bez`). Zvuk z Instagramu se přidává až při publikování.
+
+Odkud se bere díl: workflow „Díl“ uloží do větve `previews` balíček `nahledy/dil-N.rezie.json` (scénář s dosazenými čísly, hlas po větách, stav světa). Bez něj režie napíše, že díl ještě není.
+
+Varianty dílu 1: `dil-1.json` (dům, podkres lofi), `dil-1b.json` (rychlá verze, ~19 s), `dil-1c.json` (bez státu a odtržení: „Co postavíme jako první?“).
+
 ## Proměnné `{{…}}`
 
 Dosazují se samy z `world-dil.json` (stav k uzávěrce) a z posledních výsledků hlasování `tools/ig/navrhy/DATUM.json`:
