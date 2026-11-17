@@ -27,16 +27,16 @@
   el.innerHTML =
     '<div id="rzMount"></div><div id="rzSide">' +
     '<h2>Režie · díl <span id="rzN"></span></h2><div id="rzStat">Načítám balíček dílu…</div><div id="rzMsg"></div>' +
-    '<h3>S texty a hlasem</h3><div class="row"><button id="rzPlay" disabled>▶ Přehrát</button><button id="rzRec" class="rec" disabled>⏺ Nahrát video</button></div>' +
+    '<h3>S texty a hlasem</h3><div class="row"><button id="rzPlay" disabled>▶ Přehrát</button><button id="rzRec" class="rec" disabled>⏺ Vyrobit video</button></div>' +
     '<h3>Čisté záběry pro střih</h3><p>Jen obraz hry, bez textů, titulků a zvuku. Načasování záběrů zůstává podle hlasu.</p>' +
-    '<div class="row"><button id="rzClean" class="alt" disabled>▶ Přehrát</button><button id="rzCleanRec" class="rec" disabled>⏺ Nahrát čisté záběry</button><button id="rzStop" class="alt" disabled>■ Stop</button></div>' +
+    '<div class="row"><button id="rzClean" class="alt" disabled>▶ Přehrát</button><button id="rzCleanRec" class="rec" disabled>⏺ Vyrobit čisté záběry</button><button id="rzStop" class="alt" disabled>■ Stop</button></div>' +
     '<div id="rzDl"></div>' +
     '<h3>Hlas</h3><p>AI hlas je jen vodítko pro tempo. Vlastní voiceover a zvuk z Instagramu se přidávají až ve střihu.</p>' +
     '<div class="row"><button id="rzAi" class="alt" disabled>AI hlas</button><button id="rzNoVoice" class="alt" disabled>Bez hlasu</button></div>' +
     '<div class="row"><span>Hudba</span><select id="rzMusic"></select></div>' +
     '<h3>Text k namluvení</h3><textarea id="rzText" readonly></textarea>' +
     '<div class="row"><button id="rzTxt" class="alt" disabled>Stáhnout text</button><button id="rzSrt" class="alt" disabled>Stáhnout titulky .srt</button><button id="rzClose" class="alt">Zavřít režii</button></div>' +
-    '<p>Nahrává se v reálném čase na grafice tohohle počítače. Nech kartu v popředí a okno nezmenšuj. Před dalším přehráním dílu, kde přibývají domky nebo vlajky, obnov stránku.</p></div>';
+    '<p>Video se vyrábí snímek po snímku na grafice tohohle počítače: 1080×1920, 30 snímků za vteřinu. Nech kartu v popředí. Před dalším během dílu, kde přibývají domky nebo vlajky, obnov stránku.</p></div>';
   document.body.appendChild(el);
   $("rzN").textContent = Z.dil;
   REEL.musicStyles.forEach(function (m) { var o = document.createElement("option"); o.value = m; o.textContent = m; $("rzMusic").appendChild(o); });
@@ -62,20 +62,48 @@
     });
   }
 
+  /* Přehrát = v reálném čase (náhled). Vyrobit = snímek po snímku: každý snímek se vykreslí celý a zakóduje,
+     takže video má přesně 30 snímků za vteřinu v 1080×1920, i když počítač hru v reálném čase nestíhá. */
+  function lib() { return window.Mp4Muxer ? Promise.resolve() : new Promise(function (ok, no) { var t = document.createElement("script"); t.src = "https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js"; t.onload = ok; t.onerror = function () { no(new Error("nepodařilo se načíst knihovnu pro MP4")); }; document.head.appendChild(t); }); }
+  function offline(clean) {
+    var fps = 30, W = REEL.W, H = REEL.H, SR = 48000, err = null, target, muxer, venc, abuf = null, n = 0, total = script.total, frames = Math.ceil(total / 1000 * fps);
+    if (!window.VideoEncoder || !window.VideoFrame) return Promise.reject(new Error("tenhle prohlížeč neumí kódovat video (potřebuje Chrome nebo Edge)"));
+    return lib().then(function () { return clean ? null : REEL.renderAudio(script).then(function (wav) { return wav.arrayBuffer(); }).then(function (ab) { var C = window.OfflineAudioContext || window.webkitOfflineAudioContext; return new C(2, 2, SR).decodeAudioData(ab); }); })
+      .then(function (buf) { abuf = buf && window.AudioEncoder ? buf : null;
+        target = new Mp4Muxer.ArrayBufferTarget();
+        muxer = new Mp4Muxer.Muxer({ target: target, video: { codec: "avc", width: W, height: H, frameRate: fps }, audio: abuf ? { codec: "aac", numberOfChannels: 2, sampleRate: SR } : undefined, fastStart: "in-memory" });
+        venc = new VideoEncoder({ output: function (c, m) { muxer.addVideoChunk(c, m); }, error: function (e) { err = e; } });
+        venc.configure({ codec: "avc1.640028", width: W, height: H, bitrate: 14000000, framerate: fps });
+        return REEL.frames(script, { fps: fps, clean: clean, mount: $("rzMount"), each: function (cv, t, i) {
+          if (err) throw err; if (stopAsk) return false;
+          var f = new VideoFrame(cv, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) }); venc.encode(f, { keyFrame: i % 60 === 0 }); f.close(); n = i + 1;
+          if (i % 15 === 0) msg("Vyrábím video: " + Math.round(100 * i / frames) + " %");
+          return venc.encodeQueueSize > 6 ? new Promise(function (r) { (function w() { venc.encodeQueueSize > 3 ? setTimeout(w, 4) : r(); })(); }) : null;
+        } });
+      }).then(function () { return venc.flush(); }).then(function () { venc.close(); if (!abuf) return;
+        var aenc = new AudioEncoder({ output: function (c, m) { muxer.addAudioChunk(c, m); }, error: function (e) { err = e; } });
+        aenc.configure({ codec: "mp4a.40.2", sampleRate: SR, numberOfChannels: 2, bitrate: 192000 });
+        var len = Math.min(abuf.length, Math.round(n / fps * SR)), L = abuf.getChannelData(0), Rr = abuf.getChannelData(abuf.numberOfChannels > 1 ? 1 : 0), step = 4800;
+        for (var p = 0; p < len; p += step) { var k = Math.min(step, len - p), d = new Float32Array(k * 2); d.set(L.subarray(p, p + k), 0); d.set(Rr.subarray(p, p + k), k);
+          var ad = new AudioData({ format: "f32-planar", sampleRate: SR, numberOfFrames: k, numberOfChannels: 2, timestamp: Math.round(p / SR * 1e6), data: d }); aenc.encode(ad); ad.close(); }
+        return aenc.flush().then(function () { aenc.close(); });
+      }).then(function () { if (err) throw err; muxer.finalize(); var blob = new Blob([target.buffer], { type: "video/mp4" }); blob.extension = "mp4"; return blob; });
+  }
+  var stopAsk = false, offRun = false;
   function run(kind) {
-    if (busy || !pkg) return; lock(true); msg(ran ? "Běží znovu ve stejné relaci. Kdyby obraz neseděl, obnov stránku." : "");
-    var clean = kind === "clean" || kind === "cleanrec", rec = kind === "rec" || kind === "cleanrec", mount = $("rzMount");
+    if (busy || !pkg) return; lock(true); stopAsk = false; msg(ran ? "Běží znovu ve stejné relaci. Kdyby obraz neseděl, obnov stránku." : "");
+    var clean = kind === "clean" || kind === "cleanrec", rec = kind === "rec" || kind === "cleanrec", mount = $("rzMount"), t0 = performance.now();
     if (lastUrl) { URL.revokeObjectURL(lastUrl); lastUrl = null; } $("rzDl").innerHTML = "";
     build().then(function () {
-      var o = { mount: mount, clean: clean, tts: false, bitrate: 16000000 };
-      if (!rec) return REEL.play(script, o);
-      msg("Nahrávám " + sec(script.total) + "…");
-      return REEL.record(script, o).then(function (blob) {
-        lastUrl = URL.createObjectURL(blob); var name = "dil-" + Z.dil + (clean ? "-ciste-zabery" : "") + "." + (blob.extension || "webm");
+      if (!rec) return REEL.play(script, { mount: mount, clean: clean, tts: false });
+      msg("Vyrábím video…");
+      offRun = true;
+      return offline(clean).then(function (blob) {
+        lastUrl = URL.createObjectURL(blob); var name = "dil-" + Z.dil + (clean ? "-ciste-zabery" : "") + "." + (blob.extension || "mp4");
         $("rzDl").innerHTML = '<a href="' + lastUrl + '" download="' + name + '">Stáhnout ' + name + " (" + (blob.size / 1048576).toFixed(1).replace(".", ",") + " MB)</a>";
-        msg("Hotovo.");
+        msg(stopAsk ? "Zastaveno, video je kratší." : "Hotovo za " + Math.round((performance.now() - t0) / 1000) + " s.");
       });
-    }).catch(function (e) { msg("Nepovedlo se: " + (e && e.message || e), true); }).then(function () { ran = true; lock(false); });
+    }).catch(function (e) { msg("Nepovedlo se: " + (e && e.message || e), true); }).then(function () { ran = true; offRun = false; lock(false); });
   }
 
   $("rzAi").onclick = function () { voice = "ai"; lock(true); build().then(function () { msg("Zpátky AI hlas."); lock(false); }); };
@@ -83,7 +111,7 @@
   $("rzMusic").onchange = function () { REEL.setMusic(this.value); };
   $("rzPlay").onclick = function () { run("play"); }; $("rzRec").onclick = function () { run("rec"); };
   $("rzClean").onclick = function () { run("clean"); }; $("rzCleanRec").onclick = function () { run("cleanrec"); };
-  $("rzStop").onclick = function () { REEL.stop(); };
+  $("rzStop").onclick = function () { stopAsk = true; if (!offRun) REEL.stop(); };
   $("rzTxt").onclick = function () { save("dil-" + Z.dil + "-text.txt", $("rzText").value); };
   $("rzSrt").onclick = function () { save("dil-" + Z.dil + ".srt", REEL.voiceScript(script).srt || ""); };
   $("rzClose").onclick = function () { REEL.stop(); el.style.display = "none"; };
