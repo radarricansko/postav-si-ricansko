@@ -70,7 +70,7 @@ H.hide=function(){if(H.group)H.group.visible=false;if(H.man){H.man.g.visible=fal
 H.times=function(ms){return H.parts.map(p=>({t:p.at*(ms||H.ms),boom:!!p.boom}))};
 // path = body v místních souřadnicích; wave = jak dlouho po dojití mává (ms); face = kam se nakonec otočí
 H.walk=function(now,o){const m=H.man;if(!m)return;const P=o.path,L=[];let tot=0;for(let i=1;i<P.length;i++){const l=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);L.push(l);tot+=l}
- m.w={t0:now,ms:o.ms||2400,P,L,tot,wave:o.wave||0,face:o.face||null};m.x=P[0][0];m.z=P[0][1];m.g.position.set(m.x,0,m.z);m.g.visible=true;m.born=now;m.sc=o.scale||1};
+ m.w={t0:now,ms:o.ms||2400,P,L,tot,wave:o.wave||0,face:o.face||null};m.x=P[0][0];m.z=P[0][1];m.g.position.set(m.x,0,m.z);if(o.pop!==false||!m.g.visible||m.born==null)m.born=now;m.g.visible=true;m.sc=o.scale||1};// pop:false = panáček už stojí, znovu nevyskakuje (jen zamává)
 const outBack=p=>{const c=1.70158;p=Math.min(1,Math.max(0,p));return 1+(c+1)*Math.pow(p-1,3)+c*Math.pow(p-1,2)};
 H.update=function(now){if(!H.group||!H.group.visible)return;
  if(H.T0>=0){let all=true;H.parts.forEach(p=>{const a=(now-H.T0-p.at*H.ms)/p.dur;if(a<=0){p.g.visible=false;all=false;return}p.g.visible=true;

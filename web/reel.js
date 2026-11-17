@@ -2329,7 +2329,7 @@
     if (R.opts.clean) return sc;            // čisté záběry pro střih: jen obraz hry, žádné texty, titulky ani přechody
     var S = SCENES[sc.type];
     if (S && S.draw) { g.save(); S.draw(g, sc, lt); g.restore(); }
-    var next = R.script.scenes[sc.idx + 1], DIP = 90;
+    var next = R.script.scenes[sc.idx + 1], DIP = R.script.styl === 'v2' ? 0 : 90;   // v2: ostré střihy, bez ztmavnutí (ve videu působilo jako probliknutí)
     if (next && next.type !== 'outro' && !sc.noCutNext && sc.t0 + sc.dur - t < DIP) dip(g, 1 - (sc.t0 + sc.dur - t) / DIP);
     if (sc.type !== 'hook' && sc.type !== 'outro' && sc.idx > 0 && !sc.noCut && lt < DIP) dip(g, 1 - lt / DIP);
     drawChrome(g, t, sc);

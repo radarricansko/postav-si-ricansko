@@ -19,6 +19,7 @@
     "#rz button.alt,#rz select{background:rgba(255,255,255,.12);color:#fff}#rz button:disabled{opacity:.4;cursor:default}#rz button.rec{background:#ff4f6a;color:#fff}" +
     "#rz textarea{width:100%;min-height:150px;box-sizing:border-box;border-radius:12px;border:0;padding:12px;background:rgba(255,255,255,.08);color:#fff;font:500 13.5px/1.5 Inter,system-ui;resize:vertical}" +
     "#rzStat{background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;color:#dfe5fb}#rzStat b{color:#fff}#rzMsg{min-height:20px;color:#C6FF3D}#rzMsg.err{color:#ff8a9c}" +
+    "#rzDiag{color:#dfe5fb;font-size:13px}#rzDiag .rzJump{display:inline-flex;align-items:center;gap:4px;margin:6px 8px 0 0;background:rgba(255,255,255,.08);border-radius:8px;padding:4px}#rzDiag .rzJump img{height:120px;border-radius:4px}#rzDiag .rzJump span{writing-mode:vertical-rl;color:#C6FF3D;font-weight:700}" +
     "#rzDl a{color:#0A1233;background:#C6FF3D;border-radius:999px;padding:10px 16px;text-decoration:none;font-weight:700;display:inline-block}" +
     "@media(max-width:820px){#rz{flex-direction:column}#rzMount{height:auto;width:100%}}";
   document.head.appendChild(css);
@@ -30,7 +31,7 @@
     '<h3>S texty a hlasem</h3><div class="row"><button id="rzPlay" disabled>▶ Přehrát</button><button id="rzRec" class="rec" disabled>⏺ Vyrobit video</button></div>' +
     '<h3>Čisté záběry pro střih</h3><p>Jen obraz hry, bez textů, titulků a zvuku. Načasování záběrů zůstává podle hlasu.</p>' +
     '<div class="row"><button id="rzClean" class="alt" disabled>▶ Přehrát</button><button id="rzCleanRec" class="rec" disabled>⏺ Vyrobit čisté záběry</button><button id="rzStop" class="alt" disabled>■ Stop</button></div>' +
-    '<div id="rzDl"></div>' +
+    '<div id="rzDl"></div><div id="rzDiag"></div>' +
     '<h3>Hlas</h3><p>AI hlas je jen vodítko pro tempo. Vlastní voiceover a zvuk z Instagramu se přidávají až ve střihu.</p>' +
     '<div class="row"><button id="rzAi" class="alt" disabled>AI hlas</button><button id="rzMute" class="alt" disabled>Ztlumený (časování zůstává)</button><button id="rzNoVoice" class="alt" disabled>Bez hlasu</button></div>' +
     '<div class="row"><span>Hudba</span><select id="rzMusic"></select></div>' +
@@ -67,6 +68,15 @@
   function lib() { return window.Mp4Muxer ? Promise.resolve() : new Promise(function (ok, no) { var t = document.createElement("script"); t.src = "https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js"; t.onload = ok; t.onerror = function () { no(new Error("nepodařilo se načíst knihovnu pro MP4")); }; document.head.appendChild(t); }); }
   function offline(clean) {
     var fps = 30, W = REEL.W, H = REEL.H, SR = 48000, err = null, target, muxer, venc, abuf = null, n = 0, total = script.total, frames = Math.ceil(total / 1000 * fps);
+    /* kontrola plynulosti: rozdíl sousedních snímků; velký skok mimo střih = chyba v obraze (vyskočení, probliknutí) */
+    var dc = document.createElement("canvas"); dc.width = 54; dc.height = 96; var dg = dc.getContext("2d", { willReadFrequently: true }), prevPx = null, diffs = [], tc2 = document.createElement("canvas"); tc2.width = 135; tc2.height = 240; var tg = tc2.getContext("2d"), prevThumb = "", pairs = {};
+    function probe(cv, i) { dg.drawImage(cv, 0, 0, 54, 96); var px = dg.getImageData(0, 0, 54, 96).data, v = 0; if (prevPx) { for (var k = 1; k < px.length; k += 4) v += Math.abs(px[k] - prevPx[k]); v /= px.length / 4; } diffs.push(v); prevPx = px;
+      tg.drawImage(cv, 0, 0, 135, 240); var u = tc2.toDataURL("image/jpeg", 0.72); if (v > 9 && Object.keys(pairs).length < 80) pairs[i] = [prevThumb, u]; prevThumb = u; }
+    function report() { var starts = {}; script.scenes.forEach(function (sc) { var f = Math.round(sc.t0 / 1000 * fps); starts[f - 1] = starts[f] = starts[f + 1] = 1; });
+      var inside = [], cuts = 0; for (var i = 1; i < diffs.length; i++) { var nb = diffs.slice(Math.max(0, i - 8), i + 9).sort(function (a, b) { return a - b; }), med = nb[nb.length >> 1]; if (diffs[i] > 9 && diffs[i] > 3.5 * Math.max(med, 0.5)) { if (starts[i]) cuts++; else inside.push({ f: i, t: +(i / fps).toFixed(2), d: +diffs[i].toFixed(1), okoli: +med.toFixed(1) }); } }
+      Z.diag = { stihu: cuts, uvnitr: inside, snimku: diffs.length };
+      var el = $("rzDiag"); el.innerHTML = "<b>Kontrola plynulosti:</b> " + (inside.length ? inside.length + " skoků uvnitř záběru" : "žádný skok uvnitř záběru") + " · střihů " + cuts +
+        inside.slice(0, 12).map(function (x) { var pr = pairs[x.f] || ["", ""]; return '<div class="rzJump"><span>' + String(x.t).replace(".", ",") + " s</span><img src=\"" + pr[0] + '"><img src="' + pr[1] + '"></div>'; }).join(""); }
     if (!window.VideoEncoder || !window.VideoFrame) return Promise.reject(new Error("tenhle prohlížeč neumí kódovat video (potřebuje Chrome nebo Edge)"));
     return lib().then(function () { return clean ? null : REEL.renderAudio(script).then(function (wav) { return wav.arrayBuffer(); }).then(function (ab) { var C = window.OfflineAudioContext || window.webkitOfflineAudioContext; return new C(2, 2, SR).decodeAudioData(ab); }); })
       .then(function (buf) { abuf = buf && window.AudioEncoder ? buf : null;
@@ -75,7 +85,7 @@
         venc = new VideoEncoder({ output: function (c, m) { muxer.addVideoChunk(c, m); }, error: function (e) { err = e; } });
         venc.configure({ codec: "avc1.640028", width: W, height: H, bitrate: 9000000, framerate: fps });
         return REEL.frames(script, { fps: fps, clean: clean, mount: $("rzMount"), each: function (cv, t, i) {
-          if (err) throw err; if (stopAsk) return false;
+          if (err) throw err; if (stopAsk) return false; probe(cv, i);
           var f = new VideoFrame(cv, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) }); venc.encode(f, { keyFrame: i % 60 === 0 }); f.close(); n = i + 1;
           if (i % 15 === 0) msg("Vyrábím video: " + Math.round(100 * i / frames) + " %");
           return venc.encodeQueueSize > 6 ? new Promise(function (r) { (function w() { venc.encodeQueueSize > 3 ? setTimeout(w, 4) : r(); })(); }) : null;
@@ -87,7 +97,7 @@
         for (var p = 0; p < len; p += step) { var k = Math.min(step, len - p), d = new Float32Array(k * 2); d.set(L.subarray(p, p + k), 0); d.set(Rr.subarray(p, p + k), k);
           var ad = new AudioData({ format: "f32-planar", sampleRate: SR, numberOfFrames: k, numberOfChannels: 2, timestamp: Math.round(p / SR * 1e6), data: d }); aenc.encode(ad); ad.close(); }
         return aenc.flush().then(function () { aenc.close(); });
-      }).then(function () { if (err) throw err; muxer.finalize(); var blob = new Blob([target.buffer], { type: "video/mp4" }); blob.extension = "mp4"; return blob; });
+      }).then(function () { if (err) throw err; try { report(); } catch (e) {} muxer.finalize(); var blob = new Blob([target.buffer], { type: "video/mp4" }); blob.extension = "mp4"; return blob; });
   }
   var stopAsk = false, offRun = false;
   function run(kind) {
