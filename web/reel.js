@@ -1214,7 +1214,7 @@
   function hyPill(g, x, y, w, h, o) {   // skleněná pilulka s modrým světlem (nebo plná žlutá)
     o = o || {}; g.save();
     if (o.solid) { g.shadowColor = o.glow || 'rgba(255,179,47,0.7)'; g.shadowBlur = 30; g.fillStyle = o.solid; rr(g, x, y, w, h, h / 2); g.fill(); }
-    else { g.shadowColor = 'rgba(47,111,240,0.55)'; g.shadowBlur = 26; g.fillStyle = 'rgba(10,18,51,0.5)'; rr(g, x, y, w, h, h / 2); g.fill(); g.shadowBlur = 0; g.fillStyle = 'rgba(255,255,255,0.10)'; rr(g, x, y, w, h, h / 2); g.fill();
+    else { g.shadowColor = 'rgba(47,111,240,0.55)'; g.shadowBlur = 26; g.fillStyle = 'rgba(8,14,44,0.78)'; rr(g, x, y, w, h, h / 2); g.fill(); g.shadowBlur = 0; g.fillStyle = 'rgba(255,255,255,0.08)'; rr(g, x, y, w, h, h / 2); g.fill();
       g.strokeStyle = 'rgba(255,255,255,0.26)'; g.lineWidth = 2; rr(g, x, y, w, h, h / 2); g.stroke();
       var hg = g.createLinearGradient(0, y, 0, y + h * 0.5); hg.addColorStop(0, 'rgba(255,255,255,0.22)'); hg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = hg; rr(g, x + 6, y + 4, w - 12, h * 0.46, h / 2); g.fill(); }
     g.restore();
@@ -1256,7 +1256,7 @@
     var at = u.at || 0, y = u.y == null ? 1040 : u.y, pw = 300, ph = 170, xl = 70, xr = W - 70 - pw, nodes = [u.a || { big: '17:00', cap: 'uzávěrka' }, u.b || { big: '9:00', cap: 'další díl' }];
     var run = prog(lt, at + 500, at + 1900), arrived = run >= 1;
     var lx0 = xl + pw + 10, lx1 = xr - 10;
-    g.save(); g.globalAlpha = oa; g.strokeStyle = 'rgba(255,255,255,0.18)'; g.lineWidth = 8; g.lineCap = 'round'; g.beginPath(); g.moveTo(lx0, y + ph / 2); g.lineTo(lx1, y + ph / 2); g.stroke();
+    g.save(); g.globalAlpha = oa; g.strokeStyle = 'rgba(255,255,255,0.42)'; g.lineWidth = 10; g.lineCap = 'round'; g.beginPath(); g.moveTo(lx0, y + ph / 2); g.lineTo(lx1, y + ph / 2); g.stroke();
     if (run > 0) { var ex = lerp(lx0, lx1, E.inOut(run)); g.strokeStyle = HYACC; g.shadowColor = 'rgba(255,179,47,0.85)'; g.shadowBlur = 18; g.beginPath(); g.moveTo(lx0, y + ph / 2); g.lineTo(ex, y + ph / 2); g.stroke(); g.shadowBlur = 0;
       var hg = g.createRadialGradient(ex, y + ph / 2, 0, ex, y + ph / 2, 26); hg.addColorStop(0, 'rgba(255,240,200,1)'); hg.addColorStop(0.4, 'rgba(255,179,47,0.7)'); hg.addColorStop(1, 'rgba(255,179,47,0)'); g.fillStyle = hg; g.beginPath(); g.arc(ex, y + ph / 2, 26, 0, 7); g.fill(); }
     g.restore();
