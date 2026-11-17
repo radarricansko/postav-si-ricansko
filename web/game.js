@@ -787,7 +787,7 @@ function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const
  if(!fly)keyMove(dt);ctr.update();moveCars(dt);
  const dist=cam.position.distanceTo(ctr.target);updClouds(now,dist);cam.near=Math.max(.8,dist*.02);cam.far=Math.max(3000,dist*12);cam.updateProjectionMatrix();
  {const fs=PERF.lvl<3&&dist<420*S/0.09;if(fs!==forestShadow){forestShadow=fs;FOREST.forEach(m=>m.castShadow=fs)}}scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
- const sh=Math.min(Math.max(dist*.9,60),700);const sc=sun.shadow.camera;if(Math.abs(sc.right-sh)>2){sc.left=-sh;sc.right=sh;sc.top=sh;sc.bottom=-sh;sc.near=1;sc.far=sh*4;sc.updateProjectionMatrix()}
+ const sh0=Math.min(Math.max(dist*.9,18),700),sh=Math.min(700,18*Math.pow(1.25,Math.ceil(Math.log(sh0/18)/Math.log(1.25)-1e-6)));/* zblízka menší výřez stínů = ostré stíny na domku; po krocích, ať se stíny při jízdě kamery nechvějí */const sc=sun.shadow.camera;if(Math.abs(sc.right-sh)>.01){sc.left=-sh;sc.right=sh;sc.top=sh;sc.bottom=-sh;sc.near=1;sc.far=sh*4;sc.updateProjectionMatrix()}
  sun.position.copy(ctr.target).addScaledVector(SUNDIR,sh*1.8);sun.target.position.copy(ctr.target);
  if(ring.visible){const k=1+.08*Math.sin(now/180);ring.scale.set(k,1,k)}
  const v=new T.Vector3();TOWNS.forEach((t,i)=>{if(t.erb){const lh=t.lm.type==="pomnik"?9:t.lm.type==="kaple"?13:17;t.erb.position.set(t.lm.x,lh+Math.sin(now/800+i)*.5,t.lm.z);const s=Math.min(14,Math.max(6,dist*.035))*Math.min(1,.45+cam.aspect*.4);t.erb.scale.set(s*.84,s,1)}
