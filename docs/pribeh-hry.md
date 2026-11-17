@@ -125,6 +125,13 @@ Drak a podobná fantasy ne.
 
 ---
 
+## Co přibylo 17. 11.
+
+- **Příběh je otevřený:** tým říká, že „odtržení od Česka“ zní moc politicky a má to být zábavnější. Nový příběh vymýšlí tým; rozhodovat se dál bude přes komentáře, žádné sbírání. Díl 1 má proto i variantu bez státu (`dil-1c`: „Co postavíme jako první?“).
+- **Mapa:** nový vzhled (tlumené teplé barvy, mozaika políček, měkčí světlo), původní je na `?vzhled=1`. Výkon: u obce 60 snímků za vteřinu v plné kvalitě (dřív 32 v nejnižší).
+- **Web pro hráče:** uvítání ve třech krocích, karta „Dnes se rozhoduje“ a Síň rozhodnutí (`rozhodnuti.json`), správná hláška při hledání domku, rychlejší start.
+- **Video:** režie v prohlížeči (`?admin=KLÍČ&rezie=N`): díl v 1080×1920 za zhruba 20 vteřin, i čisté záběry a verze bez hlasu pod vlastní voiceover. Voiceover a zvuk z Instagramu přidává tým.
+
 ## Stav částí (10. 11. večer)
 
 | část | stav | zbývá |
