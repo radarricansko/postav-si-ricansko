@@ -324,7 +324,7 @@ function treeGeo(kind,leaf){const parts=[];const col=(g,c)=>{const n=g.attribute
  if(kind===0){const a=new T.ConeGeometry(.78,1.7,7);a.translate(0,1.55,0);const b=new T.ConeGeometry(.6,1.35,7);b.translate(0,2.35,0);const c=new T.ConeGeometry(.4,1,7);c.translate(0,3,0);[a,b,c].forEach(g=>parts.push(col(g,leaf)))}
  else{const a=new T.IcosahedronGeometry(.95,0);a.translate(0,1.75,0);const b=new T.IcosahedronGeometry(.62,0);b.translate(.42,2.25,.2);[a,b].forEach(g=>parts.push(col(g,leaf)))}
  parts.forEach(g=>{g.deleteAttribute("uv");g.setAttribute("uv",new T.BufferAttribute(new Float32Array(g.attributes.position.count*2),2))});return mergeGeos(parts.map(g=>g.index?g:g))}
-const treeMat=new T.MeshLambertMaterial({vertexColors:true});
+const treeMat=new T.MeshLambertMaterial({vertexColors:true});const treeMatLo=new T.MeshLambertMaterial({vertexColors:true});// vlastní materiál: three r128 drží jeden program na materiál a barvu instancí by u sdíleného nezapnul
 const TREEK=[[0,PAL.trees[0]],[0,PAL.trees[1]],[1,PAL.trees[2]],[1,PAL.trees[3]]];// les po dlaždicích: mimo záběr se stromy vůbec nekreslí (rychlejší mobil i render videa)
 const FTILE=480,TREEGEO=TREEK.map(([k,c])=>{const g=treeGeo(k,c);g.boundingSphere=new T.Sphere(new T.Vector3(0,6,0),FTILE*.75+24);return g});let FOREST=[],forestShadow=true;
 /* vzdálené lesy: strom z 6–8 trojúhelníků místo 83 (z dálky není rozdíl vidět, kreslí se desetkrát míň) */
@@ -350,7 +350,7 @@ function placeForest(){FOREST.forEach(m=>{scene.remove(m);m.dispose&&m.dispose()
   m.castShadow=forestShadow;m.receiveShadow=true;m.frustumCulled=true;m.userData.k=a.k;m.updateMatrixWorld();scene.add(m);FOREST.push(m);// InstancedMesh má v r128 ořez záběrem vypnutý, proto frustumCulled=true ručně
   const tk=a.tx+":"+a.tz;let tl=TL.get(tk);if(!tl)TL.set(tk,tl={x:cx,z:cz,hi:[],lo:null,isLo:false});tl.hi.push(m)});
  // vzdálená podoba dlaždice: všechny její stromy v jedné síti, barvu nese instance
- TL.forEach(tl=>{const n=tl.hi.reduce((s,m)=>s+m.count,0),lo=new T.InstancedMesh(TREEGEO_LO,treeMat,n);lo.position.set(tl.x,0,tl.z);let k=0;tl.hi.forEach(m=>{const c=TREECOL[m.userData.k];for(let i=0;i<m.count;i++){m.getMatrixAt(i,M4);lo.setMatrixAt(k,M4);lo.setColorAt(k,c);k++}});
+ TL.forEach(tl=>{const n=tl.hi.reduce((s,m)=>s+m.count,0),lo=new T.InstancedMesh(TREEGEO_LO,treeMatLo,n);lo.position.set(tl.x,0,tl.z);let k=0;tl.hi.forEach(m=>{const c=TREECOL[m.userData.k];for(let i=0;i<m.count;i++){m.getMatrixAt(i,M4);lo.setMatrixAt(k,M4);lo.setColorAt(k,c);k++}});
   lo.instanceColor.needsUpdate=true;lo.castShadow=false;lo.receiveShadow=true;lo.frustumCulled=true;lo.visible=false;lo.userData.k=-1;lo.updateMatrixWorld();scene.add(lo);FOREST.push(lo);tl.lo=lo;FTILES.push(tl)})}
 
 /* ---------- silnice: vykreslení ---------- */

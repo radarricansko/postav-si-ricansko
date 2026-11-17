@@ -99,7 +99,7 @@
       msg("Vyrábím video…");
       offRun = true;
       return offline(clean).then(function (blob) {
-        lastUrl = URL.createObjectURL(blob); var name = "dil-" + Z.dil + (clean ? "-ciste-zabery" : voice === "ai" ? "" : "-bez-hlasu") + "." + (blob.extension || "mp4");
+        lastUrl = URL.createObjectURL(blob); var name = "postav-si-ricansko-dil-" + Z.dil + (clean ? "-ciste-zabery" : voice === "ai" ? "" : "-bez-hlasu") + "." + (blob.extension || "mp4");
         $("rzDl").innerHTML = '<a href="' + lastUrl + '" download="' + name + '">Stáhnout ' + name + " (" + (blob.size / 1048576).toFixed(1).replace(".", ",") + " MB)</a>";
         msg(stopAsk ? "Zastaveno, video je kratší." : "Hotovo za " + Math.round((performance.now() - t0) / 1000) + " s.");
       });
