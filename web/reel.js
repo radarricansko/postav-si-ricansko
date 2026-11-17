@@ -1007,6 +1007,11 @@
     if (HX === 1) { g.fillText(text, x, y); return; }
     g.save(); g.translate(x, y); g.scale(HX, 1); g.fillText(text, 0, 0); g.restore();
   }
+  // obrys stejnou cestou jako htext (nadpisy na světlém pozadí: věže, střecha, nebe)
+  function hstroke(g, text, x, y) {
+    if (HX === 1) { g.strokeText(text, x, y); return; }
+    g.save(); g.translate(x, y); g.scale(HX, 1); g.strokeText(text, 0, 0); g.restore();
+  }
   function hfit(g, text, maxW, size, weight, min) { hf(g, size, weight); var w = hw(g, text); return w <= maxW ? size : Math.max(min || 12, Math.floor(size * maxW / w)); }
   // pop-in s přestřelem: .6 → 1.08 → 1 (vrací scale pro p 0..1)
   function popS(p) { if (p <= 0) return 0.6; if (p >= 1) return 1; return p < 0.7 ? lerp(0.6, 1.08, E.outCubic(p / 0.7)) : lerp(1.08, 1, (p - 0.7) / 0.3); }
@@ -1159,7 +1164,9 @@
       a *= 1 - q;
       g.save(); g.globalAlpha = a; g.translate(x + ws[i] / 2, y - E.inCubic(q) * size * 0.4); g.scale(s, s);
       if (!o.box && !o.solid && o.shadow !== false) { g.shadowColor = 'rgba(0,0,0,0.4)'; g.shadowBlur = size * 0.16; g.shadowOffsetY = size * 0.04; }
-      g.fillStyle = o.solid ? C.ink : (o.color || C.white); hf(g, size, weight); htext(g, words[i], -ws[i] / 2, 1);
+      g.fillStyle = o.solid ? C.ink : (o.color || C.white); hf(g, size, weight);
+      if (o.outline && !o.box && !o.solid) { g.lineJoin = 'round'; g.lineWidth = size * 0.11; g.strokeStyle = 'rgba(10,18,51,0.88)'; hstroke(g, words[i], -ws[i] / 2, 1); g.shadowColor = 'transparent'; }
+      htext(g, words[i], -ws[i] / 2, 1);
       g.restore();
       x += ws[i] + sp;
     }
@@ -1726,7 +1733,7 @@
       g.shadowColor = 'rgba(0,0,0,0.35)'; g.shadowBlur = 26; g.shadowOffsetY = 10; g.fillStyle = '#fff'; rr(g, x0, y, cw, ch, 26); g.fill(); g.shadowColor = 'transparent';
       if (win) { g.strokeStyle = C.blue; g.lineWidth = 6; rr(g, x0, y, cw, ch, 26); g.stroke(); }
       var av = g.createLinearGradient(x0 + 26, y + 26, x0 + 92, y + 92); av.addColorStop(0, ['#66B2FF', '#C6FF3D', '#F5C431', '#FF7AA8'][i % 4]); av.addColorStop(1, C.blue); g.fillStyle = av; g.beginPath(); g.arc(x0 + 62, y + ch / 2, 32, 0, 7); g.fill();
-      g.textAlign = 'left'; g.textBaseline = 'middle'; bf(g, 27, 600); g.fillStyle = 'rgba(11,12,18,0.55)'; g.fillText(it.user || '', x0 + 116, y + 36);
+      g.textAlign = 'left'; g.textBaseline = 'middle'; bf(g, 32, 700); g.fillStyle = 'rgba(11,12,18,0.7)'; g.fillText(it.user || '', x0 + 116, y + 36);
       bf(g, 42, 800); g.fillStyle = C.ink; var tx = String(it.text || ''); while (g.measureText(tx).width > cw - 320 && tx.length > 4) tx = tx.slice(0, -2); g.fillText(tx + (tx !== it.text ? '…' : ''), x0 + 116, y + 78);
       if (it.likes != null) { var lk = Math.round(it.likes * E.outCubic(prog(lt, at + i * every + 100, at + i * every + 100 + (u.countMs || 900)))); bf(g, 34, 800); g.textAlign = 'right'; g.fillStyle = '#E5394B'; g.fillText(fmt(lk), x0 + cw - 30, y + ch / 2 + 2);
         heart(g, x0 + cw - 46 - g.measureText(fmt(lk)).width, y + ch / 2 + 1, 34, '#E5394B'); }
@@ -1742,7 +1749,7 @@
     if (cv < 1) return;
     var lp = prog(lt, at + 300, at + 300 + POP); if (lp > 0) { g.save(); g.globalAlpha = popA(lp); g.translate(W / 2, 520); g.rotate(Math.sin(lt / 700) * 0.03); g.scale(popS(lp), popS(lp)); hf(g, 120, 900); g.fillStyle = C.white; g.textAlign = 'left'; g.textBaseline = 'middle'; htext(g, 'RADAR', -hw(g, 'RADAR') / 2, 0); g.restore(); }
     (u.q || []).forEach(function (ln, i) { kLine(g, ln.replace(/^\*/, ''), W / 2, 820 + i * 104, 82, lt, at + 480 + i * 160, { out: 1e9, stagger: 55, maxW: 960, color: /^\*/.test(ln) ? C.acc : C.white, weight: 800 }); });
-    var fy = 820 + (u.q || []).length * 104 + 90, fw = 920, fh = 118, fx = (W - fw) / 2, fp = prog(lt, at + 760, at + 760 + POP), cps = u.cps || 60, tt = String(u.type || ''), t0 = at + 900, nch = clamp(Math.floor((lt - t0) / cps), 0, tt.length), sent = lt > t0 + tt.length * cps + 250;
+    var fy = 820 + (u.q || []).length * 104 + 90, fw = 800, fh = 118, fx = (W - fw) / 2, fp = prog(lt, at + 760, at + 760 + POP), cps = u.cps || 60, tt = String(u.type || ''), t0 = at + 900, nch = clamp(Math.floor((lt - t0) / cps), 0, tt.length), sent = lt > t0 + tt.length * cps + 250;
     if (fp > 0 && !sent) { g.save(); g.globalAlpha = popA(fp); g.fillStyle = 'rgba(10,18,51,0.75)'; rr(g, fx, fy, fw, fh, fh / 2); g.fill(); g.strokeStyle = C.sky; g.lineWidth = 4; rr(g, fx, fy, fw, fh, fh / 2); g.stroke();
       bf(g, 44, nch ? 700 : 500); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = nch ? C.white : 'rgba(255,255,255,0.5)'; var shown = nch ? tt.slice(0, nch) : 'Přidat komentář…'; g.fillText(shown, fx + 48, fy + fh / 2 + 2);
       if (nch && Math.floor(lt / 260) % 2 === 0) { g.fillStyle = C.acc; g.fillRect(fx + 54 + g.measureText(shown).width, fy + 30, 5, fh - 60); }
@@ -1791,7 +1798,7 @@
     draw: function (g, s, lt) {
       var out = s.dur - 220, oa = s.last ? 1 : 1 - prog(lt, out, out + 180);
       // čitelnost: jemný přechod nahoře a dole, ať je mapa vidět
-      var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(10,18,51,0.55)'); gr.addColorStop(0.3, 'rgba(10,18,51,0.08)'); gr.addColorStop(0.62, 'rgba(10,18,51,0.05)'); gr.addColorStop(1, 'rgba(10,18,51,0.62)');
+      var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(8,20,16,0.44)'); gr.addColorStop(0.3, 'rgba(8,20,16,0.05)'); gr.addColorStop(0.62, 'rgba(8,20,16,0.04)'); gr.addColorStop(1, 'rgba(8,20,16,0.5)');   // zelenočerný, ne modrý: modrý závoj dělal z trávy šeď
       g.fillStyle = gr; g.fillRect(0, 0, W, H);
       // jmenovky nad postavičkami (a chvíli nad hotovým domkem)
       if (s.walk && G() && G().walkers) G().walkers().forEach(function (w) {
@@ -1803,7 +1810,7 @@
       });
       // velký nadpis nahoře (2–3 slova): drží přes záběry se stejným textem, při změně naskočí znovu
       if (s.head) { g.save(); g.translate(W / 2, 440); g.rotate(-0.025); var hl = String(s.head).split('|');
-        hl.forEach(function (ln, i) { kLine(g, up(ln), 0, i * 118, s.headSize || 104, s.headNew ? lt : lt + 5000, s.headNew ? (s.headAt || 0) + i * 120 : 0, { out: s.headKeep || s.last ? 1e9 : out + (s.headNew ? 0 : 5000), stagger: 60, maxW: 980, color: s.headColor === 'acc' ? C.acc : s.headColor || C.white, weight: 900 }); });
+        hl.forEach(function (ln, i) { kLine(g, up(ln), 0, i * 118, s.headSize || 104, s.headNew ? lt : lt + 5000, s.headNew ? (s.headAt || 0) + i * 120 : 0, { out: s.headKeep || s.last ? 1e9 : out + (s.headNew ? 0 : 5000), stagger: 60, maxW: 980, color: s.headColor === 'acc' ? C.acc : s.headColor || C.white, weight: 900, outline: true }); });
         g.restore(); }
       var HP = (s.ui || []).some(function (u) { return u.k === 'herotag'; }) && G() && G().heroPts ? G().heroPts() : null;
       (s.ui || []).forEach(function (u) {
@@ -2239,7 +2246,7 @@
     var appear = sType === 'hook' ? E.outCubic(prog(lt, 400, 800)) : sType === 'outro' ? 1 - prog(lt, 0, 300) + prog(lt, sc.dur - 420, sc.dur - 60) : 1;
     if (appear <= 0) return;
     if (script.styl === 'v2') { if ((sc.ui || []).some(function (u) { return u.k === 'endq' && lt > (u.at || 0) + 200; })) return;
-      g.save(); var bp = sc.idx === 0 ? prog(lt, 0, POP) : 1; chip(g, script.badge, 56, 290, { size: 34, solid: true, align: 'left', scale: popS(bp), alpha: popA(bp) });
+      g.save(); var bp = 1; /* štítek dílu je vidět od prvního snímku (náhled v mřížce) */ chip(g, script.badge, 56, 290, { size: 34, solid: true, align: 'left', scale: popS(bp), alpha: popA(bp) });
       hf(g, 40, 800); try { g.letterSpacing = '0.04em'; } catch (e) {} g.fillStyle = C.white; g.textBaseline = 'middle'; g.textAlign = 'right'; g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 14; g.fillText('RADAR', W - 56, 290); g.restore(); return; }
     var n = script.scenes.length, frac = clamp((sc.idx + clamp(lt / sc.dur, 0, 1)) / n, 0, 1);
     g.save(); g.globalAlpha = appear;
@@ -2428,11 +2435,18 @@
     return Promise.all(jobs);
   }
 
+  // hudba pod hlasem tišší, v záběrech bez věty hlasitější (jinak je tichý blok skoro ticho); t0 = čas začátku dílu v čase zvukového kontextu
+  function duckMusic(script, t0) {
+    if (!AU.voiceBuf || !AU.music || !script || !script.scenes) return;
+    var gm = AU.music.gain; gm.cancelScheduledValues(t0); gm.setValueAtTime(script.scenes[0] && script.scenes[0].vo ? 0.32 : 0.6, t0);
+    script.scenes.forEach(function (s, i) { if (!i) return; var v = s.vo ? 0.32 : 0.6, pv = script.scenes[i - 1].vo ? 0.32 : 0.6, t = t0 + s.t0 / 1000; if (v === pv) return; gm.setValueAtTime(pv, Math.max(t0, t - 0.12)); gm.linearRampToValueAtTime(v, t + 0.18); });
+  }
   function start(script, opts) {
     R.script = script; R.opts = opts || {}; R.idx = -1; R.live = null; R._hold = 0; R._lastChunk = null;
     AU.monitorNode.gain.value = R.opts.monitor === false ? 0 : 1;
     AU.master.gain.value = R.opts.clean ? 0 : 0.8;   // čisté záběry jsou bez zvuku
     AU.music.gain.value = AU.voiceBuf ? 0.32 : 0.55;
+    if (R.opts.voice !== false) duckMusic(script, AU.ctx.currentTime);
     AU.intensity = 1;
     AU.startMusic(1);
     if (AU.voiceBuf && R.opts.voice !== false) AU.playVoice();
@@ -2653,6 +2667,7 @@
       R.audioOnly = true; R.script = script; R.opts = { subtitles: false }; R.idx = -1; R.running = true; R.tts = false; R.live = null;
       AU.offT = 0; AU.intensity = 1;
       AU.music.gain.setValueAtTime(AU.voiceBuf ? 0.32 : 0.55, 0);
+      if (o.voice !== false) duckMusic(script, 0);
       var spb = 60 / AU.BPM / 4;
       for (var st = 0, tm = 0.05; tm < dur; st++, tm += spb) AU.playStep(st, tm, spb);
       if (AU.voiceBuf && o.voice !== false) AU.playVoice();

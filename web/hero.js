@@ -25,7 +25,7 @@ H.build=function(o){if(H.group)return H;const G=H.group=new T.Group();G.visible=
  part(0,0,g=>{box(g,W+2.6,.1,D+2.6,0,0,.5,M.slab);box(g,W+.3,.22,D+.3,0,.02,0,M.base)},{flat:1,dur:420});
  part(.07,0,g=>{box(g,1.3,.05,1.25,.95,.1,D/2+1.2,M.path)},{flat:1});
  // 2 zdi
- part(.15,5,g=>{box(g,W,WH,D,0,.2,0,M.wall);box(g,W+.08,.3,D+.08,0,.2,0,M.trim)},{dur:420,boom:1});
+ part(.15,3,g=>{box(g,W,WH,D,0,.2,0,M.wall);box(g,W+.08,.3,D+.08,0,.2,0,M.trim)},{dur:420,boom:1});
  // 3 dveře se schodem
  part(.31,0,g=>{box(g,1.14,2.0,.1,.95,.2,D/2+.02,M.trim);box(g,.9,1.82,.1,.95,.24,D/2+.06,M.door);box(g,.62,.5,.04,.95,1.38,D/2+.12,M.doorD);box(g,.62,.62,.04,.95,.5,D/2+.12,M.doorD);
   box(g,.08,.08,.1,1.27,1.1,D/2+.14,M.gold);box(g,1.5,.16,.62,.95,.06,D/2+.36,M.base)});

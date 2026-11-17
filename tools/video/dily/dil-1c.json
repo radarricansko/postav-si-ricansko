@@ -39,9 +39,10 @@
    "hero": {
     "build": {
      "at": 0,
-     "ms": 3000
+     "ms": 2000
     }
-   }
+   },
+   "headAt": -600
   },
   {
    "vo": "Bude na něm tvoje jméno.",
@@ -124,8 +125,7 @@
   },
   {
    "vo": "Prvních pět v každé obci? Navždy zakladatelé.",
-   "head": "PRVNÍCH 5",
-   "headColor": "acc",
+   "head": "PRVNÍCH 5|= ZAKLADATELÉ",
    "cam": {
     "hero": true,
     "cut": false,
@@ -147,7 +147,7 @@
      "text": "@tvoje_jmeno",
      "at": -1000,
      "badge": "★ ZAKLADATEL",
-     "badgeAt": 1300
+     "badgeAt": 400
     }
    ]
   },
@@ -185,10 +185,10 @@
    "ui": []
   },
   {
-   "dur": 620,
-   "head": "52 OBCÍ",
+   "dur": 700,
+   "head": "ODKUD JSI?",
    "cam": {
-    "at": "lm:Mukařov",
+    "at": "lm:Mnichovice",
     "from": [
      120,
      0.46,
@@ -197,26 +197,26 @@
     "to": [
      78,
      0.38,
-     -0.8500000000000001
+     -0.85
     ],
     "hard": true
    },
    "ui": [
     {
      "k": "chip",
-     "text": "Mukařov",
+     "text": "Mnichovice",
      "y": 1240,
-     "size": 56,
+     "size": 68,
      "at": 0,
      "solid": true
     }
    ]
   },
   {
-   "dur": 620,
-   "head": "52 OBCÍ",
+   "dur": 700,
+   "head": "ODKUD JSI?",
    "cam": {
-    "at": "lm:Ondřejov",
+    "at": "lm:Strančice",
     "from": [
      120,
      0.46,
@@ -232,19 +232,19 @@
    "ui": [
     {
      "k": "chip",
-     "text": "Ondřejov",
+     "text": "Strančice",
      "y": 1240,
-     "size": 56,
+     "size": 68,
      "at": 0,
      "solid": true
     }
    ]
   },
   {
-   "dur": 620,
-   "head": "52 OBCÍ",
+   "dur": 700,
+   "head": "ODKUD JSI?",
    "cam": {
-    "at": "lm:Kamenice",
+    "at": "lm:Velké Popovice",
     "from": [
      120,
      0.46,
@@ -260,19 +260,19 @@
    "ui": [
     {
      "k": "chip",
-     "text": "Kamenice",
+     "text": "Velké Popovice",
      "y": 1240,
-     "size": 56,
+     "size": 68,
      "at": 0,
      "solid": true
     }
    ]
   },
   {
-   "dur": 620,
-   "head": "52 OBCÍ",
+   "dur": 700,
+   "head": "ODKUD JSI?",
    "cam": {
-    "at": "lm:Kostelec nad Černými lesy",
+    "at": "lm:Kamenice",
     "from": [
      120,
      0.46,
@@ -288,16 +288,44 @@
    "ui": [
     {
      "k": "chip",
-     "text": "Kostelec nad Černými lesy",
+     "text": "Kamenice",
      "y": 1240,
-     "size": 56,
+     "size": 68,
      "at": 0,
      "solid": true
     }
    ]
   },
   {
-   "dur": 1700,
+   "dur": 700,
+   "head": "ODKUD JSI?",
+   "cam": {
+    "at": "lm:Mukařov",
+    "from": [
+     120,
+     0.46,
+     0.9
+    ],
+    "to": [
+     78,
+     0.38,
+     1.15
+    ],
+    "hard": true
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "Mukařov",
+     "y": 1240,
+     "size": 68,
+     "at": 0,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "dur": 2000,
    "head": "0 OBYVATEL",
    "headColor": "acc",
    "cam": {
@@ -313,7 +341,16 @@
      0.95
     ],
     "hard": true
-   }
+   },
+   "ui": [
+    {
+     "k": "stamp",
+     "text": "NEJVĚTŠÍ OBEC BERE KORUNU",
+     "y": 760,
+     "size": 50,
+     "at": 500
+    }
+   ]
   },
   {
    "dur": 2200,
@@ -348,7 +385,7 @@
     {
      "k": "cards",
      "at": 150,
-     "every": 300,
+     "every": 240,
      "y": 470,
      "items": [
       {
@@ -369,7 +406,8 @@
      ],
      "stamp": "ROZHODUJÍ LAJKY"
     }
-   ]
+   ],
+   "dur": 3200
   },
   {
    "vo": "První úkol: co postavíme jako první?",
@@ -419,16 +457,16 @@
      "k": "chip",
      "text": "tvoje obec",
      "y": 520,
-     "size": 64,
+     "size": 72,
      "at": 80,
      "solid": true
     },
     {
      "k": "chip",
      "text": "nápad - co postavit",
-     "y": 660,
-     "size": 54,
-     "at": 420
+     "y": 670,
+     "size": 58,
+     "at": 250
     }
    ],
    "hero": {
@@ -452,7 +490,8 @@
      ],
      "pop": false
     }
-   }
+   },
+   "dur": 3000
   },
   {
    "vo": "Nejlajkovanější vyhrává.",
@@ -473,7 +512,7 @@
    }
   },
   {
-   "dur": 4300,
+   "dur": 5000,
    "cam": {
     "at": "center",
     "cut": false,
@@ -494,7 +533,7 @@
      ],
      "type": "Mnichovice, nápad - …",
      "user": "ty · právě teď",
-     "note": "hlasuje se dnes do 17:00"
+     "note": "napiš do 17:00 = zítra v 9:00 stojí"
     }
    ]
   }
