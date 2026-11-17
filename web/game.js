@@ -35,7 +35,18 @@ const CENTER={x:-2353,y:-1346,name:"Náměstí sjednocení",scale:.72};const FIX
 const L=0.23;              // měřítko uvnitř obce (jednotek na metr)
 const GAP=5, SPREAD=1.15;  // rozestup obcí při roztahování světa
 const LOT=6.6, MAXR=170, HOUSE_S=3.6;
-const ROOFS=["#c45c3e","#9c3f2c","#4e5260","#8a6646"],ROOF_W=[.42,.26,.18,.14];
+const V2=QS.get("vzhled")!=="1";
+const PAL=V2?{sky:["#8ebde4","#cfe1ec","#f2ead8","#e7e4d6"],fog:"#e7e4d6",hemi:["#eef4ff","#a39874",.74],sun:["#ffe1b4",.94],fill:["#bcd0ff",.2],
+  ground:"#b3c588",meadow:["#bfd092","#b1c984"],orchard:"#a6c07c",forest:"#7d9c62",water:"#74b3d6",waterSpec:"#e6f3ff",
+  field:["#ddd09a","#cdd195","#bccb88","#e3d3a4","#c4c98c","#d9c592","#b3c483","#d6d6a2"],
+  road:"#6e7b93",lane:"#7c889e",d1:"#647089",cap:"#6e7b93",lawnPad:"#d9ceb0",lawn:"#b3c888",garden:"#b6cc8b",drive:"#c4c1b8",plaza:"#e0d5bc",plazaRim:"#bcad8e",
+  trees:["#2e6046","#397049","#4f8749","#6a9a52"],roofs:["#b9573e","#8f3d2e","#5b6070","#a45a3c"],sat:1.05,con:1.04,vig:.86}
+ :{sky:["#6fa9da","#b9d6e8","#e9e1cf","#d7e2e2"],fog:"#d7e2e2",hemi:["#d6e8ff","#6b6340",.5],sun:["#ffd6a3",1.18],fill:["#a8c6ff",.18],
+  ground:"#90b95f",meadow:["#a4cc6c","#97c463"],orchard:"#88b85a",forest:"#5d8a43",water:"#4c9fd0",waterSpec:"#cfe8ff",
+  field:["#c8b46a","#b7c36a","#9dbd59","#d0b878","#a7b75d","#c3a75a","#8db15a","#bfc77c"],
+  road:"#6f7480",lane:"#7d828c",d1:"#666b76",cap:"#6f7480",lawnPad:"#93c063",lawn:"#8fbd5f",garden:"#9ccb6a",drive:"#b9bcc4",plaza:"#d8ccb4",plazaRim:"#b2a284",
+  trees:["#2f6a3a","#3d7d3f","#4f8f3c","#6aa046"],roofs:["#c45c3e","#9c3f2c","#4e5260","#8a6646"],sat:1.14,con:1.07,vig:.72};
+const ROOFS=PAL.roofs,ROOF_W=[.42,.26,.18,.14];
 const CLS={M:{w:4.8,y:.078},L:{w:1.5,y:.063},P:{w:2.7,y:.070},S:{w:2.3,y:.068},T:{w:1.9,y:.066},Z:{w:1.6,y:.05},G:{w:1.9,y:.061}};
 let S=0.05,Starget=0.05;
 
@@ -49,8 +60,8 @@ const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuf
 R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
 R.setClearColor(0x000000,0);R.autoClear=true;
 const scene=new T.Scene();
-const FOGC=new T.Color("#d7e2e2");scene.fog=new T.Fog(FOGC,600,2600);
-{const c=document.createElement("canvas");c.width=4;c.height=256;const g=c.getContext("2d");const gr=g.createLinearGradient(0,0,0,256);gr.addColorStop(0,"#6fa9da");gr.addColorStop(.55,"#b9d6e8");gr.addColorStop(.8,"#e9e1cf");gr.addColorStop(1,"#d7e2e2");g.fillStyle=gr;g.fillRect(0,0,4,256);scene.background=new T.CanvasTexture(c)}
+const FOGC=new T.Color(PAL.fog);scene.fog=new T.Fog(FOGC,600,2600);
+{const c=document.createElement("canvas");c.width=4;c.height=256;const g=c.getContext("2d");const gr=g.createLinearGradient(0,0,0,256);gr.addColorStop(0,PAL.sky[0]);gr.addColorStop(.55,PAL.sky[1]);gr.addColorStop(.8,PAL.sky[2]);gr.addColorStop(1,PAL.sky[3]);g.fillStyle=gr;g.fillRect(0,0,4,256);scene.background=new T.CanvasTexture(c)}
 const cam=new T.PerspectiveCamera(34,innerWidth/innerHeight,2,24000);
 const ctr=new T.OrbitControls(cam,canvas);ctr.enableDamping=true;ctr.dampingFactor=.08;ctr.maxPolarAngle=1.32;ctr.minDistance=14;ctr.maxDistance=2600;ctr.screenSpacePanning=false;ctr.zoomSpeed=1.2;ctr.touches={ONE:T.TOUCH.PAN,TWO:T.TOUCH.DOLLY_ROTATE};ctr.mouseButtons={LEFT:T.MOUSE.PAN,MIDDLE:T.MOUSE.DOLLY,RIGHT:T.MOUSE.ROTATE};
 /* klávesnice: WSAD / šipky = posun, Q/E = otočení, R/F nebo +/− = přiblížení, Shift = rychleji */
@@ -62,9 +73,9 @@ function keyMove(dt){if(!KEYS.size||(KEYS.size===1&&KEYS.has("shift")))return;co
  let rot=0;if(KEYS.has("q"))rot+=1;if(KEYS.has("e"))rot-=1;if(rot){const a=rot*1.5*dt;const o=cam.position.clone().sub(ctr.target);const c=Math.cos(a),sn=Math.sin(a);cam.position.set(ctr.target.x+o.x*c-o.z*sn,cam.position.y,ctr.target.z+o.x*sn+o.z*c)}
  let zm=0;if(KEYS.has("r")||KEYS.has("+"))zm-=1;if(KEYS.has("f")||KEYS.has("-"))zm+=1;if(zm){const o=cam.position.clone().sub(ctr.target);const l=o.length();const k=Math.max(ctr.minDistance,Math.min(ctr.maxDistance,l*(1+zm*1.3*dt)))/l;cam.position.copy(ctr.target).add(o.multiplyScalar(k))}}
 
-const hemi=new T.HemisphereLight("#d6e8ff","#6b6340",.5);scene.add(hemi);
-const sun=new T.DirectionalLight("#ffd6a3",1.18);sun.castShadow=true;sun.shadow.mapSize.set(+QS.get("shadow")||2048,+QS.get("shadow")||2048);sun.shadow.bias=-.0005;sun.shadow.normalBias=.02;scene.add(sun,sun.target);
-const fill=new T.DirectionalLight("#a8c6ff",.18);fill.position.set(-1,.6,1);scene.add(fill);
+const hemi=new T.HemisphereLight(PAL.hemi[0],PAL.hemi[1],PAL.hemi[2]);scene.add(hemi);
+const sun=new T.DirectionalLight(PAL.sun[0],PAL.sun[1]);sun.castShadow=true;sun.shadow.mapSize.set(+QS.get("shadow")||2048,+QS.get("shadow")||2048);sun.shadow.bias=-.0005;sun.shadow.normalBias=.02;scene.add(sun,sun.target);
+const fill=new T.DirectionalLight(PAL.fill[0],PAL.fill[1]);fill.position.set(-1,.6,1);scene.add(fill);
 const SUNDIR=new T.Vector3(-.62,.5,.6).normalize();
 
 /* ---------- filmový post-processing: tilt-shift, barevné ladění, viněta ---------- */
@@ -82,9 +93,9 @@ const POST={on:QS.get("post")!=="0"};
   void main(){vec3 s=texture2D(sharp,vUv).rgb;vec3 b=texture2D(soft,vUv).rgb;
    float d=abs(vUv.y-focus);float k=smoothstep(band,band+.32,d)*tilt;vec3 c=mix(s,b,k);
    float bloom=max(max(b.r,b.g),b.b);c+=b*smoothstep(.72,1.,bloom)*.18;
-   float l=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(l),c,1.14);c=(c-.5)*1.07+.5;
+   float l=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(l),c,${PAL.sat.toFixed(3)});c=(c-.5)*${PAL.con.toFixed(3)}+.5;
    c+=vec3(.035,.012,-.02)*smoothstep(.45,1.,l);c+=vec3(-.02,0.,.03)*(1.-smoothstep(0.,.45,l));
-   vec2 q=vUv-.5;q.x*=res.x/res.y;float v=smoothstep(1.05,.32,length(q));c*=mix(.72,1.,v);
+   vec2 q=vUv-.5;q.x*=res.x/res.y;float v=smoothstep(1.05,.32,length(q));c*=mix(${PAL.vig.toFixed(3)},1.,v);
    gl_FragColor=vec4(clamp(c,0.,1.),1.);}`});
  POST.resize=()=>{R.getDrawingBufferSize(sz);POST.main.setSize(sz.x,sz.y);POST.a.setSize(sz.x>>1,sz.y>>1);POST.b.setSize(sz.x>>1,sz.y>>1);fin.uniforms.res.value.set(sz.x,sz.y)};POST.resize();
  POST.render=(tilt)=>{if(!POST.on){R.setRenderTarget(null);R.render(scene,cam);return}
@@ -246,9 +257,9 @@ function layoutTown(t){const pl=t.plan,lm=t.lm;const slots=[],res=[],usedB=[];le
 
 /* ---------- materiály, textury ---------- */
 function canvasTex(w,h,draw,rep){const c=document.createElement("canvas");c.width=w;c.height=h;draw(c.getContext("2d"),w,h);const t=new T.CanvasTexture(c);t.anisotropy=8;if(rep){t.wrapS=t.wrapT=T.RepeatWrapping}return t}
-const roadTex=canvasTex(64,128,(g,w,h)=>{g.fillStyle="#6f7480";g.fillRect(0,0,w,h);for(let i=0;i<220;i++){g.fillStyle=`rgba(${Math.random()<.5?0:255},${Math.random()<.5?0:255},255,.04)`;g.fillRect(Math.random()*w,Math.random()*h,2,2)}g.fillStyle="#e9ecf2";g.fillRect(2,0,3,h);g.fillRect(w-5,0,3,h);g.fillRect(w/2-1.5,0,3,h*.45)},true);
-const laneTex=canvasTex(64,64,(g,w,h)=>{g.fillStyle="#7d828c";g.fillRect(0,0,w,h);g.fillStyle="#9ea3ab";g.fillRect(0,0,4,h);g.fillRect(w-4,0,4,h)},true);
-const d1Tex=canvasTex(128,128,(g,w,h)=>{g.fillStyle="#666b76";g.fillRect(0,0,w,h);g.fillStyle="#5f9a48";g.fillRect(w/2-6,0,12,h);g.fillStyle="#d9dde5";g.fillRect(w/2-9,0,2,h);g.fillRect(w/2+7,0,2,h);g.fillRect(3,0,3,h);g.fillRect(w-6,0,3,h);
+const roadTex=canvasTex(64,128,(g,w,h)=>{g.fillStyle=PAL.road;g.fillRect(0,0,w,h);for(let i=0;i<220;i++){g.fillStyle=`rgba(${Math.random()<.5?0:255},${Math.random()<.5?0:255},255,.04)`;g.fillRect(Math.random()*w,Math.random()*h,2,2)}g.fillStyle="#e9ecf2";g.fillRect(2,0,3,h);g.fillRect(w-5,0,3,h);g.fillRect(w/2-1.5,0,3,h*.45)},true);
+const laneTex=canvasTex(64,64,(g,w,h)=>{g.fillStyle=PAL.lane;g.fillRect(0,0,w,h);g.fillStyle="#9ea3ab";g.fillRect(0,0,4,h);g.fillRect(w-4,0,4,h)},true);
+const d1Tex=canvasTex(128,128,(g,w,h)=>{g.fillStyle=PAL.d1;g.fillRect(0,0,w,h);g.fillStyle="#5f9a48";g.fillRect(w/2-6,0,12,h);g.fillStyle="#d9dde5";g.fillRect(w/2-9,0,2,h);g.fillRect(w/2+7,0,2,h);g.fillRect(3,0,3,h);g.fillRect(w-6,0,3,h);
  g.fillStyle="#eef1f5";[w*.27,w*.73].forEach(x=>g.fillRect(x-1.5,0,3,h*.5))},true);
 const railTex=canvasTex(64,64,(g,w,h)=>{g.fillStyle="#8d8579";g.fillRect(0,0,w,h);g.fillStyle="#6b4f37";for(let y=2;y<h;y+=10)g.fillRect(6,y,w-12,5);g.fillStyle="#c9ccd2";g.fillRect(18,0,4,h);g.fillRect(w-22,0,4,h)},true);
 const MAT={
@@ -256,17 +267,17 @@ const MAT={
  G:new T.MeshLambertMaterial({map:laneTex,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}),
  M:new T.MeshLambertMaterial({map:d1Tex,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}),
  Z:new T.MeshLambertMaterial({map:railTex,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}),
- cap:new T.MeshLambertMaterial({color:"#6f7480",polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}),
+ cap:new T.MeshLambertMaterial({color:PAL.cap,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}),
  rail:new T.MeshLambertMaterial({color:"#d9dde6",side:T.DoubleSide}),
- plaza:new T.MeshLambertMaterial({color:"#d8ccb4",polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3}),
- plazaRim:new T.MeshLambertMaterial({color:"#b2a284",polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3}),
- lawn:new T.MeshLambertMaterial({color:"#8fbd5f",polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}),
- garden:new T.MeshLambertMaterial({color:"#9ccb6a"}),
- drive:new T.MeshLambertMaterial({color:"#b9bcc4"}),
+ plaza:new T.MeshLambertMaterial({color:PAL.plaza,polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3}),
+ plazaRim:new T.MeshLambertMaterial({color:PAL.plazaRim,polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3}),
+ lawn:new T.MeshLambertMaterial({color:PAL.lawn,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}),
+ garden:new T.MeshLambertMaterial({color:PAL.garden}),
+ drive:new T.MeshLambertMaterial({color:PAL.drive}),
 };
 
 const lawnTex=canvasTex(256,256,(g,w,h)=>{const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.62,"rgba(255,255,255,1)");r.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=r;g.fillRect(0,0,w,h)});
-const lawnMats={};function lawnMat(R){const k=Math.round(R);return lawnMats[k]||(lawnMats[k]=new T.MeshLambertMaterial({color:"#93c063",alphaMap:lawnTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}))}
+const lawnMats={};function lawnMat(R){const k=Math.round(R);return lawnMats[k]||(lawnMats[k]=new T.MeshLambertMaterial({color:PAL.lawnPad,alphaMap:lawnTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}))}
 /* ---------- pás silnice ---------- */
 function ribbonInto(pts,w,y,uvS,P,U,I,H,off=0){const n=pts.length/2;if(n<2)return;const base=P.length/3;let acc=0;
  for(let i=0;i<n;i++){const x0=pts[i*2],z0=pts[i*2+1];let nx,nz;
@@ -282,15 +293,17 @@ function geoFrom(P,U,I){const g=new T.BufferGeometry();g.setAttribute("position"
  const N=new Float32Array(P.length);for(let i=1;i<N.length;i+=3)N[i]=1;g.setAttribute("normal",new T.BufferAttribute(N,3));g.setIndex(I);g.computeBoundingSphere();return g}
 
 /* ---------- krajina: pole, louky, voda ---------- */
-const FIELD=["#c8b46a","#b7c36a","#9dbd59","#d0b878","#a7b75d","#c3a75a","#8db15a","#bfc77c"];
-const fieldTex=canvasTex(64,64,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.fillStyle="rgba(0,0,0,.07)";for(let y=0;y<h;y+=8)g.fillRect(0,y,w,3)},true);
+const FIELD=PAL.field;
+/* mozaika: čtvercová políčka s lehce jiným odstínem (jako na minimapa.cz), ať zem není jedna plochá barva */
+function mosaicTex(n,lo,seed){const r=rng(seed);const t=canvasTex(n*8,n*8,(g,w,h)=>{for(let y=0;y<n;y++)for(let x=0;x<n;x++){const v=Math.round(255*(lo+(1-lo)*r())),wm=Math.round(r()*10);g.fillStyle=`rgb(${Math.min(255,v+wm)},${v},${Math.max(0,v-wm)})`;g.fillRect(x*8,y*8,8,8)}},true);t.magFilter=T.NearestFilter;return t}
+const fieldTex=V2?mosaicTex(16,.88,31):canvasTex(64,64,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.fillStyle="rgba(0,0,0,.07)";for(let y=0;y<h;y+=8)g.fillRect(0,y,w,3)},true);
 let landMesh,waterMesh,landSrc=null,waterSrc=null;
 function buildLandSource(){const r=rng(5);
  // každá plocha má vlastní výšku (pole < ostatní < louky < les), aby se překrývající plochy neprolínaly
  const LY={A:.012,O:.02,M:.028,F:.036,W:0};
  const mk=(arr,kind,out)=>arr.forEach((a,pi)=>{const p=polyFromFlat(a);if(p.length<3)return;const yy=LY[kind]+(pi%7)*.0009;let tri;try{tri=T.ShapeUtils.triangulateShape(p.map(q=>new T.Vector2(q[0],q[1])),[])}catch(e){return}if(!tri.length)return;
-  const base=out.m.length/2;let col;if(kind==="A")col=new T.Color(FIELD[Math.floor(r()*FIELD.length)]);else if(kind==="M")col=new T.Color(r()<.5?"#a4cc6c":"#97c463");else if(kind==="O")col=new T.Color("#88b85a");else if(kind==="F")col=new T.Color("#5d8a43");else col=new T.Color("#4f9ccc");
-  const an=r()*Math.PI,ca=Math.cos(an),sa=Math.sin(an);const sc=kind==="A"?26:60;
+  const base=out.m.length/2;let col;if(kind==="A")col=new T.Color(FIELD[Math.floor(r()*FIELD.length)]);else if(kind==="M")col=new T.Color(r()<.5?PAL.meadow[0]:PAL.meadow[1]);else if(kind==="O")col=new T.Color(PAL.orchard);else if(kind==="F")col=new T.Color(PAL.forest);else col=new T.Color("#4f9ccc");
+  const an=r()*Math.PI,ca=Math.cos(an),sa=Math.sin(an);const sc=V2?(kind==="A"?900:1200):kind==="A"?26:60;
   p.forEach(q=>{out.m.push(q[0],q[1]);out.y.push(yy);out.c.push(col.r,col.g,col.b);out.u.push((q[0]*ca+q[1]*sa)/sc,(-q[0]*sa+q[1]*ca)/sc)});tri.forEach(t3=>{const a=p[t3[0]],b=p[t3[1]],c=p[t3[2]];const cr=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);if(cr>0)out.i.push(base+t3[0],base+t3[1],base+t3[2]);else out.i.push(base+t3[0],base+t3[2],base+t3[1])})});
  landSrc={m:[],y:[],c:[],u:[],i:[]};mk(LAND.F,"F",landSrc);mk(LAND.M,"M",landSrc);mk(LAND.O,"O",landSrc);mk(LAND.A,"A",landSrc);
  waterSrc={m:[],y:[],c:[],u:[],i:[]};mk(LAND.W,"W",waterSrc);
@@ -298,11 +311,11 @@ function buildLandSource(){const r=rng(5);
  const N=new Float32Array(landSrc.m.length/2*3);for(let i=1;i<N.length;i+=3)N[i]=1;g.setAttribute("normal",new T.BufferAttribute(N,3));g.setIndex(landSrc.i);
  landMesh=new T.Mesh(g,new T.MeshLambertMaterial({vertexColors:true,map:fieldTex,polygonOffset:true,polygonOffsetFactor:-.5,polygonOffsetUnits:-.5}));landMesh.receiveShadow=true;landMesh.frustumCulled=false;scene.add(landMesh);
  const w=new T.BufferGeometry();w.setAttribute("position",new T.BufferAttribute(new Float32Array(waterSrc.m.length/2*3),3));const WN=new Float32Array(waterSrc.m.length/2*3);for(let i=1;i<WN.length;i+=3)WN[i]=1;w.setAttribute("normal",new T.BufferAttribute(WN,3));w.setIndex(waterSrc.i);
- waterMesh=new T.Mesh(w,new T.MeshPhongMaterial({color:"#4c9fd0",shininess:80,specular:"#cfe8ff",polygonOffset:true,polygonOffsetFactor:-1.5,polygonOffsetUnits:-1.5}));waterMesh.frustumCulled=false;waterMesh.receiveShadow=false;scene.add(waterMesh)}
+ waterMesh=new T.Mesh(w,new T.MeshPhongMaterial({color:PAL.water,shininess:80,specular:PAL.waterSpec,polygonOffset:true,polygonOffsetFactor:-1.5,polygonOffsetUnits:-1.5}));waterMesh.frustumCulled=false;waterMesh.receiveShadow=false;scene.add(waterMesh)}
 const tmp2=[0,0];
 function mapLand(){const pa=landMesh.geometry.attributes.position.array,m=landSrc.m;for(let i=0,j=0;i<m.length;i+=2,j+=3){F(m[i],m[i+1],tmp2);pa[j]=tmp2[0];pa[j+1]=landSrc.y[i>>1];pa[j+2]=tmp2[1]}landMesh.geometry.attributes.position.needsUpdate=true;
  const wa=waterMesh.geometry.attributes.position.array,w=waterSrc.m;for(let i=0,j=0;i<w.length;i+=2,j+=3){F(w[i],w[i+1],tmp2);wa[j]=tmp2[0];wa[j+1]=.085;wa[j+2]=tmp2[1]}waterMesh.geometry.attributes.position.needsUpdate=true}
-const ground=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshLambertMaterial({color:"#90b95f"}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const groundTex=V2?mosaicTex(32,.9,57):null;const ground=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshLambertMaterial({color:PAL.ground,map:groundTex}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 
 /* ---------- stromy (lesy + remízky) ---------- */
 function treeGeo(kind,leaf){const parts=[];const col=(g,c)=>{const n=g.attributes.position.count,a=new Float32Array(n*3),cc=new T.Color(c);for(let i=0;i<n;i++){a[i*3]=cc.r;a[i*3+1]=cc.g;a[i*3+2]=cc.b}g.setAttribute("color",new T.BufferAttribute(a,3));return g};
@@ -311,7 +324,7 @@ function treeGeo(kind,leaf){const parts=[];const col=(g,c)=>{const n=g.attribute
  else{const a=new T.IcosahedronGeometry(.95,0);a.translate(0,1.75,0);const b=new T.IcosahedronGeometry(.62,0);b.translate(.42,2.25,.2);[a,b].forEach(g=>parts.push(col(g,leaf)))}
  parts.forEach(g=>{g.deleteAttribute("uv");g.setAttribute("uv",new T.BufferAttribute(new Float32Array(g.attributes.position.count*2),2))});return mergeGeos(parts.map(g=>g.index?g:g))}
 const treeMat=new T.MeshLambertMaterial({vertexColors:true});
-const TREEK=[[0,"#2f6a3a"],[0,"#3d7d3f"],[1,"#4f8f3c"],[1,"#6aa046"]];// les po dlaždicích: mimo záběr se stromy vůbec nekreslí (rychlejší mobil i render videa)
+const TREEK=[[0,PAL.trees[0]],[0,PAL.trees[1]],[1,PAL.trees[2]],[1,PAL.trees[3]]];// les po dlaždicích: mimo záběr se stromy vůbec nekreslí (rychlejší mobil i render videa)
 const FTILE=480,TREEGEO=TREEK.map(([k,c])=>{const g=treeGeo(k,c);g.boundingSphere=new T.Sphere(new T.Vector3(0,6,0),FTILE*.75+24);return g});let FOREST=[],forestShadow=true;
 let forestPts=null;
 function sampleForest(){const r=rng(9);forestPts=[];const sp=(S>.15?13:7.2)/S;
@@ -634,7 +647,7 @@ function buildLinks(){if(!linkGroup){linkGroup=new T.Group();scene.add(linkGroup
  if(cP.length){const m=new T.Mesh(geoFrom(cP,cU,cI),new T.MeshLambertMaterial({color:"#7d828c",polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));m.receiveShadow=true;linkGroup.add(m)}
  if(ready&&fresh.length)toast(`🤝 ${fresh[0][0]} a ${fresh[0][1]} se spojily!`,"ulice obou obcí se propojily");return fresh}
 function relayout(full){updTownParams();TOWNS.forEach(t=>{const c=tc(t);t.group.position.copy(c)});if(window.NAMESTI&&NAMESTI.group){F(CENTER.x,CENTER.y,tmp2);NAMESTI.group.position.set(tmp2[0],0,tmp2[1])}
- const span=60000*S;ground.scale.set(span,span,1);ground.position.set(0,0,0);
+ const span=60000*S;ground.scale.set(span,span,1);if(groundTex)groundTex.repeat.set(span/576,span/576);ground.position.set(0,0,0);
  mapLand();buildRoads();TOWNS.forEach(townDecor);placeHouses(performance.now());placeStations();buildLinks();
  SIGNS.forEach(s=>{if(!s.g)s.g=bigSign(s.txt);const q=s.get();F(q[0],q[1],tmp2);s.g.position.set(tmp2[0]+(s.txt[0]==="↖"?-8:8),0,tmp2[1]+(s.txt[0]==="↖"?-8:8));s.g.lookAt(cam.position.x,0,cam.position.z)});
  if(full){sampleForest();placeForest()}
@@ -790,7 +803,7 @@ addEventListener("resize",()=>{if(aspectLock)return;cam.aspect=innerWidth/innerH
 let orbitSpeed=0,aspectLock=false;
 
 /* ---------- API pro generátor reelů ---------- */
-window.GAME={canvas,THREE:T,
+window.GAME={canvas,THREE:T,dbg:()=>({scene,cam,ctr,sun,hemi,fill,ground,landMesh,waterMesh,MAT,PAL,POST,FOGC,R,lawnMats}),
  state:()=>({day:DAY,totalPlayers:POP,towns:TOWNS.map(t=>{const c=tc(t);return{name:t.n,players:t.players.length,abandoned:abandonedN(t),revive:CONFIG.REVIVE,open:!!t.open,tier:tierOf(t.players.length),erbUrl:t.erbUrl||null,erbSvg:(()=>{const d=ERB.E.find(e=>e[0]===t.n);return d?ERB.erb(d,tierOf(t.players.length)):''})(),center:{x:c.x,y:0,z:c.z},lm:{x:c.x+t.lm.x,y:0,z:c.z+t.lm.z,r:t.lm.r},radius:t.R,
   houses:t.items.map((it,i)=>{const s=t.slots[i];return s&&it.k==="h"?{id:t.n+"#"+i,owner:it.p.nick,no:it.p.no,x:c.x+s.x,y:0,z:c.z+s.z}:null}).filter(Boolean)}})}),
  setAspect:(w,h)=>{aspectLock=!!w;if(w){const k=Math.min(1,+QS.get("render")||1);R.setPixelRatio(1);R.setSize(Math.round(w*k),Math.round(h*k),false);cam.aspect=w/h}else{R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight}cam.updateProjectionMatrix();POST.resize()},
