@@ -37,14 +37,14 @@ const GAP=5, SPREAD=1.15;  // rozestup obcí při roztahování světa
 const LOT=6.6, MAXR=170, HOUSE_S=3.6;
 const V2=QS.get("vzhled")!=="1";
 const PAL=V2?{sky:["#5fa4e2","#a8cff0","#dfeaf0","#d3e3ec"],fog:"#d3e3ec",fogK:[1.35,4.6,320],hemi:["#e2ecff","#7f7c55",.6],sun:["#fff0d2",1.1],fill:["#b4caff",.18],
-  ground:"#88ad56",meadow:["#97b962","#89b058"],orchard:"#81a854",forest:"#547d3e",water:"#4489bd",waterSpec:"#e4f1ff",
+  ground:"#88ad56",meadow:["#97b962","#89b058"],orchard:"#81a854",forest:"#547d3e",water:"#2f6a8a",waterSpec:"#93aabb",shore:"#6d8c49",
   field:["#dcc878","#c6cc78","#a6c263","#e2cb8c","#b3bf66","#d1b56a","#99ba60","#c7ce84"],
-  road:"#656b77",lane:"#757b87",d1:"#5c626f",cap:"#656b77",lawnPad:"#a3c471",lawn:"#8fb35c",garden:"#8db259",drive:"#bdbab0",plaza:"#ddd0b3",plazaRim:"#b7a785",
+  road:"#5e6064",lane:"#6e7074",d1:"#56585d",cap:"#5e6064",lawnPad:"#a3c471",lawn:"#94b85e",garden:"#8db259",drive:"#bdbab0",plaza:"#ddd0b3",plazaRim:"#b7a785",
   trees:["#2d6a3b","#38793f","#4c8d3e","#66a047"],roofs:["#c45c3e","#9c3f2c","#4e5260","#8a6646"],sat:1.08,con:1.06,vig:.84}
  :{sky:["#6fa9da","#b9d6e8","#e9e1cf","#d7e2e2"],fog:"#d7e2e2",hemi:["#d6e8ff","#6b6340",.5],sun:["#ffd6a3",1.18],fill:["#a8c6ff",.18],
   ground:"#90b95f",meadow:["#a4cc6c","#97c463"],orchard:"#88b85a",forest:"#5d8a43",water:"#4c9fd0",waterSpec:"#cfe8ff",
   field:["#c8b46a","#b7c36a","#9dbd59","#d0b878","#a7b75d","#c3a75a","#8db15a","#bfc77c"],
-  road:"#6f7480",lane:"#7d828c",d1:"#666b76",cap:"#6f7480",lawnPad:"#93c063",lawn:"#8fbd5f",garden:"#9ccb6a",drive:"#b9bcc4",plaza:"#d8ccb4",plazaRim:"#b2a284",
+  road:"#6f7480",lane:"#7d828c",d1:"#666b76",cap:"#6f7480",shore:"#7fb05a",lawnPad:"#93c063",lawn:"#8fbd5f",garden:"#9ccb6a",drive:"#b9bcc4",plaza:"#d8ccb4",plazaRim:"#b2a284",
   trees:["#2f6a3a","#3d7d3f","#4f8f3c","#6aa046"],roofs:["#c45c3e","#9c3f2c","#4e5260","#8a6646"],sat:1.14,con:1.07,vig:.72};
 const ROOFS=PAL.roofs,ROOF_W=[.42,.26,.18,.14];
 const CLS={M:{w:4.8,y:.078},L:{w:1.5,y:.063},P:{w:2.7,y:.070},S:{w:2.3,y:.068},T:{w:1.9,y:.066},Z:{w:1.6,y:.05},G:{w:1.9,y:.061}};
@@ -305,30 +305,44 @@ function bladesTex(seed){const r=rng(seed);return canvasTex(256,256,(g,w,h)=>{g.
 /* pole a louky: řádky po směru orby + zrno */
 function rowsTex(seed){const r=rng(seed);return canvasTex(128,128,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.fillStyle="rgba(60,50,10,.085)";for(let y=0;y<h;y+=8)g.fillRect(0,y,w,3);const im=g.getImageData(0,0,w,h),p=im.data;for(let i=0;i<p.length;i+=4){const k=.94+r()*.1;p[i]=Math.min(255,p[i]*k);p[i+1]=Math.min(255,p[i+1]*k);p[i+2]=Math.min(255,p[i+2]*k)}g.putImageData(im,0,0)},true)}
 const fieldTex=V2?rowsTex(31):canvasTex(64,64,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.fillStyle="rgba(0,0,0,.07)";for(let y=0;y<h;y+=8)g.fillRect(0,y,w,3)},true);
-let landMesh,waterMesh,landSrc=null,waterSrc=null;
+/* hladina: jemné vlnky a světlejší a tmavší pruhy, ať voda není jednolitá plocha */
+function waterTex(seed){const r=rng(seed);return canvasTex(256,256,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);for(let i=0;i<70;i++){const x=r()*w,y=r()*h,rx=30+r()*70,ry=5+r()*12,d=r()<.6;g.fillStyle=d?`rgba(10,40,60,${.05+r()*.07})`:`rgba(255,255,255,${.04+r()*.05})`;for(const ox of[-w,0,w])for(const oy of[-h,0,h]){g.beginPath();g.ellipse(x+ox,y+oy,rx,ry,0,0,6.283);g.fill()}}
+  const im=g.getImageData(0,0,w,h),p=im.data;for(let i=0;i<p.length;i+=4){const k=.95+r()*.07;p[i]=Math.min(255,p[i]*k);p[i+1]=Math.min(255,p[i+1]*k);p[i+2]=Math.min(255,p[i+2]*k)}g.putImageData(im,0,0)},true)}
+/* obrys zvětšený o d metrů ven (břeh kolem vody) */
+function growPoly(p,d){const n=p.length;let ar=0;for(let i=0;i<n;i++){const a=p[i],b=p[(i+1)%n];ar+=a[0]*b[1]-b[0]*a[1]}const s=ar>0?1:-1,out=[];
+ for(let i=0;i<n;i++){const a=p[(i+n-1)%n],b=p[i],c=p[(i+1)%n];const e1x=b[0]-a[0],e1y=b[1]-a[1],e2x=c[0]-b[0],e2y=c[1]-b[1],l1=Math.hypot(e1x,e1y),l2=Math.hypot(e2x,e2y);
+  let n1x=l1>1e-6?e1y/l1*s:0,n1y=l1>1e-6?-e1x/l1*s:0,n2x=l2>1e-6?e2y/l2*s:0,n2y=l2>1e-6?-e2x/l2*s:0;if(l1<=1e-6){n1x=n2x;n1y=n2y}if(l2<=1e-6){n2x=n1x;n2y=n1y}
+  let mx=n1x+n2x,my=n1y+n2y;const ml=Math.hypot(mx,my);if(ml<1e-6){mx=n1x;my=n1y}else{mx/=ml;my/=ml}const k=Math.min(1.8,1/Math.max(.4,mx*n1x+my*n1y));out.push([b[0]+mx*d*k,b[1]+my*d*k])}return out}
+let landMesh,waterMesh,shoreMesh,landSrc=null,waterSrc=null,shoreSrc=null;
 function buildLandSource(){const r=rng(5);
  // každá plocha má vlastní výšku (pole < ostatní < louky < les), aby se překrývající plochy neprolínaly
- const LY={A:.012,O:.02,M:.028,F:.036,W:0};
- const mk=(arr,kind,out)=>arr.forEach((a,pi)=>{const p=polyFromFlat(a);if(p.length<3)return;const yy=LY[kind]+(pi%7)*.0009;let tri;try{tri=T.ShapeUtils.triangulateShape(p.map(q=>new T.Vector2(q[0],q[1])),[])}catch(e){return}if(!tri.length)return;
+ const LY={A:.012,O:.02,M:.028,F:.036,W:0,S:0},SHORE=26;
+ const mk=(arr,kind,out)=>arr.forEach((a,pi)=>{const p=kind==="S"?growPoly(polyFromFlat(a),SHORE):polyFromFlat(a);if(p.length<3)return;const yy=LY[kind]+(pi%7)*.0009;let tri;try{tri=T.ShapeUtils.triangulateShape(p.map(q=>new T.Vector2(q[0],q[1])),[])}catch(e){return}if(!tri.length)return;
   const base=out.m.length/2;let col;if(kind==="A")col=new T.Color(FIELD[Math.floor(r()*FIELD.length)]);else if(kind==="M")col=new T.Color(r()<.5?PAL.meadow[0]:PAL.meadow[1]);else if(kind==="O")col=new T.Color(PAL.orchard);else if(kind==="F")col=new T.Color(PAL.forest);else col=new T.Color("#4f9ccc");
-  const an=r()*Math.PI,ca=Math.cos(an),sa=Math.sin(an);const sc=V2?(kind==="A"?34:kind==="F"?140:90):kind==="A"?26:60;
+  const an=r()*Math.PI,ca=Math.cos(an),sa=Math.sin(an);const sc=V2?(kind==="A"?34:kind==="F"?140:kind==="W"?260:90):kind==="A"?26:60;
   p.forEach(q=>{out.m.push(q[0],q[1]);out.y.push(yy);out.c.push(col.r,col.g,col.b);if(V2&&kind==="F")out.u.push(.5,.043);else out.u.push((q[0]*ca+q[1]*sa)/sc,(-q[0]*sa+q[1]*ca)/sc)});tri.forEach(t3=>{const a=p[t3[0]],b=p[t3[1]],c=p[t3[2]];const cr=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);if(cr>0)out.i.push(base+t3[0],base+t3[1],base+t3[2]);else out.i.push(base+t3[0],base+t3[2],base+t3[1])})});
  landSrc={m:[],y:[],c:[],u:[],i:[]};mk(LAND.A,"A",landSrc);mk(LAND.O,"O",landSrc);mk(LAND.M,"M",landSrc);mk(LAND.F,"F",landSrc);// pořadí = pořadí kreslení: pole dole, les navrchu (plochy nezapisují hloubku, viz landMesh)
- waterSrc={m:[],y:[],c:[],u:[],i:[]};mk(LAND.W,"W",waterSrc);
+ waterSrc={m:[],y:[],c:[],u:[],i:[]};mk(LAND.W,"W",waterSrc);shoreSrc={m:[],y:[],c:[],u:[],i:[]};if(V2)mk(LAND.W,"S",shoreSrc);
  const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(new Float32Array(landSrc.m.length/2*3),3));g.setAttribute("color",new T.Float32BufferAttribute(landSrc.c,3));g.setAttribute("uv",new T.Float32BufferAttribute(landSrc.u,2));
  const N=new Float32Array(landSrc.m.length/2*3);for(let i=1;i<N.length;i+=3)N[i]=1;g.setAttribute("normal",new T.BufferAttribute(N,3));g.setIndex(landSrc.i);
  /* Pole, louky a lesy leží skoro ve stejné výšce a překrývají se. Kdyby o pořadí rozhodovala hloubka, z dálky by plochy snímek od snímku problikávaly.
     Proto hloubku nezapisují a kreslí se v pevném pořadí hned po zemi (renderOrder), domky a stromy až po nich. */
  landMesh=new T.Mesh(g,new T.MeshLambertMaterial({vertexColors:true,map:fieldTex,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-6}));landMesh.renderOrder=-8;landMesh.receiveShadow=true;landMesh.frustumCulled=false;scene.add(landMesh);
- const w=new T.BufferGeometry();w.setAttribute("position",new T.BufferAttribute(new Float32Array(waterSrc.m.length/2*3),3));const WN=new Float32Array(waterSrc.m.length/2*3);for(let i=1;i<WN.length;i+=3)WN[i]=1;w.setAttribute("normal",new T.BufferAttribute(WN,3));w.setIndex(waterSrc.i);
- waterMesh=new T.Mesh(w,new T.MeshPhongMaterial({color:PAL.water,shininess:80,specular:PAL.waterSpec,polygonOffset:true,polygonOffsetFactor:-1.5,polygonOffsetUnits:-1.5}));waterMesh.frustumCulled=false;waterMesh.receiveShadow=false;scene.add(waterMesh)}
+ const w=new T.BufferGeometry();w.setAttribute("position",new T.BufferAttribute(new Float32Array(waterSrc.m.length/2*3),3));const WN=new Float32Array(waterSrc.m.length/2*3);for(let i=1;i<WN.length;i+=3)WN[i]=1;w.setAttribute("normal",new T.BufferAttribute(WN,3));if(V2)w.setAttribute("uv",new T.Float32BufferAttribute(waterSrc.u,2));w.setIndex(waterSrc.i);
+ waterMesh=new T.Mesh(w,new T.MeshPhongMaterial({color:PAL.water,map:V2?waterTex(71):null,shininess:V2?55:80,specular:PAL.waterSpec,polygonOffset:true,polygonOffsetFactor:-1.5,polygonOffsetUnits:-1.5}));waterMesh.frustumCulled=false;waterMesh.receiveShadow=false;scene.add(waterMesh);
+ /* břeh: tmavší porostlý pás kolem každé vodní plochy, leží pod hladinou, hloubku nezapisuje (jako ostatní plochy krajiny) */
+ if(shoreSrc.i.length){const sg=new T.BufferGeometry();sg.setAttribute("position",new T.BufferAttribute(new Float32Array(shoreSrc.m.length/2*3),3));const SN=new Float32Array(shoreSrc.m.length/2*3);for(let i=1;i<SN.length;i+=3)SN[i]=1;sg.setAttribute("normal",new T.BufferAttribute(SN,3));sg.setIndex(shoreSrc.i);
+  shoreMesh=new T.Mesh(sg,new T.MeshLambertMaterial({color:PAL.shore,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-6}));shoreMesh.renderOrder=-7;shoreMesh.receiveShadow=true;shoreMesh.frustumCulled=false;scene.add(shoreMesh)}}
 const tmp2=[0,0];
 function mapLand(){const pa=landMesh.geometry.attributes.position.array,m=landSrc.m;for(let i=0,j=0;i<m.length;i+=2,j+=3){F(m[i],m[i+1],tmp2);pa[j]=tmp2[0];pa[j+1]=landSrc.y[i>>1];pa[j+2]=tmp2[1]}landMesh.geometry.attributes.position.needsUpdate=true;
- const wa=waterMesh.geometry.attributes.position.array,w=waterSrc.m;for(let i=0,j=0;i<w.length;i+=2,j+=3){F(w[i],w[i+1],tmp2);wa[j]=tmp2[0];wa[j+1]=.085;wa[j+2]=tmp2[1]}waterMesh.geometry.attributes.position.needsUpdate=true}
+ const wa=waterMesh.geometry.attributes.position.array,w=waterSrc.m;for(let i=0,j=0;i<w.length;i+=2,j+=3){F(w[i],w[i+1],tmp2);wa[j]=tmp2[0];wa[j+1]=.085;wa[j+2]=tmp2[1]}waterMesh.geometry.attributes.position.needsUpdate=true;
+ if(shoreMesh){const sa=shoreMesh.geometry.attributes.position.array,sm=shoreSrc.m;for(let i=0,j=0;i<sm.length;i+=2,j+=3){F(sm[i],sm[i+1],tmp2);sa[j]=tmp2[0];sa[j+1]=.04;sa[j+2]=tmp2[1]}shoreMesh.geometry.attributes.position.needsUpdate=true}}
 const groundTex=V2?bladesTex(57):null,patchTex=V2?grassTex(16,.9,58):null;const ground=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshLambertMaterial({color:PAL.ground,map:groundTex}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.renderOrder=-10;scene.add(ground);
 /* velké světlejší a tmavší plochy přes trávu (násobí barvu pod sebou) */
 const groundPatch=V2?new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:patchTex,blending:T.MultiplyBlending,transparent:true,depthWrite:false,fog:false,polygonOffset:true,polygonOffsetFactor:-.2,polygonOffsetUnits:-.2})):null;if(groundPatch){groundPatch.rotation.x=-Math.PI/2;groundPatch.position.y=.004;groundPatch.renderOrder=-1;scene.add(groundPatch)}
-if(V2){MAT.garden.map=bladesTex(59);MAT.garden.needsUpdate=true}
+if(V2){MAT.garden.map=bladesTex(59);MAT.garden.needsUpdate=true;
+ /* trávník obce: stejná tráva jako okolí, jen o něco světlejší; kreslí se před velkými skvrnami, aby je dostal taky, a okraj má průhledný */
+ Object.assign(MAT.lawn,{map:groundTex,vertexColors:true,transparent:true,depthWrite:false});MAT.lawn.needsUpdate=true}
 
 /* ---------- stromy (lesy + remízky) ---------- */
 function treeGeo(kind,leaf){const parts=[];const col=(g,c)=>{const n=g.attributes.position.count,a=new Float32Array(n*3),cc=new T.Color(c);for(let i=0;i<n;i++){a[i*3]=cc.r;a[i*3+1]=cc.g;a[i*3+2]=cc.b}g.setAttribute("color",new T.BufferAttribute(a,3));return g};
@@ -472,10 +486,11 @@ function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.user
  // stožár se státní vlajkou u návsi každé živé obce
  if(t.players.length>=CONFIG.REVIVE){const lm=t.lm;const fp=flagpole(lm.x+Math.cos(lm.ry+.9)*(lm.r+.6),lm.z+Math.sin(lm.ry+.9)*(lm.r+.6),lm.type==="kaple"||lm.type==="pomnik"?8:10.5);fp.traverse(m=>{m.userData.tmp=1});g.add(fp);t.flagObj=fp}else t.flagObj=null;
  // trávník jen pod zastavěnými bloky (ne velký kruh): čtverec kolem každého bloku + kruh kolem návsi
- {const lp=[],li=[];const fan=(pts)=>{const b=lp.length/3;let cx=0,cz=0;pts.forEach(q=>{cx+=q.x;cz+=q.z});cx/=pts.length;cz/=pts.length;lp.push(cx,.044,cz);pts.forEach(q=>lp.push(q.x,.044,q.z));for(let i=0;i<pts.length;i++)li.push(b,b+1+(i+1)%pts.length,b+1+i)};
-  const circ=(x,z,r)=>{const a=[];for(let i=0;i<28;i++){const an=i/28*6.283;a.push({x:x+Math.cos(an)*r,z:z+Math.sin(an)*r})}fan(a)};
+ {const lp=[],li=[],lc=[],lu=[],NS=28;const ring=(x,z,r,al)=>{for(let i=0;i<NS;i++){const an=i/NS*6.283,px=x+Math.cos(an)*r,pz=z+Math.sin(an)*r;lp.push(px,.044,pz);lc.push(1,1,1,al);lu.push(px/14,pz/14)}};
+  /* střed + plný kruh + ve vzhledu 2 ještě prstenec, který se do okolní trávy ztrácí (žádná ostrá hrana) */
+  const circ=(x,z,r)=>{const b=lp.length/3;lp.push(x,.044,z);lc.push(1,1,1,1);lu.push(x/14,z/14);ring(x,z,V2?r*.78:r,1);for(let i=0;i<NS;i++)li.push(b,b+1+(i+1)%NS,b+1+i);if(V2){ring(x,z,r*1.08,0);for(let i=0;i<NS;i++){const j=(i+1)%NS;li.push(b+1+i,b+1+j,b+1+NS+j,b+1+i,b+1+NS+j,b+1+NS+i)}}};
   circ(t.lm.x,t.lm.z,t.lm.r+14);(t.usedB||[]).forEach(b=>{circ(b.cx,b.cz,b.lr)});(t.slots||[]).forEach(q=>{if(q.big)circ(q.x,q.z,q.big+4)});
-  const lg=new T.BufferGeometry();lg.setAttribute("position",new T.Float32BufferAttribute(lp,3));lg.setIndex(li);lg.computeVertexNormals();const lawn=new T.Mesh(lg,MAT.lawn);lawn.receiveShadow=true;lawn.userData.tmp=1;g.add(lawn)}
+  const lg=new T.BufferGeometry();lg.setAttribute("position",new T.Float32BufferAttribute(lp,3));if(V2){lg.setAttribute("color",new T.Float32BufferAttribute(lc,4));lg.setAttribute("uv",new T.Float32BufferAttribute(lu,2))}lg.setIndex(li);lg.computeVertexNormals();const lawn=new T.Mesh(lg,MAT.lawn);lawn.receiveShadow=true;lawn.renderOrder=V2?-2:0;lawn.userData.tmp=1;g.add(lawn)}
  // zastavěné území (parcely načatých bloků + ulice): podle něj se ořezávají silnice, kácí les a sází parky
  {const ZH=new Hash(14);(t.usedB||[]).forEach(b=>b.lots.forEach(q=>ZH.add(q.x,q.z,1)));ZH.add(t.lm.x,t.lm.z,1);t.ZH=ZH}
  // ulice čtvrti: obvod každého načatého bloku (vodorovné nahoře, příčné o chlup níž), zaoblené rohy
