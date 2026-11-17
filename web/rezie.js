@@ -73,7 +73,7 @@
         target = new Mp4Muxer.ArrayBufferTarget();
         muxer = new Mp4Muxer.Muxer({ target: target, video: { codec: "avc", width: W, height: H, frameRate: fps }, audio: abuf ? { codec: "aac", numberOfChannels: 2, sampleRate: SR } : undefined, fastStart: "in-memory" });
         venc = new VideoEncoder({ output: function (c, m) { muxer.addVideoChunk(c, m); }, error: function (e) { err = e; } });
-        venc.configure({ codec: "avc1.640028", width: W, height: H, bitrate: 14000000, framerate: fps });
+        venc.configure({ codec: "avc1.640028", width: W, height: H, bitrate: 9000000, framerate: fps });
         return REEL.frames(script, { fps: fps, clean: clean, mount: $("rzMount"), each: function (cv, t, i) {
           if (err) throw err; if (stopAsk) return false;
           var f = new VideoFrame(cv, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) }); venc.encode(f, { keyFrame: i % 60 === 0 }); f.close(); n = i + 1;
