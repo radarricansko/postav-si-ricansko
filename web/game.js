@@ -39,7 +39,7 @@ const V2=QS.get("vzhled")!=="1";
 const PAL=V2?{sky:["#5fa4e2","#a8cff0","#dfeaf0","#d3e3ec"],fog:"#d3e3ec",fogK:[1.35,4.6,320],hemi:["#e2ecff","#7f7c55",.6],sun:["#fff0d2",1.1],fill:["#b4caff",.18],
   ground:"#88ad56",meadow:["#97b962","#89b058"],orchard:"#81a854",forest:"#547d3e",water:"#4489bd",waterSpec:"#e4f1ff",
   field:["#dcc878","#c6cc78","#a6c263","#e2cb8c","#b3bf66","#d1b56a","#99ba60","#c7ce84"],
-  road:"#656b77",lane:"#757b87",d1:"#5c626f",cap:"#656b77",lawnPad:"#a6c574",lawn:"#93b760",garden:"#98bb62",drive:"#bdbab0",plaza:"#ddd0b3",plazaRim:"#b7a785",
+  road:"#656b77",lane:"#757b87",d1:"#5c626f",cap:"#656b77",lawnPad:"#a3c471",lawn:"#8fb35c",garden:"#8db259",drive:"#bdbab0",plaza:"#ddd0b3",plazaRim:"#b7a785",
   trees:["#2d6a3b","#38793f","#4c8d3e","#66a047"],roofs:["#c45c3e","#9c3f2c","#4e5260","#8a6646"],sat:1.08,con:1.06,vig:.84}
  :{sky:["#6fa9da","#b9d6e8","#e9e1cf","#d7e2e2"],fog:"#d7e2e2",hemi:["#d6e8ff","#6b6340",.5],sun:["#ffd6a3",1.18],fill:["#a8c6ff",.18],
   ground:"#90b95f",meadow:["#a4cc6c","#97c463"],orchard:"#88b85a",forest:"#5d8a43",water:"#4c9fd0",waterSpec:"#cfe8ff",
@@ -129,7 +129,7 @@ async function loadModels(){
  [["tree","m/tree-large.json"],["treeS","m/tree-small.json"],["lamp","r/light-square.json"],["dumpster","r/dumpster.json"],["planter","m/planter.json"]].forEach(([k,u])=>jobs.push(load(u).then(g=>{const m=meshOf(g);MODELS.p[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})));
  if(LAZYCARS)MODELS.carsLater=[];else jobs.push(loadCars());
  await Promise.all(jobs);
- if(V2){MODELS.p.tree.mat.color.set("#b6cc8c");MODELS.p.treeS.mat.color.set("#b6cc8c")}}// stromky u domků: tlumenější zelená, ať ladí s krajinou
+ if(V2)["tree","treeS"].forEach(k=>{const m=MODELS.p[k].mat;m.map=recolorTex(m.map,"#5e9d49");m.needsUpdate=true})}// stromky u domků: tlumenější zelená, ať ladí s krajinou
 /* auta (půl MB) nejsou potřeba k prvnímu pohledu: hráčům se dotáhnou až po startu; admin a render je mají hned, ať je video stejné */
 const LAZYCARS=!QS.get("admin")&&!QS.get("render");
 function loadCars(){return Promise.all(["sedan","suv","taxi","van","firetruck","hatchback-sports","suv-luxury","delivery","truck"].map(k=>load("c/"+k+".json").then(g=>{const m=meshOf(g);MODELS.c[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})))}
@@ -278,7 +278,7 @@ const MAT={
 };
 
 const lawnTex=canvasTex(256,256,(g,w,h)=>{const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.62,"rgba(255,255,255,1)");r.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=r;g.fillRect(0,0,w,h)});
-const lawnMats={};function lawnMat(R){const k=Math.round(R);return lawnMats[k]||(lawnMats[k]=new T.MeshLambertMaterial({color:PAL.lawnPad,alphaMap:lawnTex,opacity:V2?.5:1,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}))}
+const lawnMats={};function lawnMat(R){const k=Math.round(R);return lawnMats[k]||(lawnMats[k]=new T.MeshLambertMaterial({color:PAL.lawnPad,alphaMap:lawnTex,opacity:V2?.32:1,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}))}
 /* ---------- pás silnice ---------- */
 function ribbonInto(pts,w,y,uvS,P,U,I,H,off=0){const n=pts.length/2;if(n<2)return;const base=P.length/3;let acc=0;
  for(let i=0;i<n;i++){const x0=pts[i*2],z0=pts[i*2+1];let nx,nz;
