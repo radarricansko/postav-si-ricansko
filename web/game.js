@@ -666,7 +666,7 @@ function placeStations(){if(!stations){const rail=ROADS.filter(r=>r.c==="Z");sta
   const dx=bx-ax,dz=bz-az,l=Math.hypot(dx,dz)||1;s.o.position.set(tmp2[0]-dz/l*2.1,0,tmp2[1]+dx/l*2.1);s.o.rotation.y=Math.atan2(dx,dz)})}
 const cloudTex=canvasTex(256,128,(g,w,h)=>{for(let i=0;i<14;i++){const x=40+Math.random()*176,y=50+Math.random()*30,r=26+Math.random()*30;const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,"rgba(255,255,255,.95)");gr.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,7);g.fill()}});
 const clouds=[];for(let i=0;i<14;i++){const sp=new T.Sprite(new T.SpriteMaterial({map:cloudTex,transparent:true,depthWrite:false,opacity:0,fog:false}));sp.userData={u:Math.random(),v:Math.random(),sz:.7+Math.random()*.8};scene.add(sp);clouds.push(sp)}
-function updClouds(now,dist){const b=regionBox();const W=b[2]-b[0],H=b[3]-b[1];const op=Math.max(0,Math.min(.42,(dist-600*S/0.06)/(1400*S/0.06)));
+function updClouds(now,dist){const b=regionBox();const W=b[2]-b[0],H=b[3]-b[1];const op=Math.max(0,Math.min(V2?.16:.42,(dist-600*S/0.06)/(1400*S/0.06)));/* vzhled 2: mraky jen náznakem, jinak mapa z výšky šedne */
  clouds.forEach(c=>{const u=(c.userData.u+now*.000004)%1;c.position.set(b[0]-W*.1+u*W*1.2,dist*.45,b[1]+c.userData.v*H);const s=W*.16*c.userData.sz;c.scale.set(s,s*.5,1);c.material.opacity=op})}
 /* ---------- spojování obcí: když se dvě obce dotknou, jejich uličky se propojí ---------- */
 let linkGroup=null;const LINKS=new Set(),LINKSEG=[];
