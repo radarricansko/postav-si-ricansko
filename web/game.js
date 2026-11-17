@@ -37,7 +37,7 @@ const GAP=5, SPREAD=1.15;  // rozestup obcí při roztahování světa
 const LOT=6.6, MAXR=170, HOUSE_S=3.6;
 const V2=QS.get("vzhled")!=="1";
 const PAL=V2?{sky:["#5fa4e2","#a8cff0","#dfeaf0","#d3e3ec"],fog:"#d3e3ec",fogK:[1.35,4.6,320],hemi:["#e2ecff","#7f7c55",.6],sun:["#fff0d2",1.1],fill:["#b4caff",.18],
-  ground:"#88ad56",meadow:["#97b962","#89b058"],orchard:"#81a854",forest:"#547d3e",water:"#2f6a8a",waterSpec:"#93aabb",shore:"#6d8c49",
+  ground:"#88ad56",meadow:["#97b962","#89b058"],orchard:"#81a854",forest:"#547d3e",water:"#2f6a8a",waterSpec:"#93aabb",shore:"#73934c",
   field:["#dcc878","#c6cc78","#a6c263","#e2cb8c","#b3bf66","#d1b56a","#99ba60","#c7ce84"],
   road:"#5e6064",lane:"#6e7074",d1:"#56585d",cap:"#5e6064",lawnPad:"#a3c471",lawn:"#94b85e",garden:"#8db259",drive:"#bdbab0",plaza:"#ddd0b3",plazaRim:"#b7a785",
   trees:["#2d6a3b","#38793f","#4c8d3e","#66a047"],roofs:["#c45c3e","#9c3f2c","#4e5260","#8a6646"],sat:1.08,con:1.06,vig:.84}
@@ -306,7 +306,7 @@ function bladesTex(seed){const r=rng(seed);return canvasTex(256,256,(g,w,h)=>{g.
 function rowsTex(seed){const r=rng(seed);return canvasTex(128,128,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.fillStyle="rgba(60,50,10,.085)";for(let y=0;y<h;y+=8)g.fillRect(0,y,w,3);const im=g.getImageData(0,0,w,h),p=im.data;for(let i=0;i<p.length;i+=4){const k=.94+r()*.1;p[i]=Math.min(255,p[i]*k);p[i+1]=Math.min(255,p[i+1]*k);p[i+2]=Math.min(255,p[i+2]*k)}g.putImageData(im,0,0)},true)}
 const fieldTex=V2?rowsTex(31):canvasTex(64,64,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.fillStyle="rgba(0,0,0,.07)";for(let y=0;y<h;y+=8)g.fillRect(0,y,w,3)},true);
 /* hladina: jemné vlnky a světlejší a tmavší pruhy, ať voda není jednolitá plocha */
-function waterTex(seed){const r=rng(seed);return canvasTex(256,256,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);for(let i=0;i<70;i++){const x=r()*w,y=r()*h,rx=30+r()*70,ry=5+r()*12,d=r()<.6;g.fillStyle=d?`rgba(10,40,60,${.05+r()*.07})`:`rgba(255,255,255,${.04+r()*.05})`;for(const ox of[-w,0,w])for(const oy of[-h,0,h]){g.beginPath();g.ellipse(x+ox,y+oy,rx,ry,0,0,6.283);g.fill()}}
+function waterTex(seed){const r=rng(seed);return canvasTex(256,256,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);for(let i=0;i<70;i++){const x=r()*w,y=r()*h,rx=30+r()*70,ry=5+r()*12,d=r()<.6;g.fillStyle=d?`rgba(10,40,60,${.03+r()*.05})`:`rgba(255,255,255,${.03+r()*.04})`;for(const ox of[-w,0,w])for(const oy of[-h,0,h]){g.beginPath();g.ellipse(x+ox,y+oy,rx,ry,0,0,6.283);g.fill()}}
   const im=g.getImageData(0,0,w,h),p=im.data;for(let i=0;i<p.length;i+=4){const k=.95+r()*.07;p[i]=Math.min(255,p[i]*k);p[i+1]=Math.min(255,p[i+1]*k);p[i+2]=Math.min(255,p[i+2]*k)}g.putImageData(im,0,0)},true)}
 /* obrys zvětšený o d metrů ven (břeh kolem vody) */
 function growPoly(p,d){const n=p.length;let ar=0;for(let i=0;i<n;i++){const a=p[i],b=p[(i+1)%n];ar+=a[0]*b[1]-b[0]*a[1]}const s=ar>0?1:-1,out=[];
@@ -316,7 +316,7 @@ function growPoly(p,d){const n=p.length;let ar=0;for(let i=0;i<n;i++){const a=p[
 let landMesh,waterMesh,shoreMesh,landSrc=null,waterSrc=null,shoreSrc=null;
 function buildLandSource(){const r=rng(5);
  // každá plocha má vlastní výšku (pole < ostatní < louky < les), aby se překrývající plochy neprolínaly
- const LY={A:.012,O:.02,M:.028,F:.036,W:0,S:0},SHORE=26;
+ const LY={A:.012,O:.02,M:.028,F:.036,W:0,S:0},SHORE=15;
  const mk=(arr,kind,out)=>arr.forEach((a,pi)=>{const p=kind==="S"?growPoly(polyFromFlat(a),SHORE):polyFromFlat(a);if(p.length<3)return;const yy=LY[kind]+(pi%7)*.0009;let tri;try{tri=T.ShapeUtils.triangulateShape(p.map(q=>new T.Vector2(q[0],q[1])),[])}catch(e){return}if(!tri.length)return;
   const base=out.m.length/2;let col;if(kind==="A")col=new T.Color(FIELD[Math.floor(r()*FIELD.length)]);else if(kind==="M")col=new T.Color(r()<.5?PAL.meadow[0]:PAL.meadow[1]);else if(kind==="O")col=new T.Color(PAL.orchard);else if(kind==="F")col=new T.Color(PAL.forest);else col=new T.Color("#4f9ccc");
   const an=r()*Math.PI,ca=Math.cos(an),sa=Math.sin(an);const sc=V2?(kind==="A"?34:kind==="F"?140:kind==="W"?260:90):kind==="A"?26:60;
