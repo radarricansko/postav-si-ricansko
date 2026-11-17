@@ -2415,7 +2415,7 @@
     }
     AU.init();
     var jobs = [loadFonts(opts)];
-    if (AU.ctx && AU.ctx.state === 'suspended') jobs.push(AU.ctx.resume().catch(function () {}));
+    if (AU.ctx && AU.ctx.state === 'suspended') jobs.push(Promise.race([AU.ctx.resume().catch(function () {}), sleep(400)]));   // bez kliknutí uživatele by resume() čekalo donekonečna
     script.scenes.forEach(function (s) {
       if (s.type === 'town' && s.img === undefined) jobs.push(svgToImage(s.erbSvg).then(function (im) { s.img = im; }));
       jobs.push(loadAssets(s));
