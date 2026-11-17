@@ -69,9 +69,9 @@
   function offline(clean) {
     var fps = 30, W = REEL.W, H = REEL.H, SR = 48000, err = null, target, muxer, venc, abuf = null, n = 0, total = script.total, frames = Math.ceil(total / 1000 * fps);
     /* kontrola plynulosti: rozdíl sousedních snímků; velký skok mimo střih = chyba v obraze (vyskočení, probliknutí) */
-    var dc = document.createElement("canvas"); dc.width = 54; dc.height = 96; var dg = dc.getContext("2d", { willReadFrequently: true }), prevPx = null, diffs = [], tc2 = document.createElement("canvas"); tc2.width = 135; tc2.height = 240; var tg = tc2.getContext("2d"), prevThumb = "", pairs = {};
+    var dc = document.createElement("canvas"); dc.width = 54; dc.height = 96; var dg = dc.getContext("2d", { willReadFrequently: true }), prevPx = null, diffs = [], tc2 = document.createElement("canvas"); tc2.width = 135; tc2.height = 240; var tg = tc2.getContext("2d"), prevThumb = "", pairs = {}, nPairs = 0;
     function probe(cv, i) { dg.drawImage(cv, 0, 0, 54, 96); var px = dg.getImageData(0, 0, 54, 96).data, v = 0; if (prevPx) { for (var k = 1; k < px.length; k += 4) v += Math.abs(px[k] - prevPx[k]); v /= px.length / 4; } diffs.push(v); prevPx = px;
-      tg.drawImage(cv, 0, 0, 135, 240); var u = tc2.toDataURL("image/jpeg", 0.72); if (v > 9 && Object.keys(pairs).length < 80) pairs[i] = [prevThumb, u]; prevThumb = u; }
+      tg.drawImage(cv, 0, 0, 135, 240); var u = tc2.toDataURL("image/jpeg", 0.72); if (v > 9 && ++nPairs < 400) pairs[i] = [prevThumb, u]; prevThumb = u; }
     function report() { var starts = {}; script.scenes.forEach(function (sc) { var f = Math.round(sc.t0 / 1000 * fps); starts[f - 1] = starts[f] = starts[f + 1] = 1; });
       var inside = [], cuts = 0; for (var i = 1; i < diffs.length; i++) { var nb = diffs.slice(Math.max(0, i - 8), i + 9).sort(function (a, b) { return a - b; }), med = nb[nb.length >> 1]; if (diffs[i] > 9 && diffs[i] > 3.5 * Math.max(med, 0.5)) { if (starts[i]) cuts++; else inside.push({ f: i, t: +(i / fps).toFixed(2), d: +diffs[i].toFixed(1), okoli: +med.toFixed(1) }); } }
       Z.diag = { stihu: cuts, uvnitr: inside, snimku: diffs.length };
