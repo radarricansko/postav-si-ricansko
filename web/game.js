@@ -129,7 +129,7 @@ async function loadModels(){
  [["tree","m/tree-large.json"],["treeS","m/tree-small.json"],["lamp","r/light-square.json"],["dumpster","r/dumpster.json"],["planter","m/planter.json"]].forEach(([k,u])=>jobs.push(load(u).then(g=>{const m=meshOf(g);MODELS.p[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})));
  if(LAZYCARS)MODELS.carsLater=[];else jobs.push(loadCars());
  await Promise.all(jobs);
- if(V2){MODELS.p.tree.mat.color.set("#b5d3ae");MODELS.p.treeS.mat.color.set("#b5d3ae")}}// stromky u domků: tlumenější zelená, ať ladí s krajinou
+ if(V2){MODELS.p.tree.mat.color.set("#9fc3a2");MODELS.p.treeS.mat.color.set("#9fc3a2")}}// stromky u domků: tlumenější zelená, ať ladí s krajinou
 /* auta (půl MB) nejsou potřeba k prvnímu pohledu: hráčům se dotáhnou až po startu; admin a render je mají hned, ať je video stejné */
 const LAZYCARS=!QS.get("admin")&&!QS.get("render");
 function loadCars(){return Promise.all(["sedan","suv","taxi","van","firetruck","hatchback-sports","suv-luxury","delivery","truck"].map(k=>load("c/"+k+".json").then(g=>{const m=meshOf(g);MODELS.c[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})))}
@@ -756,7 +756,7 @@ function openCatalog(){$("cat").classList.add("on");if(catDone)return;catDone=tr
 let last=performance.now();const frameCbs=[];
 /* automatické snížení kvality, když se to seká (slabší telefony) */
 const PERF={acc:0,n:0,lvl:0,t0:performance.now()};
-function perfTick(dt,now){if(aspectLock||PERF.lvl>=3||QS.get("perf")==="0")return;PERF.acc+=dt;PERF.n++;if(now-PERF.t0<2500)return;const ms=PERF.acc/PERF.n*1000;PERF.acc=0;PERF.n=0;PERF.t0=now;
+function perfTick(dt,now){if(aspectLock||PERF.lvl>=3||QS.get("perf")==="0")return;if(now<PERF.t0){PERF.acc=0;PERF.n=0;return}/* prvních pár vteřin po startu se neměří (kompilace shaderů, úvodní přelet), jinak kvalita spadne i na rychlém stroji */PERF.acc+=dt;PERF.n++;if(now-PERF.t0<2500)return;const ms=PERF.acc/PERF.n*1000;PERF.acc=0;PERF.n=0;PERF.t0=now;
  if(ms>38){PERF.lvl++;if(PERF.lvl===1){R.setPixelRatio(1);R.setSize(innerWidth,innerHeight);POST.resize()}else if(PERF.lvl===2){POST.on=false}else{sun.shadow.mapSize.set(1024,1024);sun.shadow.map&&sun.shadow.map.dispose();sun.shadow.map=null;forestShadow=false;FOREST.forEach(m=>m.castShadow=false)}}}
 /* ---------- oživení: postavičky jdou ke svému domku, prach při stavbě, vytažení vlajek ---------- */
 const FX={walkers:[],puffs:[],puffed:new Set(),flagT0:-1,flagMs:0};
@@ -864,6 +864,6 @@ window.GAME={canvas,THREE:T,look:()=>({scene,cam,ctr,sun,hemi,fill,ground,landMe
  setMsg("krajina, lesy a pole…");await new Promise(r=>setTimeout(r,20));
  buildLandSource();TOWNS.forEach(buildTown);TOWNS.forEach(t=>{setFog(t);setErb(t)});relayout(true);initCars();updateUI();
  const t0=byName["Říčany"];const c=tc(t0);ctr.target.set(c.x,0,c.z);cam.position.set(c.x+260,300,c.z+420);
- $("load").remove();if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);NAMESTI.build({scene,x:tmp2[0],z:tmp2[1],scale:CENTER.scale,cathedralScale:1.5,towns:TOWNS.map(t=>t.n),signTex:townSignTex(CENTER.name)});TOWNS.forEach(t=>{t.erbKey=null;setErb(t)});buildRoads()}buildCenterMarks();updCrown();updateUI();ready=true;requestAnimationFrame(loop);window.done=1;
+ $("load").remove();if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);NAMESTI.build({scene,x:tmp2[0],z:tmp2[1],scale:CENTER.scale,cathedralScale:1.5,towns:TOWNS.map(t=>t.n),signTex:townSignTex(CENTER.name)});TOWNS.forEach(t=>{t.erbKey=null;setErb(t)});buildRoads()}buildCenterMarks();updCrown();updateUI();ready=true;PERF.t0=performance.now()+4000;requestAnimationFrame(loop);window.done=1;
  setTimeout(()=>focusTown(t0,2600,true),300);if(real)setInterval(pollWorld,CONFIG.POLL_MS)})();
 })();
