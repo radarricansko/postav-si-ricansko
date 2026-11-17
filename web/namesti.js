@@ -9,16 +9,16 @@ const lam=(c,o)=>new T.MeshLambertMaterial(Object.assign({color:c},o||{}));
 const M={
  stone:lam("#d6d0c0"),stoneD:lam("#b5ae9d"),stoneL:lam("#ebe6d8"),granite:lam("#4f5363"),
  roof:lam("#3d4658"),roofG:lam("#4f8470"),tile:lam("#b7452f"),tile2:lam("#a63d2a"),
- glass:lam("#223a7c",{emissive:"#15306a",emissiveIntensity:.45}),rose:lam("#7a2fa8",{emissive:"#55208a",emissiveIntensity:.6}),
+ glass:lam("#223a7c",{emissive:"#15306a",emissiveIntensity:.45}),rose:lam("#7a2fa8",{emissive:"#55208a",emissiveIntensity:.3}),
  gold:new T.MeshStandardMaterial({color:"#f5c431",metalness:.7,roughness:.28,emissive:"#5e4300",emissiveIntensity:.3}),
  goldD:new T.MeshStandardMaterial({color:"#c9971c",metalness:.7,roughness:.35}),
- dark:lam("#2b2a2e"),wood:lam("#6b4a2e"),lawn:lam("#8fbd5f",{polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}),
+ dark:lam("#2b2a2e"),wood:lam("#6b4a2e"),lawn:lam("#82ac5e",{polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}),
  water:lam("#4aa5d8",{transparent:true,opacity:.85}),rim:lam("#a99d85",{polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3}),
  plaza:null,
 };
 const PASTEL=["#f2d9a6","#e9c9c0","#cfe0c2","#f6e3b4","#d9d6ea","#f0cfa0","#e3d8c4","#cfdde8","#f3e0d0","#dbe6b8"];
 function tex(w,h,fn){const c=document.createElement("canvas");c.width=w;c.height=h;fn(c.getContext("2d"),w,h);const t=new T.CanvasTexture(c);t.anisotropy=8;t.wrapS=t.wrapT=T.RepeatWrapping;return t}
-M.plaza=lam("#ffffff",{polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3});
+M.plaza=lam("#e9e2d0",{polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3});
 M.plaza.map=tex(256,256,(g,w,h)=>{g.fillStyle="#cdbfa3";g.fillRect(0,0,w,h);for(let y=0;y<h;y+=16)for(let x=0;x<w;x+=16){const v=200+Math.random()*30;g.fillStyle=`rgb(${v},${v-14},${v-40})`;g.fillRect(x+1,y+1,14,14)}
  // kruhový vzor
  g.strokeStyle="rgba(90,60,30,.16)";g.lineWidth=2;g.beginPath();g.arc(w/2,h/2,w*.38,0,7);g.stroke()});M.plaza.map.repeat.set(14,14);
@@ -141,7 +141,7 @@ function plaza(opts){const G=new T.Group();const P=window.MODELS&&window.MODELS.
  // kulatý trávníkový podklad s měkkým okrajem (jako u obcí) + dlážděný kruh pod domy
  const ell=(a,b,n=72)=>{const sh=new T.Shape();for(let i=0;i<=n;i++){const t=i/n*Math.PI*2;const x=Math.cos(t)*a,y=Math.sin(t)*b;i?sh.lineTo(x,y):sh.moveTo(x,y)}return sh};
  const flat=(shape,mat,y)=>{const m=new T.Mesh(new T.ShapeGeometry(shape,1),mat);m.rotation.x=-Math.PI/2;m.position.y=y;m.receiveShadow=true;return m};
- const apron=flat(ell(H*1.9,HZ*1.55),new T.MeshLambertMaterial({color:"#93c063",alphaMap:apronTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}),.04);G.add(apron);
+ const apron=flat(ell(H*1.9,HZ*1.55),new T.MeshLambertMaterial({color:"#82ac5e",alphaMap:apronTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}),.04);G.add(apron);
  const disc=flat(ell(H*1.45,HZ*1.22),M.plaza,.08);G.add(disc);
  const base=flat(ell(H+1,HZ+1),M.plaza,.1);G.add(base);
  // obruba oválu
