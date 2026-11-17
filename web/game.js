@@ -799,7 +799,7 @@ function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const
   if(!l){const it=t.items[o.userData.ref.idx];const c=SPECIALS.CAT.find(x=>x.id===it.id);l=document.createElement("div");l.className="slbl";l.innerHTML=`<span>${c.emoji}</span>${String(it.text).replace(/</g,"&lt;")}`;l.onclick=()=>selectItem(t,o.userData.ref.idx);document.body.appendChild(l);o.userData.lbl=l}
   v.y+=5.2;v.project(cam);const vis=v.z<1&&Math.abs(v.x)<1&&Math.abs(v.y)<1;l.style.display=vis?"":"none";if(vis){l.style.left=(v.x*.5+.5)*innerWidth+"px";l.style.top=(-v.y*.5+.5)*innerHeight+"px";l.style.opacity=Math.min(1,(95-d)/25)}}));
  document.querySelector("#compass .n").style.transform=`rotate(${-ctr.getAzimuthalAngle()}rad)`;
- POST.render(Math.max(.35,Math.min(1,(700*S/0.09-dist)/(500*S/0.09)))*Math.min(1,Math.max(0,(dist-30)/150)));// zblízka (domek přes celý obraz) se nerozmazáváif(crownObj){crownObj.rotation.y=now*.0009;crownObj.position.y=crownObj.userData.y+Math.sin(now*.0022)*.45}frameCbs.forEach(f=>f(now))}
+ POST.render(Math.max(.35,Math.min(1,(700*S/0.09-dist)/(500*S/0.09)))*Math.min(1,Math.max(0,(dist-30)/150)));/* zblízka (domek přes celý obraz) se nerozmazává */if(crownObj){crownObj.rotation.y=now*.0009;crownObj.position.y=crownObj.userData.y+Math.sin(now*.0022)*.45}frameCbs.forEach(f=>f(now))}
 addEventListener("resize",()=>{if(aspectLock)return;cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);POST.resize()});
 let orbitSpeed=0,aspectLock=false;
 
