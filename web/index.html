@@ -191,6 +191,7 @@ body.card-open #pDec,#pSide.sheet~#pDec,#pTop.open~#pDec{display:none}
 #pCta b{color:var(--lime)}#pCta .arr{font-weight:700}#pCta .dot{width:9px;height:9px;border-radius:50%;background:#ff4f6a;box-shadow:0 0 0 0 #ff4f6a99;animation:ping 1.6s infinite}
 @keyframes ping{70%{box-shadow:0 0 0 10px #ff4f6a00}100%{box-shadow:0 0 0 0 #ff4f6a00}}
 #pNav{display:none}#pCta .short{display:none}
+.shareMine{display:block;width:100%;margin-top:12px;padding:11px;border:0;border-radius:999px;background:var(--noc,#0a1233);color:#fff;font:700 13.5px Inter,system-ui;cursor:pointer}
 .rkMore{display:block;width:100%;margin:10px 0 4px;padding:12px;border:0;border-radius:14px;background:rgba(10,18,51,.06);color:var(--ink);font:600 13px Inter,system-ui;cursor:pointer}
 #pWelcome .wFind{display:block;width:100%;margin-top:9px;background:none;border:1.5px solid var(--noc);color:var(--noc);font:600 14px Inter,system-ui;padding:12px;border-radius:999px;cursor:pointer}
 #pWelcome{overflow:auto}
@@ -212,7 +213,7 @@ body.card-open #pMine,#pSide.sheet~#pMine,#pTop.open~#pMine{display:none}
  body.has-dec #pMine{bottom:calc(186px + env(safe-area-inset-bottom))}
  /* karta obce nízká, ať je obec nad ní vidět; rozmazání pozadí nad 3D plátnem je na telefonu drahé a zhoršuje čitelnost */
  #pTown{max-height:min(46vh,340px)!important}#tSpark,#pTown .fd,#pTown .sp,#pTown .nx,#pTown .lm{display:none}
- #pTown,body.player #info{background:rgba(255,255,255,.93)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ #pTown,body.player #info{background:rgba(255,255,255,.97)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
  #pNav,#pSide,#pTop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}#pTop{background:rgba(255,255,255,.9)}
 }
 body.player #compass{left:auto;right:16px;bottom:16px}body.player #attr{left:16px}

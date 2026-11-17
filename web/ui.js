@@ -207,6 +207,12 @@ function showDecChip(){const d=decToday();if(!d||$("pDec"))return;document.body.
  if(fromLink){setTimeout(()=>{$("pTown").hidden=true;curTown=null;GAME.select(hit.town,hit.idx)},900);return}
  const b=document.createElement("button");b.id="pMine";b.type="button";b.innerHTML=`<i>🏠</i><span><small>Tvůj domek stojí</small><b>${esc(hit.nick)} · ${esc(hit.town)}</b></span>`;b.onclick=()=>{b.remove();closeSheets();$("pTown").hidden=true;curTown=null;GAME.select(hit.town,hit.idx)};root.appendChild(b)},300)})();
 
+/* ---------- sdílení domku: odkaz ?nick=… (telefon nabídne sdílení, jinde se zkopíruje) ---------- */
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".shareMine");if(!b)return;const n=(b.dataset.nick||"").replace(/^@/,"");if(!n)return;
+ const url=location.origin+location.pathname+"?nick="+encodeURIComponent(n);const done=t=>{b.textContent=t};
+ if(navigator.share){navigator.share({title:"Postav si Říčansko",text:"Můj domek na mapě Říčanska",url}).catch(()=>{})}
+ else{try{navigator.clipboard.writeText(url).then(()=>done("Odkaz zkopírován ✓"),()=>done(url))}catch(err){done(url)}}});
+
 /* ---------- aktualizace ---------- */
 function upd(){const i=GAME.info();const r=GAME.ranking();const rv=GAME.revive();$("pSub").textContent=`Den ${i.day} · ${dayDate(i.day)}`;
  $("kPop").textContent=i.pop.toLocaleString("cs-CZ");$("kAlive").firstChild.textContent=r.filter(t=>t.players>=rv).length;$("kTot").textContent="/"+i.total;
