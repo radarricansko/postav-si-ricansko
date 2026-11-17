@@ -4,7 +4,7 @@
  "badge": "DÍL 1",
  "title": "Postav si Říčansko · Díl 1: Co kdyby se Říčansko osamostatnilo",
  "data": "tools/video/dily/prazdny-svet.json",
- "hudba": "bez",
+ "hudba": "lofi",
  "hero": {
   "town": "Říčany",
   "slot": 0
@@ -77,7 +77,7 @@
     "hero": true,
     "cut": false,
     "p": [
-     5.0,
+     5,
      2.6,
      11.5
     ],
@@ -125,7 +125,7 @@
   {
    "vo": "Prvních pět v každé obci? Navždy zakladatelé.",
    "head": "PRVNÍCH 5",
-   "headColor": "#F5C431",
+   "headColor": "acc",
    "cam": {
     "hero": true,
     "cut": false,
@@ -307,7 +307,7 @@
   {
    "dur": 1700,
    "head": "0 OBYVATEL",
-   "headColor": "#F5C431",
+   "headColor": "acc",
    "cam": {
     "at": "slot:Mukařov:1",
     "from": [
@@ -412,7 +412,7 @@
      3.3
     ],
     "p": [
-     3.0,
+     3,
      2.15,
      8.4
     ],

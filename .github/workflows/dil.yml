@@ -96,7 +96,10 @@ jobs:
           ffmpeg -v error -y -i "$f" -vf "select='not(mod(n\,100))',scale=270:-1,tile=7x1" -frames:v 1 "out/$n-nahled.jpg"
           git config user.name "RADAR bot"; git config user.email "radar.ricansko@gmail.com"
           git checkout -q -- . ; git clean -fdq -e out -e nahledy -e node_modules
-          git fetch -q origin previews && git checkout -q -f previews
-          mkdir -p nahledy && cp "out/$n-nahled.jpg" "out/$n.txt" "$f" nahledy/ && (cp "out/$n.rezie.json" nahledy/ 2>/dev/null || true) && git add nahledy && git commit -q -m "díl $n" && git push -q origin previews || echo "video nepushnuto"
+          # víc dílů může doběhnout zároveň: při odmítnutém pushi se větev načte znovu a zkusí se to ještě jednou
+          ok=0; for i in 1 2 3 4; do
+            git fetch -q origin previews && git checkout -q -f -B previews origin/previews && mkdir -p nahledy && cp "out/$n-nahled.jpg" "out/$n.txt" "$f" nahledy/ && (cp "out/$n.rezie.json" nahledy/ 2>/dev/null || true) && git add nahledy && git commit -q -m "díl $n" && git push -q origin previews && ok=1 && break
+            sleep $((RANDOM % 20 + 5)); done
+          [ "$ok" = 1 ] || echo "video nepushnuto"
       - uses: actions/upload-artifact@v4
         with: { name: dil, path: "out/*.mp4", retention-days: 14 }
