@@ -92,12 +92,12 @@ const POST={on:QS.get("post")!=="0"};
   fragmentShader:`uniform sampler2D sharp,soft;uniform float tilt,focus,band;uniform vec2 res;varying vec2 vUv;
   void main(){vec3 s=texture2D(sharp,vUv).rgb;vec3 b=texture2D(soft,vUv).rgb;
    float d=abs(vUv.y-focus);float k=smoothstep(band,band+.32,d)*tilt;vec3 c=mix(s,b,k);
-   float bloom=max(max(b.r,b.g),b.b);c+=b*smoothstep(.72,1.,bloom)*.18;
+   float bloom=max(max(b.r,b.g),b.b);c+=b*smoothstep(${V2?".82":".72"},1.,bloom)*${V2?".07":".18"};
    float l=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(l),c,${PAL.sat.toFixed(3)});c=(c-.5)*${PAL.con.toFixed(3)}+.5;
    c+=vec3(.035,.012,-.02)*smoothstep(.45,1.,l);c+=vec3(-.02,0.,.03)*(1.-smoothstep(0.,.45,l));
    vec2 q=vUv-.5;q.x*=res.x/res.y;float v=smoothstep(1.05,.32,length(q));c*=mix(${PAL.vig.toFixed(3)},1.,v);
    gl_FragColor=vec4(clamp(c,0.,1.),1.);}`});
- POST.resize=()=>{R.getDrawingBufferSize(sz);POST.main.setSize(sz.x,sz.y);POST.a.setSize(sz.x>>1,sz.y>>1);POST.b.setSize(sz.x>>1,sz.y>>1);fin.uniforms.res.value.set(sz.x,sz.y)};POST.resize();
+ POST.resize=()=>{R.getDrawingBufferSize(sz);POST.main.setSize(sz.x,sz.y);POST.a.setSize(sz.x>>1,sz.y>>1);POST.b.setSize(sz.x>>1,sz.y>>1);fin.uniforms.res.value.set(sz.x,sz.y);fin.uniforms.band.value=sz.y>sz.x?.26:.16};POST.resize();
  POST.render=(tilt)=>{if(!POST.on){R.setRenderTarget(null);R.render(scene,cam);return}
   R.setRenderTarget(POST.main);R.render(scene,cam);
   quad.material=blur;blur.uniforms.tex.value=POST.main.texture;blur.uniforms.dir.value.set(1.6/POST.a.width,0);R.setRenderTarget(POST.a);R.render(qs,quadCam);
@@ -799,7 +799,7 @@ function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const
   if(!l){const it=t.items[o.userData.ref.idx];const c=SPECIALS.CAT.find(x=>x.id===it.id);l=document.createElement("div");l.className="slbl";l.innerHTML=`<span>${c.emoji}</span>${String(it.text).replace(/</g,"&lt;")}`;l.onclick=()=>selectItem(t,o.userData.ref.idx);document.body.appendChild(l);o.userData.lbl=l}
   v.y+=5.2;v.project(cam);const vis=v.z<1&&Math.abs(v.x)<1&&Math.abs(v.y)<1;l.style.display=vis?"":"none";if(vis){l.style.left=(v.x*.5+.5)*innerWidth+"px";l.style.top=(-v.y*.5+.5)*innerHeight+"px";l.style.opacity=Math.min(1,(95-d)/25)}}));
  document.querySelector("#compass .n").style.transform=`rotate(${-ctr.getAzimuthalAngle()}rad)`;
- POST.render(Math.max(.35,Math.min(1,(700*S/0.09-dist)/(500*S/0.09))));if(crownObj){crownObj.rotation.y=now*.0009;crownObj.position.y=crownObj.userData.y+Math.sin(now*.0022)*.45}frameCbs.forEach(f=>f(now))}
+ POST.render(Math.max(.35,Math.min(1,(700*S/0.09-dist)/(500*S/0.09)))*Math.min(1,Math.max(0,(dist-30)/150)));// zblízka (domek přes celý obraz) se nerozmazáváif(crownObj){crownObj.rotation.y=now*.0009;crownObj.position.y=crownObj.userData.y+Math.sin(now*.0022)*.45}frameCbs.forEach(f=>f(now))}
 addEventListener("resize",()=>{if(aspectLock)return;cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);POST.resize()});
 let orbitSpeed=0,aspectLock=false;
 

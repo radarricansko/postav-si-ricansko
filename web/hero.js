@@ -7,9 +7,9 @@
 const T=window.THREE;
 const lam=(c,o)=>new T.MeshLambertMaterial(Object.assign({color:c},o||{}));
 const flat=(c,o)=>new T.MeshLambertMaterial(Object.assign({color:c,flatShading:true},o||{}));
-const M={wall:lam("#e9dfc8"),base:lam("#8d8a86"),trim:lam("#4b5270"),roof:lam("#b5432c"),roofE:lam("#8f3220"),door:lam("#a8652f"),doorD:lam("#7c4720"),frame:lam("#f6f2e8"),
- glass:lam("#8cc6ea",{emissive:"#2a5f86",emissiveIntensity:.35}),slab:lam("#c9c5ba"),path:lam("#d8d3c6"),brick:lam("#9c4a33"),metal:lam("#23252b"),
- lantern:lam("#fff0b8",{emissive:"#ffcf5a",emissiveIntensity:1}),fence:lam("#f7f4ec"),wood:lam("#8a5a34"),leaf:flat("#3f9a42"),leafD:flat("#2f7d3a"),trunk:lam("#c0622c"),
+const M={wall:lam("#dcd1b8"),base:lam("#8d8a86"),trim:lam("#4b5270"),roof:lam("#b5432c"),roofE:lam("#8f3220"),door:lam("#a8652f"),doorD:lam("#7c4720"),frame:lam("#e8e3d6"),
+ glass:lam("#5f9fc9",{emissive:"#1f4c6e",emissiveIntensity:.3}),slab:lam("#bdb9ad"),path:lam("#cbc6b8"),brick:lam("#9c4a33"),metal:lam("#23252b"),
+ lantern:lam("#fff0b8",{emissive:"#ffcf5a",emissiveIntensity:1}),fence:lam("#e6e2d6"),wood:lam("#8a5a34"),leaf:flat("#3d8246"),leafD:flat("#2d6a40"),trunk:lam("#c0622c"),
  f1:flat("#ef4b4b"),f2:flat("#f7b92d"),f3:flat("#ffffff"),skin:flat("#ecbd94"),hair:flat("#5b3620"),jacket:lam("#2f4aa8"),jacket2:lam("#c6ff3d"),pants:lam("#20232c"),shoe:lam("#14151a"),eye:lam("#17181c"),gold:lam("#f5c431")};
 const W=4.8,D=3.9,WH=2.35,RH=1.55;   // půdorys, výška zdi, výška štítu
 const H={group:null,parts:[],T0:-1,ms:3200,man:null,W,D};
