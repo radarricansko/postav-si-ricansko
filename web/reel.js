@@ -22,6 +22,10 @@
   var FONT_H = '"Archivo", "Inter", "Segoe UI", Roboto, Arial, sans-serif';   // nadpisy, čísla, titulky (expanded 125 %, 800)
   var FONT_B = '"Inter", "Segoe UI", Roboto, Arial, sans-serif';              // text v bublinách, popisky
   var FONT = FONT_H;
+  // styl v3 = „hybrid“ (v2 + motion grafika podle faceless explaineru: Archivo zdola, záře, infografiky, žlutý akcent, jedna lišta nahoře)
+  var HYACC = '#FFB32F', HYBLUE = '#2F6FF0';
+  function isV2() { var st = R && R.script && R.script.styl; return st === 'v2' || st === 'v3'; }
+  function isHy() { return !!(R && R.script && R.script.styl === 'v3'); }
   var TIERS = { wood: { label: 'osada' }, silver: { label: 'ves' }, gold: { label: 'městys' }, plat: { label: 'město' } };
 
   // ------------------------------------------------------------------ utility
@@ -1019,12 +1023,20 @@
   var POP = 220;
 
   // ------------------------------------------------------------------ KIT: podklad
-  function drawGame(g) {
+  function drawGame(g, sc, lt) {
     var gc = G() && G().canvas;
     g.fillStyle = C.night; g.fillRect(0, 0, W, H);
     if (!gc || !gc.width) return;
-    var s = Math.max(W / gc.width, H / gc.height), dw = gc.width * s, dh = gc.height * s;
-    try { g.drawImage(gc, (W - dw) / 2, (H - dh) / 2, dw, dh); } catch (e) {}
+    var s = Math.max(W / gc.width, H / gc.height), blur = 0;
+    if (sc && isHy() && sc.type === 'shot') {   // hybrid: zoom-through na střihu (nový záběr doletí z přiblížení, odcházející ujede dopředu); souvislé záběry (cut:false) bez střihu
+      var ARR = 460, DEP = 170, rem = sc.dur - lt, nx = R.script.scenes[sc.idx + 1];
+      if (sc.idx > 0 && !sc.noCut && lt < ARR) s *= 1 + 0.11 * (1 - E.outCubic(lt / ARR));
+      else if (sc.idx > 0 && sc.hardCut && lt < 240) s *= 1 + 0.055 * (1 - E.outCubic(lt / 240));   // ostrý střih: jen krátké „cuknutí“
+      else if (nx && nx.type === 'shot' && !nx.noCut && !sc.noCutNext && rem < DEP) { var dp = E.inCubic(1 - rem / DEP); s *= 1 + 0.07 * dp; blur = 4 * dp; }
+    }
+    var dw = gc.width * s, dh = gc.height * s;
+    try { if (blur > 0.4) g.filter = 'blur(' + blur.toFixed(1) + 'px)'; g.drawImage(gc, (W - dw) / 2, (H - dh) / 2, dw, dh); } catch (e) {}
+    try { g.filter = 'none'; } catch (e) {}
   }
   // tint Noc + 2 rozmazané bloby (světle modrý .6, tmavě modrý .35), pomalu se hýbou
   function backdrop(g, t, tint, o) {
@@ -1141,8 +1153,126 @@
     return h;
   }
   // řádek nadpisu (Archivo): slova pop-in s malým zpožděním. o.box = glass pozadí, o.solid = akcentový blok s tmavým textem
+  // ================================================================== HYBRID (styl v3)
+  // nadpis: slova vyjíždějí zezdola z masky, jemná záře, klíčové slovo (*slovo*) se z úzkého a tenkého roztáhne do širokého a tučného
+  var HY_STRETCH = ['condensed', 'semi-condensed', 'normal', 'semi-expanded', 'expanded'];
+  function kLineHy(g, text, cx, y, size, lt, delay, o) {
+    var weight = o.weight || 800, stagger = o.stagger == null ? 80 : o.stagger, maxW = o.maxW || 960;
+    var words = String(text).split(' '), keys = words.map(function (w) { return w.indexOf('*') >= 0; });
+    words = words.map(function (w) { return w.replace(/\*/g, ''); });
+    size = hfit(g, words.join(' '), maxW, size, weight, 28); hf(g, size, weight);
+    var sp = size * 0.24, ws = words.map(function (w) { return hw(g, w); }), total = ws.reduce(function (a, b) { return a + b; }, 0) + sp * (words.length - 1);
+    var outT = o.out, pOut = outT != null ? prog(lt, outT, outT + 240) : 0;
+    if (lt < delay || pOut >= 1) return { w: total, h: size };
+    var x = cx - total / 2;
+    g.save(); g.beginPath(); g.rect(cx - total / 2 - size, y - size * 1.05, total + size * 2, size * 2.1); g.clip();   // maska s rezervou na čárky (Ř, Č, Í)
+    g.textBaseline = 'middle'; g.textAlign = 'center';
+    for (var i = 0; i < words.length; i++) {
+      var d0 = delay + i * stagger, p = prog(lt, d0, d0 + 460), cxw = x + ws[i] / 2;
+      if (p > 0) {
+        var e = E.outCubic(p), q = outT != null ? E.inCubic(prog(lt, outT + i * 30, outT + i * 30 + 220)) : 0;
+        var dy = (1 - e) * size * 0.95 - q * size * 0.9;
+        g.save(); g.globalAlpha = clamp(p * 3, 0, 1) * (1 - q); g.translate(cxw, y + dy); g.rotate((1 - e) * 0.05);
+        var col = keys[i] ? (o.keyColor || HYACC) : (o.color || C.white), wgt = weight, st = 'expanded';
+        if (keys[i]) { var k = E.outCubic(prog(lt, d0 + 80, d0 + 700)); wgt = Math.round(lerp(500, 900, k)); st = HY_STRETCH[Math.min(4, Math.floor(k * 4.99))]; }
+        g.font = wgt + ' ' + Math.round(size) + 'px ' + FONT_H; try { g.fontStretch = st; g.letterSpacing = '-0.02em'; } catch (er) {}
+        g.fillStyle = col;
+        g.shadowColor = keys[i] ? 'rgba(255,179,47,0.6)' : 'rgba(120,180,255,0.55)'; g.shadowBlur = size * 0.32; g.fillText(words[i], 0, 0);   // měkká záře
+        g.shadowColor = 'rgba(0,0,0,0.35)'; g.shadowBlur = size * 0.1; g.shadowOffsetY = size * 0.03; g.fillText(words[i], 0, 0);
+        g.restore();
+      }
+      x += ws[i] + sp;
+    }
+    g.restore();
+    return { w: total, h: size };
+  }
+  // jedna jednotná lišta nahoře: skleněná dráha, žlutá výplň se září, světelná hlava, body střihů se rozsvítí
+  function drawBarHy(g, t) {
+    var tot = R.script.total || 1, x0 = 56, bw = W - 112, y = SAFE_TOP + 14, frac = clamp(t / tot, 0, 1), hx = x0 + bw * frac;
+    g.save();
+    g.fillStyle = 'rgba(255,255,255,0.16)'; rr(g, x0, y - 4, bw, 8, 4); g.fill();
+    if (frac > 0) { var gr = g.createLinearGradient(x0, 0, Math.max(hx, x0 + 1), 0); gr.addColorStop(0, 'rgba(255,179,47,0.45)'); gr.addColorStop(1, HYACC);
+      g.shadowColor = 'rgba(255,179,47,0.8)'; g.shadowBlur = 16; g.fillStyle = gr; rr(g, x0, y - 4, Math.max(8, bw * frac), 8, 4); g.fill(); g.shadowBlur = 0; }
+    R.script.scenes.forEach(function (s2, i) { if (i === 0 || s2.noCut || s2.type === 'outro') return;
+      var cx = x0 + bw * s2.t0 / tot, lit = t >= s2.t0, pulse = lit ? clamp(1 - (t - s2.t0) / 400, 0, 1) : 0;
+      g.shadowColor = 'rgba(255,255,255,0.9)'; g.shadowBlur = lit ? 8 + pulse * 14 : 0; g.fillStyle = lit ? '#fff' : 'rgba(255,255,255,0.32)'; g.beginPath(); g.arc(cx, y, (lit ? 5 : 3.5) + pulse * 3, 0, 7); g.fill(); });
+    g.shadowBlur = 0; var pu = 1 + 0.14 * Math.sin(t / 240), hr = 24 * pu, hg = g.createRadialGradient(hx, y, 0, hx, y, hr);
+    hg.addColorStop(0, 'rgba(255,240,200,0.95)'); hg.addColorStop(0.35, 'rgba(255,179,47,0.65)'); hg.addColorStop(1, 'rgba(255,179,47,0)'); g.fillStyle = hg; g.beginPath(); g.arc(hx, y, hr, 0, 7); g.fill();
+    g.restore();
+  }
+  // ikonky (čárové, čisté)
+  function hyIcon(g, kind, cx, cy, s, col) {
+    g.save(); g.translate(cx, cy); g.strokeStyle = col; g.fillStyle = col; g.lineWidth = Math.max(3, s * 0.07); g.lineCap = 'round'; g.lineJoin = 'round';
+    var h = s / 2;
+    if (kind === 'bubble') { g.beginPath(); rr(g, -h, -h * 0.72, s, s * 0.78, s * 0.2); g.stroke(); g.beginPath(); g.moveTo(-h * 0.5, h * 0.06); g.lineTo(-h * 0.62, h * 0.5); g.lineTo(-h * 0.1, h * 0.06); g.stroke(); [-0.32, 0, 0.32].forEach(function (dx) { g.beginPath(); g.arc(dx * s, -h * 0.34, s * 0.055, 0, 7); g.fill(); }); }
+    else if (kind === 'house') { g.beginPath(); g.moveTo(-h, -h * 0.05); g.lineTo(0, -h * 0.95); g.lineTo(h, -h * 0.05); g.stroke(); g.beginPath(); g.moveTo(-h * 0.72, -h * 0.2); g.lineTo(-h * 0.72, h * 0.8); g.lineTo(h * 0.72, h * 0.8); g.lineTo(h * 0.72, -h * 0.2); g.stroke(); g.beginPath(); rr(g, -h * 0.2, h * 0.22, h * 0.4, h * 0.58, 3); g.stroke(); }
+    else if (kind === 'man') { g.beginPath(); g.arc(0, -h * 0.45, h * 0.34, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-h * 0.62, h * 0.85); g.quadraticCurveTo(-h * 0.62, h * 0.15, 0, h * 0.15); g.quadraticCurveTo(h * 0.62, h * 0.15, h * 0.62, h * 0.85); g.stroke(); }
+    else if (kind === 'star') { g.beginPath(); for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? h * 0.42 : h * 0.95; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fill(); }
+    else if (kind === 'clock') { g.beginPath(); g.arc(0, 0, h * 0.9, 0, 7); g.stroke(); g.beginPath(); g.moveTo(0, -h * 0.5); g.lineTo(0, 0); g.lineTo(h * 0.4, h * 0.25); g.stroke(); }
+    g.restore();
+  }
+  function hyPill(g, x, y, w, h, o) {   // skleněná pilulka s modrým světlem (nebo plná žlutá)
+    o = o || {}; g.save();
+    if (o.solid) { g.shadowColor = o.glow || 'rgba(255,179,47,0.7)'; g.shadowBlur = 30; g.fillStyle = o.solid; rr(g, x, y, w, h, h / 2); g.fill(); }
+    else { g.shadowColor = 'rgba(47,111,240,0.55)'; g.shadowBlur = 26; g.fillStyle = 'rgba(10,18,51,0.5)'; rr(g, x, y, w, h, h / 2); g.fill(); g.shadowBlur = 0; g.fillStyle = 'rgba(255,255,255,0.10)'; rr(g, x, y, w, h, h / 2); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,0.26)'; g.lineWidth = 2; rr(g, x, y, w, h, h / 2); g.stroke();
+      var hg = g.createLinearGradient(0, y, 0, y + h * 0.5); hg.addColorStop(0, 'rgba(255,255,255,0.22)'); hg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = hg; rr(g, x + 6, y + 4, w - 12, h * 0.46, h / 2); g.fill(); }
+    g.restore();
+  }
+  // infografika „tok“: KOMENTÁŘ → DŮM → PANÁČEK (ikona + slovo, žlutá šipka se kreslí mezi nimi)
+  function drawFlow(g, u, lt, oa) {
+    var items = u.items || [], n = items.length, show = u.show == null ? n : u.show, pre = u.pre || 0, at = u.at || 0, every = u.every || 320;
+    var pw = u.pw || 306, ph = 124, gap = u.gap || 44, total = n * pw + (n - 1) * gap, x0 = (W - total) / 2, y = u.y == null ? 1180 : u.y;
+    for (var i = 0; i < n && i < show; i++) {
+      var ti = i < pre ? -1000 : at + (i - pre) * every, p = prog(lt, ti, ti + POP); if (p <= 0) continue;
+      var x = x0 + i * (pw + gap), last = i === show - 1 && i >= pre, cx = x + pw / 2;
+      if (i > 0) { var ap = prog(lt, ti - 160, ti + 120); if (ap > 0) { var ax0 = x - gap + 8, ax1 = x - 8, xe = lerp(ax0, ax1, E.outCubic(ap));
+        g.save(); g.globalAlpha = oa; g.strokeStyle = HYACC; g.lineWidth = 6; g.lineCap = 'round'; g.shadowColor = 'rgba(255,179,47,0.8)'; g.shadowBlur = 14; g.beginPath(); g.moveTo(ax0, y + ph / 2); g.lineTo(xe, y + ph / 2); g.stroke();
+        if (ap > 0.8) { g.beginPath(); g.moveTo(ax1 - 14, y + ph / 2 - 14); g.lineTo(ax1, y + ph / 2); g.lineTo(ax1 - 14, y + ph / 2 + 14); g.stroke(); } g.restore(); } }
+      g.save(); g.globalAlpha = popA(p) * oa; g.translate(cx, y + ph / 2); g.scale(popS(p), popS(p)); g.translate(-cx, -(y + ph / 2));
+      hyPill(g, x, y, pw, ph, last ? { solid: HYACC } : {});
+      hyIcon(g, items[i].icon, x + 60, y + ph / 2, 56, last ? '#10131f' : '#fff');
+      var fs = hfit(g, items[i].text, pw - 124, 36, 800, 22); hf(g, fs, 800); g.fillStyle = last ? '#10131f' : '#fff'; g.textAlign = 'left'; g.textBaseline = 'middle'; htext(g, items[i].text, x + 104, y + ph / 2 + 2);
+      g.restore();
+    }
+  }
+  // infografika „pět míst“: kolečka 1–5 se plní, první zlaté (zakladatel)
+  function drawSlots(g, u, lt, oa) {
+    var n = u.n || 5, at = u.at || 0, every = u.every || 250, d = u.d || 118, gap = u.gap || 30, total = n * d + (n - 1) * gap, x0 = (W - total) / 2, y = u.y == null ? 1170 : u.y;
+    g.save(); g.globalAlpha = oa; g.strokeStyle = 'rgba(255,255,255,0.16)'; g.lineWidth = 6; g.beginPath(); g.moveTo(x0 + d / 2, y); g.lineTo(x0 + total - d / 2, y); g.stroke(); g.restore();
+    for (var i = 0; i < n; i++) {
+      var ti = at + i * every, p = prog(lt, ti, ti + POP), cx = x0 + i * (d + gap) + d / 2;
+      g.save(); g.globalAlpha = oa;
+      g.strokeStyle = 'rgba(255,255,255,0.35)'; g.lineWidth = 4; g.fillStyle = 'rgba(10,18,51,0.5)'; g.beginPath(); g.arc(cx, y, d / 2, 0, 7); g.fill(); g.stroke();
+      if (p > 0) { var s2 = popS(p), gold = i === 0; g.globalAlpha = oa * popA(p); g.translate(cx, y); g.scale(s2, s2);
+        g.shadowColor = gold ? 'rgba(255,179,47,0.85)' : 'rgba(47,111,240,0.8)'; g.shadowBlur = 32; g.fillStyle = gold ? HYACC : HYBLUE; g.beginPath(); g.arc(0, 0, d / 2, 0, 7); g.fill(); g.shadowBlur = 0;
+        if (gold) hyIcon(g, 'star', 0, -d * 0.02, d * 0.5, '#10131f'); else { hf(g, d * 0.46, 800); g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; htext(g, String(i + 1), -hw(g, String(i + 1)) / 2, 2); } }
+      g.restore();
+    }
+    if (u.label) { var lp = prog(lt, at + n * every, at + n * every + 260); if (lp > 0) { g.save(); g.globalAlpha = oa * lp; bf(g, 36, 700); g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.shadowColor = 'rgba(120,180,255,0.6)'; g.shadowBlur = 16; g.fillText(u.label, W / 2, y + d / 2 + 54 - (1 - lp) * 12); g.restore(); } }
+  }
+  // infografika „čas“: 17:00 ──●──▶ 9:00, tečka dojede a pravý uzel se rozsvítí
+  function drawTimeline(g, u, lt, oa) {
+    var at = u.at || 0, y = u.y == null ? 1040 : u.y, pw = 300, ph = 170, xl = 70, xr = W - 70 - pw, nodes = [u.a || { big: '17:00', cap: 'uzávěrka' }, u.b || { big: '9:00', cap: 'další díl' }];
+    var run = prog(lt, at + 500, at + 1900), arrived = run >= 1;
+    var lx0 = xl + pw + 10, lx1 = xr - 10;
+    g.save(); g.globalAlpha = oa; g.strokeStyle = 'rgba(255,255,255,0.18)'; g.lineWidth = 8; g.lineCap = 'round'; g.beginPath(); g.moveTo(lx0, y + ph / 2); g.lineTo(lx1, y + ph / 2); g.stroke();
+    if (run > 0) { var ex = lerp(lx0, lx1, E.inOut(run)); g.strokeStyle = HYACC; g.shadowColor = 'rgba(255,179,47,0.85)'; g.shadowBlur = 18; g.beginPath(); g.moveTo(lx0, y + ph / 2); g.lineTo(ex, y + ph / 2); g.stroke(); g.shadowBlur = 0;
+      var hg = g.createRadialGradient(ex, y + ph / 2, 0, ex, y + ph / 2, 26); hg.addColorStop(0, 'rgba(255,240,200,1)'); hg.addColorStop(0.4, 'rgba(255,179,47,0.7)'); hg.addColorStop(1, 'rgba(255,179,47,0)'); g.fillStyle = hg; g.beginPath(); g.arc(ex, y + ph / 2, 26, 0, 7); g.fill(); }
+    g.restore();
+    nodes.forEach(function (nd, i) {
+      var ti = at + i * 500, p = prog(lt, ti, ti + POP); if (p <= 0) return; var x = i ? xr : xl, hot = i === 1 && arrived, cx = x + pw / 2, cy = y + ph / 2;
+      g.save(); g.globalAlpha = popA(p) * oa; g.translate(cx, cy); var sc3 = popS(p) * (hot ? 1 + 0.05 * Math.sin((lt - at - 1900) / 120) * clamp(1 - (lt - at - 1900) / 700, 0, 1) : 1); g.scale(sc3, sc3); g.translate(-cx, -cy);
+      hyPill(g, x, y, pw, ph, hot ? { solid: HYACC } : {});
+      hf(g, 66, 800); g.fillStyle = hot ? '#10131f' : '#fff'; g.textBaseline = 'middle'; htext(g, nd.big, cx - hw(g, nd.big) / 2, cy - 18);
+      bf(g, 28, 700); g.fillStyle = hot ? 'rgba(16,19,31,0.8)' : 'rgba(255,255,255,0.78)'; g.textAlign = 'center'; g.fillText(nd.cap, cx, cy + 46);
+      g.restore();
+    });
+  }
+
   function kLine(g, text, cx, y, size, lt, delay, o) {
     o = o || {};
+    if (o.hy) return kLineHy(g, text, cx, y, size, lt, delay, o);
     var weight = o.weight || 800, stagger = o.stagger == null ? 45 : o.stagger, maxW = o.maxW || 960;
     size = hfit(g, text, maxW - ((o.box || o.solid) ? 80 : 0), size, weight, 28); hf(g, size, weight);
     var words = String(text).split(' '), sp = size * 0.24;
@@ -1809,8 +1939,8 @@
         g.fillStyle = C.ink; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(w.nick, 0, 2); g.restore();
       });
       // velký nadpis nahoře (2–3 slova): drží přes záběry se stejným textem, při změně naskočí znovu
-      if (s.head) { g.save(); g.translate(W / 2, 440); g.rotate(-0.025); var hl = String(s.head).split('|');
-        hl.forEach(function (ln, i) { kLine(g, up(ln), 0, i * 118, s.headSize || 104, s.headNew ? lt : lt + 5000, s.headNew ? (s.headAt || 0) + i * 120 : 0, { out: s.headKeep || s.last ? 1e9 : out + (s.headNew ? 0 : 5000), stagger: 60, maxW: 980, color: s.headColor === 'acc' ? C.acc : s.headColor || C.white, weight: 900, outline: true }); });
+      if (s.head) { g.save(); g.translate(W / 2, isHy() ? 470 : 440); g.rotate(isHy() ? 0 : -0.025); var hl = String(s.head).split('|');
+        hl.forEach(function (ln, i) { kLine(g, up(ln), 0, i * 118, s.headSize || 104, s.headNew ? lt : lt + 5000, s.headNew ? (s.headAt || 0) + i * 120 : 0, { out: s.headKeep || s.last ? 1e9 : out + (s.headNew ? 0 : 5000), stagger: 60, maxW: 980, color: s.headColor === 'acc' ? C.acc : s.headColor || C.white, weight: 900, outline: true, hy: isHy() }); });
         g.restore(); }
       var HP = (s.ui || []).some(function (u) { return u.k === 'herotag'; }) && G() && G().heroPts ? G().heroPts() : null;
       (s.ui || []).forEach(function (u) {
@@ -1819,6 +1949,9 @@
         if (u.k === 'herotag') { drawHeroTag(g, u, lt, HP, u.keep ? 1 : oa); return; }
         if (u.k === 'cards') { drawCards(g, u, lt, oa); return; }
         if (u.k === 'endq') { drawEndQ(g, u, lt); return; }
+        if (u.k === 'flow') { drawFlow(g, u, lt, oa); return; }
+        if (u.k === 'slots') { drawSlots(g, u, lt, oa); return; }
+        if (u.k === 'timeline') { drawTimeline(g, u, lt, oa); return; }
         if (u.k === 'title') kLine(g, up(u.text), x, y, u.size || 96, lt, at, { out: s.last ? 1e9 : out, stagger: 55, maxW: u.maxW || 940, box: u.box, solid: u.solid });
         else if (u.k === 'chip') chip(g, u.text, x, y, { size: u.size || 36, solid: !!u.solid, scale: popS(p), alpha: popA(p) * oa });
         else if (u.k === 'stamp') stamp(g, u.text, x, y, { size: u.size || 64, p: p, alpha: oa, rot: u.rot == null ? -0.06 : u.rot });
@@ -1859,12 +1992,12 @@
       var s = { type: 'shot', role: 'content', vo: sh.vo || '', cam: sh.cam, ui: sh.ui || [], add: sh.add || null, walk: sh.walk || null, flags: sh.flags || null, voStart: sh.voStart == null ? 60 : sh.voStart, noSubs: !!sh.noSubs, last: i === all.length - 1,
         hero: sh.hero || null, head: sh.head || '', headColor: sh.headColor, headSize: sh.headSize, headAt: sh.headAt };
       s.headNew = !!s.head && (i === 0 || all[i - 1].head !== sh.head); s.headKeep = !!s.head && i < all.length - 1 && all[i + 1].head === sh.head;
-      s.noCut = !!(sh.cam && (sh.cam.cut === false || sh.cam.hard)); s.noCutNext = !!(all[i + 1] && all[i + 1].cam && (all[i + 1].cam.cut === false || all[i + 1].cam.hard));   // hard = ostrý střih bez zatmívačky
+      s.hardCut = !!(sh.cam && sh.cam.hard); s.noCut = !!(sh.cam && (sh.cam.cut === false || sh.cam.hard)); s.noCutNext = !!(all[i + 1] && all[i + 1].cam && (all[i + 1].cam.cut === false || all[i + 1].cam.hard));   // hard = ostrý střih bez zatmívačky
       if (sh.dur) s.durFixed = sh.dur;
       (s.ui || []).forEach(function (u) { if ((u.k === 'end' || u.k === 'endq') && !u.handle) u.handle = opts.handle || ''; if (u.k === 'flag' && G() && G().stat && G().stat().svg) s.assets = { flag: G().stat().svg }; });
       return s;
     });
-    var script = { version: 2, day: def.dil || 1, hook: 'dil', title: def.title || ('Postav si Říčansko · Díl ' + (def.dil || 1)), opts: opts, scenes: scenes, styl: def.styl || '', badge: def.badge || ('DÍL ' + (def.dil || 1)), subMax: def.styl === 'v2' ? 3 : 0 };
+    var script = { version: 2, day: def.dil || 1, hook: 'dil', title: def.title || ('Postav si Říčansko · Díl ' + (def.dil || 1)), opts: opts, scenes: scenes, styl: def.styl || '', badge: def.badge || ('DÍL ' + (def.dil || 1)), subMax: (def.styl === 'v2' || def.styl === 'v3') ? 3 : 0, subs: !!def.subs };
     if (def.hero) gcall('hero', 'place', def.hero); else gcall('hero', 'hide');
     layout(script);
     return script;
@@ -2243,9 +2376,10 @@
   // ---- perzistentní UI: progress (6 segmentů), logo RADAR vlevo, časový kód vpravo
   function drawChrome(g, t, sc) {
     var script = R.script, sType = sc && sc.type, lt = t - sc.t0;
+    if (isHy() && !(sc.ui || []).some(function (u) { return u.k === 'endq' && lt > (u.at || 0) + 200; })) drawBarHy(g, t);
     var appear = sType === 'hook' ? E.outCubic(prog(lt, 400, 800)) : sType === 'outro' ? 1 - prog(lt, 0, 300) + prog(lt, sc.dur - 420, sc.dur - 60) : 1;
     if (appear <= 0) return;
-    if (script.styl === 'v2') { if ((sc.ui || []).some(function (u) { return u.k === 'endq' && lt > (u.at || 0) + 200; })) return;
+    if (isV2()) { if ((sc.ui || []).some(function (u) { return u.k === 'endq' && lt > (u.at || 0) + 200; })) return;
       g.save(); var bp = 1; /* štítek dílu je vidět od prvního snímku (náhled v mřížce) */ chip(g, script.badge, 56, 290, { size: 34, solid: true, align: 'left', scale: popS(bp), alpha: popA(bp) });
       hf(g, 40, 800); try { g.letterSpacing = '0.04em'; } catch (e) {} g.fillStyle = C.white; g.textBaseline = 'middle'; g.textAlign = 'right'; g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 14; g.fillText('RADAR', W - 56, 290); g.restore(); return; }
     var n = script.scenes.length, frac = clamp((sc.idx + clamp(lt / sc.dur, 0, 1)) / n, 0, 1);
@@ -2268,7 +2402,7 @@
 
   // ---- titulky karaoke: Archivo 700, aktuální slovo na akcentu, odeznělá bílá, budoucí .45
   function drawSubs(g, t, sc) {
-    if (!sc || !sc.chunks || !sc.chunks.length || sc.noSubs || sc.type === 'hook' || sc.type === 'outro' || R.opts.subtitles === false) return;
+    if (!sc || !sc.chunks || !sc.chunks.length || sc.noSubs || sc.type === 'hook' || sc.type === 'outro' || R.opts.subtitles === false || (isHy() && !R.script.subs)) return;
     var lt = t - sc.t0, ws = sc.words, ci = -1, wi = -1;
     var live = R.live && R.live.scene === sc.idx && R.live.started ? R.live : null;
     if (live) {
@@ -2288,7 +2422,7 @@
     var ch = sc.chunks[ci];
     if (R._lastChunk !== sc.idx + ':' + ci) { R._lastChunk = sc.idx + ':' + ci; R._chunkAt = t; }
     var pop = prog(t - R._chunkAt, 0, 180), sc2 = popS(pop);
-    var v2 = R.script && R.script.styl === 'v2', fullText = ch.map(function (j) { return ws[j].w; }).join(' ');
+    var v2 = isV2(), fullText = ch.map(function (j) { return ws[j].w; }).join(' ');
     if (v2) ch = ch.filter(function (j) { return j <= wi; });
     var words = ch.map(function (j) { return v2 ? ws[j].w : subDisplay(ws[j].w); });
     var disp = [], map = [];
@@ -2332,11 +2466,12 @@
   function renderFrame(t) {
     var g = R.g, sc = sceneAt(t), lt = t - sc.t0;
     try { g.fontStretch = 'normal'; g.letterSpacing = '0px'; } catch (e) {}
-    drawGame(g);
+    C.acc = isHy() ? HYACC : '#C6FF3D'; C.blue = isHy() ? HYBLUE : '#2F4AA8';
+    drawGame(g, sc, lt);
     if (R.opts.clean) return sc;            // čisté záběry pro střih: jen obraz hry, žádné texty, titulky ani přechody
     var S = SCENES[sc.type];
     if (S && S.draw) { g.save(); S.draw(g, sc, lt); g.restore(); }
-    var next = R.script.scenes[sc.idx + 1], DIP = R.script.styl === 'v2' ? 0 : 90;   // v2: ostré střihy, bez ztmavnutí (ve videu působilo jako probliknutí)
+    var next = R.script.scenes[sc.idx + 1], DIP = isV2() ? 0 : 90;   // v2: ostré střihy, bez ztmavnutí (ve videu působilo jako probliknutí)
     if (next && next.type !== 'outro' && !sc.noCutNext && sc.t0 + sc.dur - t < DIP) dip(g, 1 - (sc.t0 + sc.dur - t) / DIP);
     if (sc.type !== 'hook' && sc.type !== 'outro' && sc.idx > 0 && !sc.noCut && lt < DIP) dip(g, 1 - lt / DIP);
     drawChrome(g, t, sc);
@@ -2400,10 +2535,19 @@
     opts = opts || {};
     if (!document.fonts || !document.fonts.load) { HX = 1.08; return Promise.resolve(false); }
     if (R.fontsDone) return Promise.resolve(R.archivo);
-    if (!R._fontLink && opts.fonts !== false && !document.querySelector('link[href*="family=Archivo"]')) {
+    // fonty z vlastního webu (web/vendor/fonts): Archivo s osami wdth+wght a Inter, nezávislé na síti (cloud, režie, pomalý mobil)
+    if (!R._localFonts && window.FontFace) {
+      var LAT = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
+      var EXT = 'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF';
+      R._localFonts = [['Archivo', 'archivo-latin-wdth-normal.woff2', LAT, '62% 125%'], ['Archivo', 'archivo-latin-ext-wdth-normal.woff2', EXT, '62% 125%'], ['Inter', 'inter-latin-wght-normal.woff2', LAT, ''], ['Inter', 'inter-latin-ext-wght-normal.woff2', EXT, '']].map(function (d) {
+        var desc = { weight: '100 900', unicodeRange: d[2] }; if (d[3]) desc.stretch = d[3];
+        try { var ff = new FontFace(d[0], 'url(vendor/fonts/' + d[1] + ')', desc); document.fonts.add(ff); return ff.load().catch(function () { return null; }); } catch (e) { return Promise.resolve(null); }
+      });
+    }
+    if (!R._fontLink && opts.fonts !== false && !document.querySelector('link[href*="family=Archivo"]') && opts.fonts !== 'local' && !document.querySelector('link[href*="family=Archivo"]')) {
       var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = FONTS_CSS; document.head.appendChild(l); R._fontLink = l;
     }
-    var load = Promise.all(['800', '700'].map(function (w) { return document.fonts.load(w + ' 64px Archivo').catch(function () { return []; }); }))
+    var load = Promise.all(R._localFonts || []).then(function () { return Promise.all(['800', '700'].map(function (w) { return document.fonts.load(w + ' 64px Archivo').catch(function () { return []; }); })); })
       .then(function () { return document.fonts.ready; });
     return Promise.race([load, sleep(opts.fontTimeout || 3500)]).then(function () {
       R.archivo = archivoLoaded(); R.fontsDone = R.archivo;   // bez Archiva to zkusí při příštím play znovu

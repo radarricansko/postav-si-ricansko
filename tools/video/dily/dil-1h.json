@@ -1,0 +1,523 @@
+{
+ "dil": 1,
+ "styl": "v3",
+ "badge": "DÍL 1",
+ "title": "Postav si Říčansko · Díl 1 (hybrid: styl faceless explaineru)",
+ "data": "tools/video/dily/prazdny-svet.json",
+ "hudba": "funk",
+ "hero": {
+  "town": "Říčany",
+  "slot": 0
+ },
+ "shots": [
+  {
+   "vo": "Napiš svou obec a postavím ti tam dům.",
+   "head": "JSI Z|*ŘÍČANSKA*?",
+   "cam": {
+    "hero": true,
+    "p0": [
+     6,
+     3.2,
+     14
+    ],
+    "l0": [
+     0,
+     2.5,
+     0.5
+    ],
+    "p": [
+     8.5,
+     4.6,
+     17.5
+    ],
+    "l": [
+     0,
+     3.1,
+     1
+    ]
+   },
+   "hero": {
+    "build": {
+     "at": 0,
+     "ms": 1800
+    }
+   },
+   "headAt": -600
+  },
+  {
+   "vo": "Bude na něm tvoje jméno.",
+   "head": "KOMENTÁŘ = *DŮM*",
+   "cam": {
+    "hero": true,
+    "cut": false,
+    "p": [
+     5.5,
+     3.2,
+     13.5
+    ],
+    "l": [
+     0.4,
+     2.9,
+     1.5
+    ]
+   },
+   "ui": [
+    {
+     "k": "herotag",
+     "on": "door",
+     "text": "@tvoje_jmeno",
+     "at": 250,
+     "dy": -30
+    },
+    {
+     "k": "flow",
+     "items": [
+      {
+       "text": "KOMENTÁŘ",
+       "icon": "bubble"
+      },
+      {
+       "text": "DŮM",
+       "icon": "house"
+      },
+      {
+       "text": "PANÁČEK",
+       "icon": "man"
+      }
+     ],
+     "show": 2,
+     "at": 350,
+     "every": 380,
+     "y": 1190
+    }
+   ]
+  },
+  {
+   "vo": "A panáček, co v něm bydlí.",
+   "head": "KOMENTÁŘ = *DŮM*",
+   "cam": {
+    "hero": true,
+    "cut": false,
+    "p": [
+     5,
+     2.6,
+     11.5
+    ],
+    "l": [
+     0.95,
+     1.4,
+     3.6
+    ]
+   },
+   "hero": {
+    "walk": {
+     "at": 0,
+     "path": [
+      [
+       5.6,
+       5.1
+      ],
+      [
+       1.4,
+       5.1
+      ],
+      [
+       0.95,
+       3.3
+      ]
+     ],
+     "ms": 1900,
+     "wave": 2800,
+     "face": [
+      3.2,
+      12
+     ]
+    }
+   },
+   "ui": [
+    {
+     "k": "herotag",
+     "on": "man",
+     "text": "@tvoje_jmeno",
+     "at": 200,
+     "keep": true
+    },
+    {
+     "k": "flow",
+     "items": [
+      {
+       "text": "KOMENTÁŘ",
+       "icon": "bubble"
+      },
+      {
+       "text": "DŮM",
+       "icon": "house"
+      },
+      {
+       "text": "PANÁČEK",
+       "icon": "man"
+      }
+     ],
+     "show": 3,
+     "pre": 2,
+     "at": 250,
+     "y": 1190
+    }
+   ]
+  },
+  {
+   "vo": "Prvních pět z každé obce.",
+   "head": "PRVNÍCH *5*",
+   "cam": {
+    "hero": true,
+    "cut": false,
+    "p": [
+     2.9,
+     2.15,
+     8.3
+    ],
+    "l": [
+     0.95,
+     1.6,
+     3.3
+    ]
+   },
+   "ui": [
+    {
+     "k": "herotag",
+     "on": "man",
+     "text": "@tvoje_jmeno",
+     "at": -1000,
+     "badge": "★ ZAKLADATEL",
+     "badgeAt": 400
+    },
+    {
+     "k": "slots",
+     "n": 5,
+     "at": 250,
+     "every": 240,
+     "y": 1200,
+     "label": "z každé obce"
+    }
+   ]
+  },
+  {
+   "dur": 700,
+   "head": "ODKUD JSI?",
+   "cam": {
+    "at": "lm:Mnichovice",
+    "from": [
+     120,
+     0.46,
+     -1.1
+    ],
+    "to": [
+     78,
+     0.38,
+     -0.85
+    ],
+    "hard": true
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "Mnichovice",
+     "y": 1240,
+     "size": 68,
+     "at": 0,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "dur": 700,
+   "head": "ODKUD JSI?",
+   "cam": {
+    "at": "lm:Strančice",
+    "from": [
+     120,
+     0.46,
+     0.4
+    ],
+    "to": [
+     78,
+     0.38,
+     0.65
+    ],
+    "hard": true
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "Strančice",
+     "y": 1240,
+     "size": 68,
+     "at": 0,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "dur": 700,
+   "head": "ODKUD JSI?",
+   "cam": {
+    "at": "lm:Velké Popovice",
+    "from": [
+     120,
+     0.46,
+     1.6
+    ],
+    "to": [
+     78,
+     0.38,
+     1.85
+    ],
+    "hard": true
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "Velké Popovice",
+     "y": 1240,
+     "size": 68,
+     "at": 0,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "dur": 700,
+   "head": "ODKUD JSI?",
+   "cam": {
+    "at": "lm:Kamenice",
+    "from": [
+     120,
+     0.46,
+     -0.5
+    ],
+    "to": [
+     78,
+     0.38,
+     -0.25
+    ],
+    "hard": true
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "Kamenice",
+     "y": 1240,
+     "size": 68,
+     "at": 0,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "dur": 700,
+   "head": "ODKUD JSI?",
+   "cam": {
+    "at": "lm:Mukařov",
+    "from": [
+     120,
+     0.46,
+     0.9
+    ],
+    "to": [
+     78,
+     0.38,
+     1.15
+    ],
+    "hard": true
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "Mukařov",
+     "y": 1240,
+     "size": 68,
+     "at": 0,
+     "solid": true
+    }
+   ]
+  },
+  {
+   "dur": 2000,
+   "head": "0 OBYVATEL",
+   "headColor": "acc",
+   "cam": {
+    "at": "slot:Mukařov:1",
+    "from": [
+     46,
+     0.42,
+     0.5
+    ],
+    "to": [
+     28,
+     0.3,
+     0.95
+    ],
+    "hard": true
+   },
+   "ui": [
+    {
+     "k": "stamp",
+     "text": "NEJVĚTŠÍ OBEC BERE KORUNU",
+     "y": 760,
+     "size": 50,
+     "at": 500
+    }
+   ]
+  },
+  {
+   "vo": "Co tu vyroste, rozhodují lajky.",
+   "dur": 3200,
+   "cam": {
+    "at": "slot:Mukařov:1",
+    "cut": false,
+    "to": [
+     40,
+     0.36,
+     1.4
+    ]
+   },
+   "ui": [
+    {
+     "k": "cards",
+     "at": 150,
+     "every": 240,
+     "y": 470,
+     "items": [
+      {
+       "user": "ty",
+       "text": "Mukařov, nápad - skatepark",
+       "likes": 128
+      },
+      {
+       "user": "tvuj_soused",
+       "text": "Říčany, nápad - metro",
+       "likes": 94
+      },
+      {
+       "user": "tvoje_babicka",
+       "text": "Hrusice, nápad - obří hrad",
+       "likes": 61
+      }
+     ],
+     "stamp": "ROZHODUJÍ LAJKY"
+    }
+   ]
+  },
+  {
+   "vo": "Napiš svou obec pod video.",
+   "cam": {
+    "hero": true,
+    "p0": [
+     4.4,
+     2.6,
+     10.8
+    ],
+    "l0": [
+     0.95,
+     1.5,
+     3.3
+    ],
+    "p": [
+     3,
+     2.15,
+     8.4
+    ],
+    "l": [
+     0.95,
+     1.6,
+     3.3
+    ]
+   },
+   "ui": [
+    {
+     "k": "chip",
+     "text": "tvoje obec",
+     "y": 520,
+     "size": 76,
+     "at": 80,
+     "solid": true
+    },
+    {
+     "k": "chip",
+     "text": "+ nápad, co postavit",
+     "y": 670,
+     "size": 56,
+     "at": 250
+    },
+    {
+     "k": "timeline",
+     "at": 700,
+     "y": 900,
+     "a": {
+      "big": "17:00",
+      "cap": "napiš do"
+     },
+     "b": {
+      "big": "9:00",
+      "cap": "zítra tvůj dům"
+     }
+    }
+   ],
+   "hero": {
+    "walk": {
+     "at": 0,
+     "path": [
+      [
+       0.95,
+       3.3
+      ],
+      [
+       0.95,
+       3.31
+      ]
+     ],
+     "ms": 100,
+     "wave": 5000,
+     "face": [
+      3.2,
+      12
+     ],
+     "pop": false
+    }
+   },
+   "dur": 2800
+  },
+  {
+   "dur": 4400,
+   "cam": {
+    "hero": true,
+    "cut": false,
+    "p": [
+     3,
+     2.15,
+     8.4
+    ],
+    "l": [
+     0.95,
+     1.6,
+     3.3
+    ]
+   },
+   "noSubs": true,
+   "ui": [
+    {
+     "k": "endq",
+     "at": 0,
+     "q": [
+      "Z jaké jsi",
+      "*obce?"
+     ],
+     "type": "Mnichovice",
+     "user": "ty · právě teď",
+     "note": "napiš do 17:00 = zítra v 9:00 stojí"
+    }
+   ]
+  }
+ ],
+ "tempo": 1.15
+}
