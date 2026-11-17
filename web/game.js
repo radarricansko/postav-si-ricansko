@@ -327,6 +327,10 @@ function treeGeo(kind,leaf){const parts=[];const col=(g,c)=>{const n=g.attribute
 const treeMat=new T.MeshLambertMaterial({vertexColors:true});
 const TREEK=[[0,PAL.trees[0]],[0,PAL.trees[1]],[1,PAL.trees[2]],[1,PAL.trees[3]]];// les po dlaždicích: mimo záběr se stromy vůbec nekreslí (rychlejší mobil i render videa)
 const FTILE=480,TREEGEO=TREEK.map(([k,c])=>{const g=treeGeo(k,c);g.boundingSphere=new T.Sphere(new T.Vector3(0,6,0),FTILE*.75+24);return g});let FOREST=[],forestShadow=true;
+/* vzdálené lesy: strom z 6–8 trojúhelníků místo 83 (z dálky není rozdíl vidět, kreslí se desetkrát míň) */
+function treeGeoLo(kind,leaf){const g=kind===0?new T.ConeGeometry(.8,3.05,6,1,true):new T.OctahedronGeometry(1.05,0);g.translate(0,kind===0?1.95:1.9,0);const n=g.attributes.position.count,a=new Float32Array(n*3),cc=new T.Color(leaf);for(let i=0;i<n;i++){a[i*3]=cc.r;a[i*3+1]=cc.g;a[i*3+2]=cc.b}g.setAttribute("color",new T.BufferAttribute(a,3));g.setAttribute("uv",new T.BufferAttribute(new Float32Array(n*2),2));return g}
+const TREEGEO_LO=TREEK.map(([k,c])=>{const g=treeGeoLo(k,c);g.boundingSphere=new T.Sphere(new T.Vector3(0,6,0),FTILE*.75+24);return g}),LOD2=1250*1250;
+function forestLod(){const cp=cam.position,y2=cp.y*cp.y;for(let i=0;i<FOREST.length;i++){const m=FOREST[i],dx=m.position.x-cp.x,dz=m.position.z-cp.z,lo=dx*dx+dz*dz+y2>LOD2;if(lo!==m.userData.lo){m.userData.lo=lo;m.geometry=(lo?TREEGEO_LO:TREEGEO)[m.userData.k]}}}
 let forestPts=null;
 function sampleForest(){const r=rng(9);forestPts=[];const sp=(S>.15?13:7.2)/S;
  LAND.F.forEach(a=>{const p=polyFromFlat(a);const b=bbox(p);for(let x=b[0];x<b[2];x+=sp)for(let y=b[1];y<b[3];y+=sp){const px=x+r()*sp*.8,py=y+r()*sp*.8;if(inPoly(px,py,p))forestPts.push(px,py,r()<.62?0:1,r())}});
@@ -341,7 +345,7 @@ function placeForest(){FOREST.forEach(m=>{scene.remove(m);m.dispose&&m.dispose()
   const s=forestPts[i+3];const k=forestPts[i+2]*2+(s*997%1<.5?0:1);const tx=Math.floor(X/FTILE),tz=Math.floor(Z/FTILE),key=k+":"+tx+":"+tz;let a=B.get(key);if(!a)B.set(key,a={k,tx,tz,d:[]});a.d.push(X,Z,s)}
  B.forEach(a=>{const n=a.d.length/3,cx=(a.tx+.5)*FTILE,cz=(a.tz+.5)*FTILE;const m=new T.InstancedMesh(TREEGEO[a.k],treeMat,n);m.position.set(cx,0,cz);
   for(let i=0;i<n;i++){const s=a.d[i*3+2];Q.setFromAxisAngle(UP,s*6.28);V.set(a.d[i*3]-cx,0,a.d[i*3+1]-cz);const h=S>.15?2.3+s*1.6:1.25+s*.9;SC.set(h,h*(0.9+s*.3),h);M4.compose(V,Q,SC);m.setMatrixAt(i,M4)}
-  m.castShadow=forestShadow;m.receiveShadow=true;m.updateMatrixWorld();scene.add(m);FOREST.push(m)})}
+  m.castShadow=forestShadow;m.receiveShadow=true;m.frustumCulled=true;m.userData.k=a.k;m.userData.lo=false;m.updateMatrixWorld();scene.add(m);FOREST.push(m)})}// InstancedMesh má v r128 ořez záběrem vypnutý, proto frustumCulled=true ručně
 
 /* ---------- silnice: vykreslení ---------- */
 let roadGroup=new T.Group();scene.add(roadGroup);let carPaths=[],railPath=null;
@@ -786,7 +790,7 @@ function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const
  if(orbitSpeed){const off=cam.position.clone().sub(ctr.target);off.applyAxisAngle(UP,orbitSpeed*dt);cam.position.copy(ctr.target).add(off)}
  if(!fly)keyMove(dt);ctr.update();moveCars(dt);
  const dist=cam.position.distanceTo(ctr.target);updClouds(now,dist);cam.near=Math.max(.8,dist*.02);cam.far=Math.max(3000,dist*12);cam.updateProjectionMatrix();
- {const fs=PERF.lvl<3&&dist<420*S/0.09;if(fs!==forestShadow){forestShadow=fs;FOREST.forEach(m=>m.castShadow=fs)}}scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
+ {const fs=PERF.lvl<3&&dist<420*S/0.09;if(fs!==forestShadow){forestShadow=fs;FOREST.forEach(m=>m.castShadow=fs)}}forestLod();scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
  const sh0=Math.min(Math.max(dist*.9,18),700),sh=Math.min(700,18*Math.pow(1.25,Math.ceil(Math.log(sh0/18)/Math.log(1.25)-1e-6)));/* zblízka menší výřez stínů = ostré stíny na domku; po krocích, ať se stíny při jízdě kamery nechvějí */const sc=sun.shadow.camera;if(Math.abs(sc.right-sh)>.01){sc.left=-sh;sc.right=sh;sc.top=sh;sc.bottom=-sh;sc.near=1;sc.far=sh*4;sc.updateProjectionMatrix()}
  sun.position.copy(ctr.target).addScaledVector(SUNDIR,sh*1.8);sun.target.position.copy(ctr.target);
  if(ring.visible){const k=1+.08*Math.sin(now/180);ring.scale.set(k,1,k)}
