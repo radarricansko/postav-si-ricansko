@@ -38,22 +38,38 @@ Instagramová hra RADARu Říčansko (regionální médium pro mladé, Radar s.r
 - Maty: videa byla "hrozně slabá". Hlavní příčiny, které se ukázaly až na skutečné grafice (17. 11.): záběry zblízka byly rozmazané (tilt-shift naplno), stíny na detailním domku rozpité (velký výřez stínové mapy), cloud kreslí v polovičním rozlišení.
 - **Režie v prohlížeči** (`web/rezie.js`, `?admin=KLÍČ&rezie=N`): díl se v Chromu vyrobí snímek po snímku v 1080×1920 / 30 fps za zhruba minutu (WebCodecs + mp4-muxer). Umí čisté záběry bez textů a ztlumený hlas se zachovaným časováním. Tohle je hlavní cesta; cloud (`dil.yml`) dodává hlas a balíček `nahledy/dil-N.rezie.json`.
 - **Voiceover si tým přidává sám** ve střihu, neřešit. AI hlas je jen vodítko pro tempo. Trendy zvuk (Timeless, Runaway…) se přidává až v Instagramu; do souboru chráněnou hudbu nevkládat.
-- Varianty dílu 1: `dil-1` (dům), `dil-1b` (rychlá), `dil-1c` (bez státu). Vzory: reels @nahotovo_mesto.
+- Varianty dílu 1: `dil-1` (dům, příběh se státem), `dil-1b` (rychlá), `dil-1c` (bez státu), `dil-1d` (verze komise: jedna výzva „napiš obec“, háček „JSI Z ŘÍČANSKA?“, asi 24 s). Vzory: reels @nahotovo_mesto.
 - Maty k první sadě: "záběry mapy se bugují". Příčiny: problikávání ploch (viz níže), ztmavnutí u každého střihu (ve stylu `v2` zrušeno, střihy jsou ostré) a panáček, který v dalším záběru znovu vyskočil (`pop:false`). Režie má kontrolu plynulosti (`REZIE.diag`): skok uvnitř záběru znamená chybu, výjimkou je nájezd závěrečné karty.
-- Soubory z režie se jmenují `postav-si-ricansko-dil-N[-bez-hlasu|-ciste-zabery].mp4`; při nové sadě přidávám příponu verze (poslední je `-v3`). Všechny tři soubory jedné varianty dělat z jednoho načtení stránky, ať mají stejné časování hlasu. Po každé změně vzhledu mapy je sada stará.
+- Soubory z režie se jmenují `postav-si-ricansko-dil-N[-bez-hlasu|-ciste-zabery].mp4`; při nové sadě přidávám příponu verze (poslední je `-v5`). Všechny tři soubory jedné varianty dělat z jednoho načtení stránky, ať mají stejné časování hlasu. Po každé změně vzhledu mapy je sada stará.
 - Když mám propojený Matyho počítač a Chrome, můžu se na video i mapu dívat na skutečné grafice (snímky během přehrávání). Bez toho stavím naslepo.
 
 ## Vzhled mapy a výkon
-- Vzhled 2 (výchozí od 17. 11.), třetí paleta: přirozená sytá zeleň jako z leteckého snímku, tráva se stébly (`bladesTex`), velké skvrny přes násobící vrstvu (`groundPatch`), pole s řádky, voda s vlnkami a porostlým břehem (`waterTex`, `growPoly`, `shoreMesh`), trávník obce s měkkým okrajem (průhlednost ve vrcholech), tmavší asfalt, mraky jen náznakem. Původní je `?vzhled=1`. Paleta je v `PAL` na začátku `game.js`.
-- Maty první verzi vzhledu 2 odmítl jako "zešedlou a nerealistickou" (bledá béžová paleta, šedý opar). Nevracet se k tlumeným barvám; hlídat bílé závoje (mraky, mlha podle dálky).
+- Vzhled 2 (výchozí od 17. 11.), po komisi: přirozená sytá zeleň, tráva se stébly (`bladesTex`), měkké skvrny (`softTex`, `groundPatch`) a plující stíny mraků (`cloudShade`) místo bílých obláčků, pole s řádky v klidnější paletě, voda s vlnkami a tmavým porostlým břehem, trávník obce s měkkým okrajem, teplý šedý asfalt s čárou jen na hlavních silnicích, domky s malým rozptylem natočení a výšky, stromy v obci ze stejné geometrie jako les a vysoké jako domek, erb živé obce roste s dálkou. Původní je `?vzhled=1`. Paleta je v `PAL` na začátku `game.js`.
+- **Světlo:** součet světla na osluněné ploše držet pod zhruba 1,2 (teď slunce .76, obloha .66, slunce 40° nad obzorem). Výš se barvy v 8 bitech oříznou: střechy svítí oranžově, kostel je bílá plocha bez tvaru, tráva zežloutne do limetkova.
+- Maty první verzi vzhledu 2 odmítl jako "zešedlou a nerealistickou" (bledá béžová paleta, šedý opar). Nevracet se k tlumeným barvám; sytost trávy nedávat pod zhruba 55 %.
 - **Problikávání ploch:** pole, louky a lesy leží skoro ve stejné výšce. Proto `landMesh` nezapisuje hloubku a kreslí se v pevném pořadí (`renderOrder`), stejně břeh; bližší rovina kamery se posouvá s dálkou. Nové ploché vrstvy dělat stejně, ne přes drobné rozdíly ve výšce.
-- Lesy: `InstancedMesh` má v three r128 vypnutý ořez záběrem, proto `frustumCulled=true` ručně; vzdálené dlaždice mají jednoduché stromy (`forestLod`), při výrobě videa až mnohem dál. Před opravou 7,5 mil. trojúhelníků na snímek a 32 fps na M1, po ní kolem 60 fps u obce.
+- **Problikávání země zblízka:** zem je obří plocha; ze dvou trojúhelníků vycházela hloubka zblízka nepřesně a tráva na jednotlivých snímcích zaplavila silnici a desku pod domkem. Dělo se to jen v softwarovém vykreslování (cloud, 14 % snímků záběrů domku), na M1 ne. Zem je proto dělená 64×64 (`GSEG`, `?zem=1` vrátí starý stav pro srovnání).
+- Výkon: lesy po dlaždicích s ořezem a jednoduchými stromy v dálce; stíny domků, stromků a lamp jen do vzdálenosti 1000; na dotykových zařízeních poměr pixelů 1,5, stíny 1024 a bez vyhlazování plátna; automatické snižování kvality ignoruje snímky delší než 0,25 s (odskok do jiné aplikace). Změřeno komisí: s 2 000 hráči 4,9 mil. trojúhelníků na snímek, protože domky nemají ořez ani zjednodušení (otevřené, viz níže).
 - Ladění na živém webu: `GAME.look()` vrací scénu, světla a materiály. Barvy jde zkoušet rovnou v Chromu a do kódu psát až výsledek.
-- Zbývá k realističnosti: terén je rovný, domky stojí v pravidelné mřížce, stromy jsou malé.
+- Knihovny three.js jsou ve `web/vendor/` (ne z CDN). `pages.yml` před nasazením kontroluje skripty, data a testy.
+
+## Komise 17. 11. (pět nezávislých posudků)
+Plné posudky jsou v projektu „RADAR AI Asistent“ jako `claude/postav-si-ricansko-komise.md`. Zapracováno je světlo a paleta, silnice, stromy, rozptyl domků, dělená zem, obrysy nadpisů, délky výzev a závěrečné karty, varianta `dil-1d`, odkaz pod díl (`dil_url` v `rozhodnuti.json`), hledání ve spodní liště, hlášky podle hodiny, zapamatovaný nick a `?nick=`, hláška při nenačtení, kontrola před nasazením, filtr parametrů adresy. **Otevřené (čeká na Matyho nebo na víc času):**
+- překlápět mapu v 9:00 podle času, ne podle rozpoznání postu s hashtagem (teď 10–40 min zpoždění, bez hashtagu se nestane nic); hlídač v 9:30;
+- hlášení chyb na Telegram se skutečnou chybou; týdenní prodloužení `IG_TOKEN`;
+- komentáře a jména lidí se commitují do veřejného repa (`nerozpoznane.json`, `navrhy/`) a v historii zůstávají navždy;
+- větev `previews` roste (stovky MB videí), přepisovat jedním commitem;
+- domky: jednoduchá vzdálená podoba a sítě po obcích s ořezem (nutné pro 2 000 hráčů);
+- vyhlazení zubatých silnic, meze mezi poli, víc typů domků, speciální budovy načítat až podle potřeby;
+- karta domku (žargon „Zlatá obec“, „Status“), tlačítko „Sdílet můj domek“;
+- nikdo neviděl hru na skutečném telefonu v prohlížeči Instagramu.
 
 ## Poučení
 - **Commit jen po `node --check`** všech změněných souborů ve stejném příkazu spojeném `&&`. Jednou se takhle dostal na web rozbitý `game.js` (řádková poznámka `//` uprostřed jednořádkového kódu zakomentovala zbytek řádku).
 - Po nasazení může prohlížeč držet starý `index.html`; při zkoušce přidej do adresy nový parametr (`&c=2`).
+- **„Opraveno“ ověřuj na výstupu, který Maty opravdu vidí.** Na telefon mu chodí cloudové náhledy; ty blikaly, i když režie na Macu byla čistá. Cloudový náhled před odesláním projdi po snímcích (rozdíl sousedních snímků ve spodním pruhu), ne jen kontrolní list.
+- Kontrola plynulosti v režii hlídá i pruh pod titulky (`kde:"dole"`); skok při 0,33 s je dopad zdi při stavbě domku, skoky na konci jsou nájezd závěrečné karty.
+- Nezávislý posudek (víc pohledů najednou) našel během půl hodiny věci, které jsem přehlížel celý den. U větších celků si ho vyžádat dřív, než řeknu „hotovo“.
 
 ## Co funguje a co ne
 - Funguje: krátký háček "Napiš svou obec a postavím ti tam dům", domek co se staví po kouskách, titulky slovo po slově, tichý střední blok, závěrečná karta s psaním komentáře.

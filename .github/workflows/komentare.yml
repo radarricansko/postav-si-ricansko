@@ -64,5 +64,5 @@ jobs:
           T="Čtení komentářů z Instagramu selhalo"
           URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           N=$(gh issue list --state open --search "$T in:title" --json number -q '.[0].number' || true)
-          BODY="Běh selhal: $URL. Nejčastější příčina: vypršel IG_TOKEN (platí 60 dní, prodloužení popisuje tools/ig/README.md). Dokud to nepůjde, hra nepřijímá nové obyvatele."
+          BODY="Běh selhal: $URL. Skutečnou chybu ukáže log běhu. Možné příčiny: vypršel IG_TOKEN (platí 60 dní, prodloužení popisuje tools/ig/README.md), limit nebo výpadek Instagram API, konflikt při zápisu do repozitáře. Dokud to nepůjde, hra nepřijímá nové obyvatele."
           if [ -z "$N" ]; then gh issue create --title "$T" --body "$BODY"; else gh issue comment "$N" --body "$BODY"; fi

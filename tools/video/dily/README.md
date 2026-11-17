@@ -63,3 +63,12 @@ Co se dosadí, vypíše: `node tools/video/dil-data.js --dil 3`.
 - **Náhled bez hlasu (snímky po půl vteřině):** `node tools/video/render.js --dil 3 --sheet`.
 - **Nanečisto bez Instagramu:** `--data tools/video/dily/zkouska-svet.json --navrhy tools/video/dily/zkouska-navrhy.json` (64 vymyšlených lidí, stát „Radarie“, stavba, měna, jídlo).
 - Díl 7 má dva konce: `dil-7.json` (konec) a `dil-7b.json` (pokračování), spouští se jako `dil` = `7` nebo `7b`.
+
+## Po komisi 17. 11.
+- `dil-1d.json`: verze podle posudku komise. Jedna výzva (napiš obec), háček „JSI Z ŘÍČANSKA?“, pět obcí po 0,7 s pod nadpisem „ODKUD JSI?“, kartičky nad prázdnou obcí, závěrečná karta „Z jaké jsi obce?“. Asi 24 s.
+- Nadpisy (`head`) mají tmavý obrys, takže jdou číst i přes světlé věže a střechu; `headColor` už kvůli čitelnosti není potřeba.
+- `"headAt": -600` u prvního záběru: nadpis je vidět od nultého snímku (náhled v mřížce profilu).
+- Záběr s výzvou (štítky „tvoje obec“ apod.) má mít `"dur"` aspoň 2600, záběr s kartičkami (`cards`) aspoň 3000, závěrečná karta aspoň 4200. U záběru s větou je `dur` nejkratší délka.
+- Montáž obcí: nejmíň 700 ms na obec a krátké názvy; štítek `size` kolem 70.
+- Hudba je v záběrech bez věty hlasitější (dřív tichý blok působil jako výpadek zvuku).
+- Závěrečná karta má pole široké 800 px, pravý okraj nezasahuje pod ikony Instagramu.

@@ -38,3 +38,6 @@ Scénář, hlas a popisek dílu 1 i dalších šesti dílů jsou v `pribeh-hry.m
 - **Komentáře:** Actions → „Komentáře → world.json“, běží každých 30 minut (ráno po 9:00 každých 10). Popis v `tools/ig/README.md`.
 - **Díl:** Actions → „Díl (rychlý render po částech)“, `dil` = číslo. Scénáře a návod: `tools/video/dily/`.
 - **Starý denní reel z dat:** Actions → „Denní reel a klipy“, spouští se jen ručně (denní automat je vypnutý, bral kvótu hlasu).
+
+## Odkaz pod díl (od 17. 11.)
+Do `rozhodnuti.json` patří kromě otázky dne i `"dil_url"`: adresa nejnovějšího reelu (`https://www.instagram.com/reel/…/`). Všechna tlačítka „napsat obec“ na webu pak vedou přímo pod díl, ne na profil. Otázka v `dnes` se ukazuje jen ten den hry, který má v poli `den`.
