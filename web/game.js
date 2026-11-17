@@ -37,9 +37,9 @@ const GAP=5, SPREAD=1.15;  // rozestup obcí při roztahování světa
 const LOT=6.6, MAXR=170, HOUSE_S=3.6;
 const V2=QS.get("vzhled")!=="1";
 const PAL=V2?{sky:["#5fa4e2","#a8cff0","#dfeaf0","#d3e3ec"],fog:"#d3e3ec",fogK:[1.35,4.6,320],hemi:["#e2ecff","#7f7c55",.6],sun:["#fff0d2",1.1],fill:["#b4caff",.18],
-  ground:"#88ad56",meadow:["#97b962","#89b058"],orchard:"#81a854",forest:"#547d3e",water:"#2f6a8a",waterSpec:"#93aabb",shore:"#73934c",
+  ground:"#7da24e",meadow:["#97b962","#89b058"],orchard:"#81a854",forest:"#547d3e",water:"#2f6a8a",waterSpec:"#93aabb",shore:"#73934c",
   field:["#dcc878","#c6cc78","#a6c263","#e2cb8c","#b3bf66","#d1b56a","#99ba60","#c7ce84"],
-  road:"#5e6064",lane:"#6e7074",d1:"#56585d",cap:"#5e6064",lawnPad:"#a3c471",lawn:"#94b85e",garden:"#8db259",drive:"#bdbab0",plaza:"#ddd0b3",plazaRim:"#b7a785",
+  road:"#5e6064",lane:"#6e7074",d1:"#56585d",cap:"#5e6064",lawnPad:"#a3c471",lawn:"#88ac55",garden:"#82a652",drive:"#bdbab0",plaza:"#ddd0b3",plazaRim:"#b7a785",
   trees:["#2d6a3b","#38793f","#4c8d3e","#66a047"],roofs:["#c45c3e","#9c3f2c","#4e5260","#8a6646"],sat:1.08,con:1.06,vig:.84}
  :{sky:["#6fa9da","#b9d6e8","#e9e1cf","#d7e2e2"],fog:"#d7e2e2",hemi:["#d6e8ff","#6b6340",.5],sun:["#ffd6a3",1.18],fill:["#a8c6ff",.18],
   ground:"#90b95f",meadow:["#a4cc6c","#97c463"],orchard:"#88b85a",forest:"#5d8a43",water:"#4c9fd0",waterSpec:"#cfe8ff",
