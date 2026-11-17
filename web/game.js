@@ -37,10 +37,10 @@ const GAP=5, SPREAD=1.15;  // rozestup obcí při roztahování světa
 const LOT=6.6, MAXR=170, HOUSE_S=3.6;
 const V2=QS.get("vzhled")!=="1";
 const PAL=V2?{sky:["#5fa4e2","#a8cff0","#dfeaf0","#d3e3ec"],fog:"#d3e3ec",fogK:[1.35,4.6,320],hemi:["#e2ecff","#7f7c55",.6],sun:["#fff0d2",1.1],fill:["#b4caff",.18],
-  ground:"#8fb360",meadow:["#9cbf68","#8cb45c"],orchard:"#84ab57",forest:"#56803f",water:"#4a96d0",waterSpec:"#dcefff",
+  ground:"#88ad56",meadow:["#97b962","#89b058"],orchard:"#81a854",forest:"#547d3e",water:"#4489bd",waterSpec:"#e4f1ff",
   field:["#dcc878","#c6cc78","#a6c263","#e2cb8c","#b3bf66","#d1b56a","#99ba60","#c7ce84"],
-  road:"#656b77",lane:"#757b87",d1:"#5c626f",cap:"#656b77",lawnPad:"#a2c36e",lawn:"#9abd66",garden:"#a5c771",drive:"#bdbab0",plaza:"#ddd0b3",plazaRim:"#b7a785",
-  trees:["#2d6a3b","#38793f","#4c8d3e","#66a047"],roofs:["#c45c3e","#9c3f2c","#4e5260","#8a6646"],sat:1.12,con:1.06,vig:.84}
+  road:"#656b77",lane:"#757b87",d1:"#5c626f",cap:"#656b77",lawnPad:"#a6c574",lawn:"#93b760",garden:"#98bb62",drive:"#bdbab0",plaza:"#ddd0b3",plazaRim:"#b7a785",
+  trees:["#2d6a3b","#38793f","#4c8d3e","#66a047"],roofs:["#c45c3e","#9c3f2c","#4e5260","#8a6646"],sat:1.08,con:1.06,vig:.84}
  :{sky:["#6fa9da","#b9d6e8","#e9e1cf","#d7e2e2"],fog:"#d7e2e2",hemi:["#d6e8ff","#6b6340",.5],sun:["#ffd6a3",1.18],fill:["#a8c6ff",.18],
   ground:"#90b95f",meadow:["#a4cc6c","#97c463"],orchard:"#88b85a",forest:"#5d8a43",water:"#4c9fd0",waterSpec:"#cfe8ff",
   field:["#c8b46a","#b7c36a","#9dbd59","#d0b878","#a7b75d","#c3a75a","#8db15a","#bfc77c"],
@@ -129,7 +129,7 @@ async function loadModels(){
  [["tree","m/tree-large.json"],["treeS","m/tree-small.json"],["lamp","r/light-square.json"],["dumpster","r/dumpster.json"],["planter","m/planter.json"]].forEach(([k,u])=>jobs.push(load(u).then(g=>{const m=meshOf(g);MODELS.p[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})));
  if(LAZYCARS)MODELS.carsLater=[];else jobs.push(loadCars());
  await Promise.all(jobs);
- if(V2){MODELS.p.tree.mat.color.set("#c3dbb0");MODELS.p.treeS.mat.color.set("#c3dbb0")}}// stromky u domků: tlumenější zelená, ať ladí s krajinou
+ if(V2){MODELS.p.tree.mat.color.set("#b6cc8c");MODELS.p.treeS.mat.color.set("#b6cc8c")}}// stromky u domků: tlumenější zelená, ať ladí s krajinou
 /* auta (půl MB) nejsou potřeba k prvnímu pohledu: hráčům se dotáhnou až po startu; admin a render je mají hned, ať je video stejné */
 const LAZYCARS=!QS.get("admin")&&!QS.get("render");
 function loadCars(){return Promise.all(["sedan","suv","taxi","van","firetruck","hatchback-sports","suv-luxury","delivery","truck"].map(k=>load("c/"+k+".json").then(g=>{const m=meshOf(g);MODELS.c[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})))}
@@ -278,7 +278,7 @@ const MAT={
 };
 
 const lawnTex=canvasTex(256,256,(g,w,h)=>{const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.62,"rgba(255,255,255,1)");r.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=r;g.fillRect(0,0,w,h)});
-const lawnMats={};function lawnMat(R){const k=Math.round(R);return lawnMats[k]||(lawnMats[k]=new T.MeshLambertMaterial({color:PAL.lawnPad,alphaMap:lawnTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}))}
+const lawnMats={};function lawnMat(R){const k=Math.round(R);return lawnMats[k]||(lawnMats[k]=new T.MeshLambertMaterial({color:PAL.lawnPad,alphaMap:lawnTex,opacity:V2?.5:1,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}))}
 /* ---------- pás silnice ---------- */
 function ribbonInto(pts,w,y,uvS,P,U,I,H,off=0){const n=pts.length/2;if(n<2)return;const base=P.length/3;let acc=0;
  for(let i=0;i<n;i++){const x0=pts[i*2],z0=pts[i*2+1];let nx,nz;
@@ -299,6 +299,9 @@ const FIELD=PAL.field;
 function grassTex(n,lo,seed){const r=rng(seed),c=512/n;return canvasTex(512,512,(g,w,h)=>{for(let y=0;y<n;y++)for(let x=0;x<n;x++){const v=Math.round(255*(lo+(1-lo)*r())),wm=Math.round(r()*8);g.fillStyle=`rgb(${Math.min(255,v+wm)},${v},${Math.max(0,v-wm-4)})`;g.fillRect(x*c,y*c,c+1,c+1)}
   for(let i=0;i<90;i++){const x=r()*w,y=r()*h,rad=20+r()*70,gr=g.createRadialGradient(x,y,0,x,y,rad),d=r()<.5;gr.addColorStop(0,d?"rgba(40,70,20,.10)":"rgba(255,255,210,.09)");gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(x-rad,y-rad,rad*2,rad*2)}
   const im=g.getImageData(0,0,w,h),p=im.data;for(let i=0;i<p.length;i+=4){const k=.93+r()*.11;p[i]=Math.min(255,p[i]*k);p[i+1]=Math.min(255,p[i+1]*k);p[i+2]=Math.min(255,p[i+2]*k)}g.putImageData(im,0,0)},true)}
+/* tráva zblízka: zrno a krátká stébla; dlaždice má kolem 14 jednotek, z dálky splyne v barvu */
+function bladesTex(seed){const r=rng(seed);return canvasTex(256,256,(g,w,h)=>{g.fillStyle="rgb(236,238,228)";g.fillRect(0,0,w,h);const im=g.getImageData(0,0,w,h),p=im.data;for(let i=0;i<p.length;i+=4){const k=.86+r()*.16;p[i]*=k;p[i+1]=Math.min(255,p[i+1]*(k+.02));p[i+2]*=k-.03}g.putImageData(im,0,0);
+  g.lineCap="round";for(let i=0;i<1500;i++){const x=r()*w,y=r()*h,l=3+r()*6,a=-1.57+(r()-.5)*1.1,d=r()<.55;g.strokeStyle=d?`rgba(70,105,40,${.10+r()*.14})`:`rgba(250,255,215,${.10+r()*.14})`;g.lineWidth=1+r()*.8;g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(a)*l,y+Math.sin(a)*l);g.stroke()}},true)}
 /* pole a louky: řádky po směru orby + zrno */
 function rowsTex(seed){const r=rng(seed);return canvasTex(128,128,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.fillStyle="rgba(60,50,10,.085)";for(let y=0;y<h;y+=8)g.fillRect(0,y,w,3);const im=g.getImageData(0,0,w,h),p=im.data;for(let i=0;i<p.length;i+=4){const k=.94+r()*.1;p[i]=Math.min(255,p[i]*k);p[i+1]=Math.min(255,p[i+1]*k);p[i+2]=Math.min(255,p[i+2]*k)}g.putImageData(im,0,0)},true)}
 const fieldTex=V2?rowsTex(31):canvasTex(64,64,(g,w,h)=>{g.fillStyle="#fff";g.fillRect(0,0,w,h);g.fillStyle="rgba(0,0,0,.07)";for(let y=0;y<h;y+=8)g.fillRect(0,y,w,3)},true);
@@ -320,7 +323,10 @@ function buildLandSource(){const r=rng(5);
 const tmp2=[0,0];
 function mapLand(){const pa=landMesh.geometry.attributes.position.array,m=landSrc.m;for(let i=0,j=0;i<m.length;i+=2,j+=3){F(m[i],m[i+1],tmp2);pa[j]=tmp2[0];pa[j+1]=landSrc.y[i>>1];pa[j+2]=tmp2[1]}landMesh.geometry.attributes.position.needsUpdate=true;
  const wa=waterMesh.geometry.attributes.position.array,w=waterSrc.m;for(let i=0,j=0;i<w.length;i+=2,j+=3){F(w[i],w[i+1],tmp2);wa[j]=tmp2[0];wa[j+1]=.085;wa[j+2]=tmp2[1]}waterMesh.geometry.attributes.position.needsUpdate=true}
-const groundTex=V2?grassTex(16,.93,57):null;const ground=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshLambertMaterial({color:PAL.ground,map:groundTex}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const groundTex=V2?bladesTex(57):null,patchTex=V2?grassTex(16,.9,58):null;const ground=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshLambertMaterial({color:PAL.ground,map:groundTex}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+/* velké světlejší a tmavší plochy přes trávu (násobí barvu pod sebou) */
+const groundPatch=V2?new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:patchTex,blending:T.MultiplyBlending,transparent:true,depthWrite:false,fog:false,polygonOffset:true,polygonOffsetFactor:-.2,polygonOffsetUnits:-.2})):null;if(groundPatch){groundPatch.rotation.x=-Math.PI/2;groundPatch.position.y=.004;groundPatch.renderOrder=-1;scene.add(groundPatch)}
+if(V2){MAT.garden.map=bladesTex(59);MAT.garden.needsUpdate=true}
 
 /* ---------- stromy (lesy + remízky) ---------- */
 function treeGeo(kind,leaf){const parts=[];const col=(g,c)=>{const n=g.attributes.position.count,a=new Float32Array(n*3),cc=new T.Color(c);for(let i=0;i<n;i++){a[i*3]=cc.r;a[i*3+1]=cc.g;a[i*3+2]=cc.b}g.setAttribute("color",new T.BufferAttribute(a,3));return g};
@@ -662,7 +668,7 @@ function buildLinks(){if(!linkGroup){linkGroup=new T.Group();scene.add(linkGroup
  if(cP.length){const m=new T.Mesh(geoFrom(cP,cU,cI),new T.MeshLambertMaterial({color:"#7d828c",polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));m.receiveShadow=true;linkGroup.add(m)}
  if(ready&&fresh.length)toast(`🤝 ${fresh[0][0]} a ${fresh[0][1]} se spojily!`,"ulice obou obcí se propojily");return fresh}
 function relayout(full){updTownParams();TOWNS.forEach(t=>{const c=tc(t);t.group.position.copy(c)});if(window.NAMESTI&&NAMESTI.group){F(CENTER.x,CENTER.y,tmp2);NAMESTI.group.position.set(tmp2[0],0,tmp2[1])}
- const span=60000*S;ground.scale.set(span,span,1);if(groundTex)groundTex.repeat.set(span/300,span/300);ground.position.set(0,0,0);
+ const span=60000*S;ground.scale.set(span,span,1);if(groundTex)groundTex.repeat.set(span/14,span/14);if(groundPatch){groundPatch.scale.set(span,span,1);patchTex.repeat.set(span/300,span/300)}ground.position.set(0,0,0);
  mapLand();buildRoads();TOWNS.forEach(townDecor);placeHouses(performance.now());placeStations();buildLinks();
  SIGNS.forEach(s=>{if(!s.g)s.g=bigSign(s.txt);const q=s.get();F(q[0],q[1],tmp2);s.g.position.set(tmp2[0]+(s.txt[0]==="↖"?-8:8),0,tmp2[1]+(s.txt[0]==="↖"?-8:8));s.g.lookAt(cam.position.x,0,cam.position.z)});
  if(full){sampleForest();placeForest()}
