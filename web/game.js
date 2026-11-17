@@ -91,13 +91,13 @@ const POST={on:QS.get("post")!=="0"};
  const fin=new T.ShaderMaterial({uniforms:{sharp:{value:null},soft:{value:null},tilt:{value:1},focus:{value:.48},band:{value:.16},res:{value:new T.Vector2()}},vertexShader:vs,depthTest:false,depthWrite:false,
   fragmentShader:`uniform sampler2D sharp,soft;uniform float tilt,focus,band;uniform vec2 res;varying vec2 vUv;
   void main(){vec3 s=texture2D(sharp,vUv).rgb;vec3 b=texture2D(soft,vUv).rgb;
-   float d=abs(vUv.y-focus);float k=smoothstep(band,band+.32,d)*tilt;vec3 c=mix(s,b,k);
+   float d=abs(vUv.y-focus);float k=smoothstep(band,band+.32,d)*tilt*${V2?".55":"1."};vec3 c=mix(s,b,k);
    float bloom=max(max(b.r,b.g),b.b);c+=b*smoothstep(${V2?".82":".72"},1.,bloom)*${V2?".07":".18"};
    float l=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(l),c,${PAL.sat.toFixed(3)});c=(c-.5)*${PAL.con.toFixed(3)}+.5;
    c+=vec3(.035,.012,-.02)*smoothstep(.45,1.,l);c+=vec3(-.02,0.,.03)*(1.-smoothstep(0.,.45,l));
    vec2 q=vUv-.5;q.x*=res.x/res.y;float v=smoothstep(1.05,.32,length(q));c*=mix(${PAL.vig.toFixed(3)},1.,v);
    gl_FragColor=vec4(clamp(c,0.,1.),1.);}`});
- POST.resize=()=>{R.getDrawingBufferSize(sz);POST.main.setSize(sz.x,sz.y);POST.a.setSize(sz.x>>1,sz.y>>1);POST.b.setSize(sz.x>>1,sz.y>>1);fin.uniforms.res.value.set(sz.x,sz.y);fin.uniforms.band.value=sz.y>sz.x?.26:.16};POST.resize();
+ POST.resize=()=>{R.getDrawingBufferSize(sz);POST.main.setSize(sz.x,sz.y);POST.a.setSize(sz.x>>1,sz.y>>1);POST.b.setSize(sz.x>>1,sz.y>>1);fin.uniforms.res.value.set(sz.x,sz.y);fin.uniforms.band.value=sz.y>sz.x?.26:V2?.2:.16};POST.resize();
  POST.render=(tilt)=>{if(!POST.on){R.setRenderTarget(null);R.render(scene,cam);return}
   R.setRenderTarget(POST.main);R.render(scene,cam);
   quad.material=blur;blur.uniforms.tex.value=POST.main.texture;blur.uniforms.dir.value.set(1.6/POST.a.width,0);R.setRenderTarget(POST.a);R.render(qs,quadCam);
