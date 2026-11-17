@@ -125,7 +125,7 @@
   },
   {
    "vo": "Prvních pět z každé obce.",
-   "head": "PRVNÍCH 5|= ZAKLADATELÉ",
+   "head": "PRVNÍCH 5",
    "cam": {
     "hero": true,
     "cut": false,
