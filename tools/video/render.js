@@ -94,6 +94,7 @@ function orez(mp3){const a=path.join(OUT,'v-in.mp3'),b=path.join(OUT,'v-out.mp3'
  console.log('hook:',script.hook,'scény:',script.scenes.join(' › '));
  /* hlas po segmentech */
  const VIN=arg('voice-in'),VOUT=arg('voice-out'),PART=arg('part'),MUX=process.argv.includes('--mux');const vin=VIN&&fs.existsSync(VIN)?JSON.parse(fs.readFileSync(VIN,'utf8')):null;
+ let balikClips=[];
  const segs=script.vo.segments||[];let voiced=0;if((vin||process.env.ELEVENLABS_API_KEY||process.env.GEMINI_API_KEY)&&segs.length&&!SHEET){let clips=vin?vin.clips||[]:[];if(vin){voiced=clips.filter(Boolean).length;ttsVia=vin.via||''}
   if(!vin){
   /* díl: celý text na jeden zátah (1 dotaz, šetří denní kvótu) s dlouhými pauzami mezi řádky, podle nich se stříhá a ticho se pak ořízne.
@@ -101,8 +102,11 @@ function orez(mp3){const a=path.join(OUT,'v-in.mp3'),b=path.join(OUT,'v-out.mp3'
   if(def&&process.env.GEMINI_API_KEY&&GEM&&process.env.HLAS_REZIM!=='vety'){const take=await GEM.tts(segs.map(s=>s.text).join('\n'),{zive:true,pozice:'zatah',tempo:+(def&&def.tempo)||+process.env.GEMINI_TEMPO||1.06});const parts=take?await splitTake(take,segs.map(s=>s.text)):null;if(parts){clips=parts.map(b=>orez(b).toString('base64'));voiced=parts.length;ttsVia='Gemini (jeden zátah)'}}
   if(!clips.length){const gem=def&&process.env.GEMINI_API_KEY&&GEM;const delky=[];for(let i=0;i<segs.length;i++){const s=segs[i];let buf=gem?await GEM.tts(s.text,{zive:true,pozice:i===0?'prvni':i===segs.length-1?'posledni':'stred',tempo:+(def&&def.tempo)||+process.env.GEMINI_TEMPO||1.06}):await tts(s.text);if(buf&&gem)buf=orez(buf);clips.push(buf?buf.toString('base64'):null);if(buf){voiced++;delky.push((buf.length/20000).toFixed(1))}}if(gem&&voiced){ttsVia='Gemini (po větách)';console.log('hlas: věty zvlášť, délky ~',delky.join(' '),'s')}}}
   if(VOUT){fs.writeFileSync(VOUT,JSON.stringify({clips,via:ttsVia}));console.log('hlas uložen:',VOUT,'segmentů',voiced,'/',segs.length,ttsVia);await b.close();srv.close();return}
+  balikClips=clips;
   if(clips.some(Boolean))  await p.evaluate(async clips=>{const blobs=clips.map(c=>c?new Blob([Uint8Array.from(atob(c),ch=>ch.charCodeAt(0))],{type:'audio/mpeg'}):null);await REEL.setVoiceSegments(window.__script,blobs,{padMs:window.__script.hook==='dil'?140:80})},clips);
   console.log('hlas: segmentů',voiced,'/',segs.length)}else if(VOUT){fs.writeFileSync(VOUT,JSON.stringify({clips:[],via:''}));console.log('hlas: žádný klíč, video bude bez hlasu');await b.close();srv.close();return}else console.log('hlas: bez ElevenLabs (chybí ELEVENLABS_API_KEY) – video bude jen s hudbou, text je v .txt/.srt');
+ /* balíček pro režii v prohlížeči (?admin=…&rezie=N): vyplněný scénář, hlas po větách a stav světa; z něj jde díl přehrát a nahrát v plné kvalitě */
+ if(def&&arg('balik')){fs.writeFileSync(arg('balik'),JSON.stringify({dil:String(DIL),vznik:new Date().toISOString(),def,clips:balikClips,via:ttsVia,vety:segs.map(x=>x.text),svet:JSON.parse(fs.readFileSync(path.join(ROOT,data),'utf8'))}));console.log('balíček pro režii:',arg('balik'))}
  const MUSIC=arg('music')||(def&&def.hudba)||process.env.MUSIC||'';if(MUSIC)console.log('hudba:',await p.evaluate(m=>REEL.setMusic(m),MUSIC));
  fs.writeFileSync(path.join(OUT,tag+'.json'),JSON.stringify(await p.evaluate(()=>window.__script),null,1));
  if(process.argv.includes('--audio-only')){ /* ukázky podkresů: stejný hlas, různá hudba */

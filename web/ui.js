@@ -77,7 +77,7 @@ function storyFacts(d,latest){const L=GAME.dayLog(d);const f=[];
  return f}
 function storyDay(d,latest){const s=STORY[d];const facts=storyFacts(d,latest);
  return`<div class="day${latest?" today":""}"><div class="dn"><b>Den ${d}</b><small>${dayDate(d)}</small></div><div class="dc">${s&&s.ph?`<span class="ph">${s.ph}</span>`:""}${s?`<h4>${esc(s.t)}</h4><p>${esc(s.x)}</p>`:""}${facts.length?`<ul>${facts.join("")}</ul>`:(s?"":`<p class="q">Klidný den na radaru.</p>`)}</div></div>`}
-function renderStory(){const d0=GAME.info().day;let h=`<div class="paneHead"><b>Příběh Říčanska</b><small>co se dnes stalo na mapě</small></div><div class="tl">${storyDay(d0,true)}</div>`;
+function renderStory(){const d0=GAME.info().day;let h=`<div class="paneHead"><b>Příběh Říčanska</b><small>co se dnes stalo na mapě</small></div>${decisionsHtml()}<div class="tl">${storyDay(d0,true)}</div>`;
  if(d0>1){h+=`<details class="old"><summary><span>Starší dny</span><em>${d0-1}</em></summary><div class="tl">`;for(let d=d0-1;d>=1;d--)h+=storyDay(d,false);h+=`</div></details>`}
  h+=`<p class="next">Co bude dál? Sleduj reely na <a href="${IG}" target="_blank" rel="noopener">@radar_ricansko</a>.</p>`;$("pane-story").innerHTML=h}
 
@@ -144,12 +144,15 @@ function renderTown(){document.body.classList.toggle("card-open",!!curTown||info
 const info=$("info");new MutationObserver(()=>{if(info.classList.contains("on")){$("pTown").hidden=true;curTown=null}document.body.classList.toggle("card-open",!!curTown||info.classList.contains("on"))}).observe(info,{attributes:true,attributeFilter:["class"]});
 
 /* ---------- hledání ---------- */
+/* mapa se mění jednou denně v 9:00; kdo napsal obec do 17:00, je tam další ráno, po 17:00 o den později */
+const pragueHour=()=>{try{return +new Intl.DateTimeFormat("cs-CZ",{timeZone:"Europe/Prague",hour:"numeric",hourCycle:"h23"}).format(new Date())}catch(e){return new Date().getHours()}};
+const waitMsg=()=>`<b>Zatím tě tu nevidíme.</b> Mapa se mění jednou denně v 9:00 s novým dílem. ${pragueHour()<17?"Napsal(a) jsi obec dnes před 17:00? Pak tu tvůj domek stojí <b>zítra v 9:00</b>.":"Obec napsaná po 17:00 se staví až <b>pozítří v 9:00</b>. Co jsi napsal(a) před 17:00 včera nebo dřív, už tu být má, zkus jiný zápis nicku."} Ještě jsi nenapsal(a)? <a href="${IG}" target="_blank" rel="noopener">Napiš obec pod nejnovější díl.</a>`;
 const q=$("pQ"),res=$("pRes");
 const fold=x=>x.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
 q.addEventListener("input",()=>{const v=q.value.trim();if(!v){res.innerHTML="";return}
  const towns=GAME.ranking().filter(t=>fold(t.name).includes(fold(v))).slice(0,4);const ppl=GAME.find(v);
  res.innerHTML=(towns.map(t=>`<button data-k="t" data-n="${esc(t.name)}">${erbImg(t.erbUrl,"erbS")}<span><b>${esc(t.name)}</b><small>${t.players} obyvatel</small></span></button>`).join("")+
-  ppl.map(p=>`<button data-k="h" data-n="${esc(p.town)}" data-i="${p.idx}"><span class="hs">🏠</span><span><b>${esc(p.nick)}</b><small>${esc(p.town)} · obyvatel č. ${String(p.no).padStart(4,"0")}</small></span></button>`).join(""))||`<div class="empty">Nic jsme nenašli. Domek se objeví do 2 hodin od komentáře.</div>`;
+  ppl.map(p=>`<button data-k="h" data-n="${esc(p.town)}" data-i="${p.idx}"><span class="hs">🏠</span><span><b>${esc(p.nick)}</b><small>${esc(p.town)} · obyvatel č. ${String(p.no).padStart(4,"0")}</small></span></button>`).join(""))||`<div class="empty">${waitMsg()}</div>`;
  res.querySelectorAll("button").forEach(b=>b.onclick=()=>{q.value="";res.innerHTML="";closeSheets();q.blur();if(b.dataset.k==="t")GAME.focusTown(b.dataset.n);else{$("pTown").hidden=true;curTown=null;GAME.select(b.dataset.n,+b.dataset.i)}})});
 q.addEventListener("keydown",e=>{if(e.key==="Enter"){const b=res.querySelector("button");if(b)b.click()}if(e.key==="Escape"){q.value="";res.innerHTML="";q.blur()}});
 document.addEventListener("pointerdown",e=>{if(res.innerHTML&&!e.target.closest(".pSearch"))res.innerHTML=""});
@@ -161,6 +164,31 @@ document.addEventListener("pointerdown",e=>{if(res.innerHTML&&!e.target.closest(
 /* ---------- kompas: popisky na dial zůstávají vzpřímené (game.js otáčí #compass .n) ---------- */
 (function(){const n=document.querySelector("#compass .n");const c=$("compass");if(!n||!c||!GAME.onFrame)return;let last="";
  GAME.onFrame(()=>{const tr=n.style.transform;if(tr===last)return;last=tr;const m=/rotate\((-?[\d.e+-]+)rad\)/.exec(tr);c.style.setProperty("--r",m?(-m[1])+"rad":"0rad")})})();
+
+/* ---------- rozhodnutí: co se dnes rozhoduje a co už rozhodnuto bylo (rozhodnuti.json, plní se večer s dílem) ---------- */
+let DEC=null;
+function decisionsHtml(){if(!DEC)return"";let h="";const d=DEC.dnes;
+ if(d&&d.otazka)h+=`<div class="decNow"><small>Dnes se rozhoduje${d.den?" · den "+esc(d.den):""}</small><b>${esc(d.otazka)}</b>${d.detail?`<span>${esc(d.detail)}</span>`:""}<a href="${IG}" target="_blank" rel="noopener">Napsat pod díl</a><em>Hlasuje se do ${esc(d.do||"17:00")}</em></div>`;
+ const H=(DEC.historie||[]).slice().reverse();
+ if(H.length)h+=`<details class="old" open><summary><span>Síň rozhodnutí</span><em>${H.length}</em></summary><div class="decList">${H.map(x=>`<div><small>Den ${esc(x.den)}</small><b>${esc(x.otazka)}</b><span>Vyhrálo: <b>${esc(x.vitez)}</b>${x.autor?` · navrhl(a) ${esc(x.autor)}`:""}${x.hlasy?` · ${esc(x.hlasy)} lajků`:""}</span></div>`).join("")}</div></details>`;
+ return h}
+fetch("rozhodnuti.json?t="+Math.floor(Date.now()/60000),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&typeof j==="object"){DEC=j;if(curTab==="story")render("story");showDecChip()}}).catch(()=>{});
+function showDecChip(){const d=DEC&&DEC.dnes;if(!d||!d.otazka||$("pDec"))return;const b=document.createElement("button");b.id="pDec";b.type="button";b.innerHTML=`<i>🗳️</i><span><small>Dnes se rozhoduje</small><b>${esc(d.otazka)}</b></span>`;b.onclick=()=>{closeSheets();tab("story");$("pSide").classList.add("sheet")};root.appendChild(b)}
+
+/* ---------- uvítání pro nové lidi (jednou; ?uvod=1 ho vynutí, ?uvod=0 vypne) ---------- */
+(function(){const f=QS.get("uvod");let seen=false;try{seen=!!localStorage.getItem("psr_uvod")}catch(e){}
+ if(f==="0"||(seen&&f!=="1"))return;
+ const w=setInterval(()=>{if(!window.done)return;clearInterval(w);setTimeout(()=>{
+  const el=document.createElement("div");el.id="pWelcome";el.setAttribute("role","dialog");el.setAttribute("aria-label","Jak to funguje");
+  el.innerHTML=`<div class="wCard"><small>#postavsiricansko</small><h2>Postav si Říčansko</h2>
+   <p>Tohle je mapa našeho regionu, 52 obcí. Každý, kdo se přidá, tu má <b>domek se svým nickem</b>. A <b>co se tu postaví, rozhodujete vy</b> v komentářích.</p>
+   <ol><li><b>Napiš svou obec</b><span>do komentáře pod nejnovější díl na Instagramu @radar_ricansko</span></li>
+   <li><b>Zítra v 9:00 tu stojí tvůj domek</b><span>mapa se mění jednou denně, s novým dílem</span></li>
+   <li><b>Rozhoduj komentářem</b><span>nejlajkovanější nápad dne se postaví</span></li></ol>
+   <a class="wGo" href="${IG}" target="_blank" rel="noopener">Napsat obec na Instagramu</a><button class="wSkip" type="button">Nejdřív se podívám na mapu</button></div>`;
+  const close=()=>{el.classList.add("out");try{localStorage.setItem("psr_uvod","1")}catch(e){}setTimeout(()=>el.remove(),300)};
+  el.querySelector(".wSkip").onclick=close;el.querySelector(".wGo").addEventListener("click",()=>{try{localStorage.setItem("psr_uvod","1")}catch(e){}});
+  el.addEventListener("keydown",e=>{if(e.key==="Escape")close()});document.body.appendChild(el);el.querySelector(".wSkip").focus({preventScroll:true})},700)},250)})();
 
 /* ---------- aktualizace ---------- */
 function upd(){const i=GAME.info();const r=GAME.ranking();const rv=GAME.revive();$("pSub").textContent=`Den ${i.day} · ${dayDate(i.day)}`;

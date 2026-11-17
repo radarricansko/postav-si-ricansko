@@ -89,7 +89,7 @@ jobs:
           cp podklady/world.json world.json; [ -f podklady/world-dil.json ] && cp podklady/world-dil.json world-dil.json; [ -d podklady/navrhy ] && mkdir -p tools/ig/navrhy && cp -r podklady/navrhy/. tools/ig/navrhy/
           DATA="$([ -f world-dil.json ] && echo world-dil.json || echo world.json)"
           ls out/frames | wc -l
-          node tools/video/render.js --dil "$DIL" ${ZK:---data $DATA} --voice-in podklady/hlas.json --mux --out out
+          node tools/video/render.js --dil "$DIL" ${ZK:---data $DATA} --voice-in podklady/hlas.json --mux --out out --balik "out/dil-$DIL.rezie.json"
       - name: Video do větve previews
         run: |
           f=$(ls out/*.mp4 | head -1); n=$(basename "$f" .mp4)
@@ -97,6 +97,6 @@ jobs:
           git config user.name "RADAR bot"; git config user.email "radar.ricansko@gmail.com"
           git checkout -q -- . ; git clean -fdq -e out -e nahledy -e node_modules
           git fetch -q origin previews && git checkout -q -f previews
-          mkdir -p nahledy && cp "out/$n-nahled.jpg" "out/$n.txt" "$f" nahledy/ && git add nahledy && git commit -q -m "díl $n" && git push -q origin previews || echo "video nepushnuto"
+          mkdir -p nahledy && cp "out/$n-nahled.jpg" "out/$n.txt" "$f" nahledy/ && (cp "out/$n.rezie.json" nahledy/ 2>/dev/null || true) && git add nahledy && git commit -q -m "díl $n" && git push -q origin previews || echo "video nepushnuto"
       - uses: actions/upload-artifact@v4
         with: { name: dil, path: "out/*.mp4", retention-days: 14 }

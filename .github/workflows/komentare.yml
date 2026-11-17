@@ -12,6 +12,7 @@ on:
 permissions:
   contents: write
   actions: write
+  issues: write
 concurrency: { group: komentare, cancel-in-progress: false }
 jobs:
   komentare:
@@ -54,3 +55,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"
+      # když čtení komentářů selže (nejčastěji vypršel IG_TOKEN, platí 60 dní), založí se upozornění; majitel repa dostane e-mail
+      - name: Upozornění při chybě
+        if: ${{ failure() && !inputs.dry && !inputs.token }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          T="Čtení komentářů z Instagramu selhalo"
+          URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          N=$(gh issue list --state open --search "$T in:title" --json number -q '.[0].number' || true)
+          BODY="Běh selhal: $URL. Nejčastější příčina: vypršel IG_TOKEN (platí 60 dní, prodloužení popisuje tools/ig/README.md). Dokud to nepůjde, hra nepřijímá nové obyvatele."
+          if [ -z "$N" ]; then gh issue create --title "$T" --body "$BODY"; else gh issue comment "$N" --body "$BODY"; fi

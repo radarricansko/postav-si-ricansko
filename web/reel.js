@@ -2326,6 +2326,7 @@
     var g = R.g, sc = sceneAt(t), lt = t - sc.t0;
     try { g.fontStretch = 'normal'; g.letterSpacing = '0px'; } catch (e) {}
     drawGame(g);
+    if (R.opts.clean) return sc;            // čisté záběry pro střih: jen obraz hry, žádné texty, titulky ani přechody
     var S = SCENES[sc.type];
     if (S && S.draw) { g.save(); S.draw(g, sc, lt); g.restore(); }
     var next = R.script.scenes[sc.idx + 1], DIP = 90;
@@ -2430,6 +2431,7 @@
   function start(script, opts) {
     R.script = script; R.opts = opts || {}; R.idx = -1; R.live = null; R._hold = 0; R._lastChunk = null;
     AU.monitorNode.gain.value = R.opts.monitor === false ? 0 : 1;
+    AU.master.gain.value = R.opts.clean ? 0 : 0.8;   // čisté záběry jsou bez zvuku
     AU.music.gain.value = AU.voiceBuf ? 0.32 : 0.55;
     AU.intensity = 1;
     AU.startMusic(1);

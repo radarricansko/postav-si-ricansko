@@ -31,7 +31,7 @@ function sign(G,text,color,emoji,x=-1.9,z=2.45,w=2.7){
 function kenney(G,type,roof,x=0,z=0,sc=3.4){const src=window.MODELS&&window.MODELS.b[type];if(!src)return null;
  const m=new T.Mesh(src.geo,window.MODELS.roofMat(src,roof));m.scale.setScalar(sc);m.rotation.y=-Math.PI/2;m.position.set(x,0,z);m.castShadow=m.receiveShadow=true;G.add(m);return m}
 function prop(G,kind,x,z,sc=3.4,ry=0){const p=window.MODELS&&window.MODELS.p[kind];if(!p)return null;const m=new T.Mesh(p.geo,p.mat);m.scale.setScalar(sc);m.position.set(x,0,z);m.rotation.y=ry;m.castShadow=true;G.add(m);return m}
-function car(G,kind,x,z,ry=0,sc=.55){const c=window.MODELS&&window.MODELS.c[kind];if(!c)return null;const m=new T.Mesh(c.geo,c.mat);m.scale.setScalar(sc);m.position.set(x,.16,z);m.rotation.y=ry;m.castShadow=true;G.add(m);return m}
+function car(G,kind,x,z,ry=0,sc=.55){const M=window.MODELS;const add=()=>{const c=M&&M.c[kind];if(!c)return null;const m=new T.Mesh(c.geo,c.mat);m.scale.setScalar(sc);m.position.set(x,.16,z);m.rotation.y=ry;m.castShadow=true;G.add(m);return m};if(M&&!M.c[kind]&&M.carsLater){M.carsLater.push(add);return null}return add()}
 function tree(G,x,z,s=4.2){const t=window.MODELS&&window.MODELS.p.tree;if(!t)return;const m=new T.Mesh(t.geo,t.mat);m.scale.setScalar(s);m.position.set(x,0,z);m.castShadow=true;G.add(m)}
 function stripes(a,b,n=8){return canvasTex(128,64,(g,w,h)=>{for(let i=0;i<n;i++){g.fillStyle=i%2?b:a;g.fillRect(i*w/n,0,w/n,h)}g.fillStyle="rgba(0,0,0,.12)";g.fillRect(0,h-8,w,8)})}
 function awning(G,w,x,y,z,a,b,depth=.9){const t=stripes(a,b);const m=new T.Mesh(new T.BoxGeometry(w,.08,depth),[M(a),M(a),new T.MeshLambertMaterial({map:t}),M(a),new T.MeshLambertMaterial({map:t}),M(a)]);

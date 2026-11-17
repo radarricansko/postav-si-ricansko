@@ -1,0 +1,5 @@
+{
+  "_navod": "Plní se večer s dílem. 'dnes' = co se rozhoduje (null = skryté), 'historie' = co už rozhodnuto bylo. Web to ukáže v záložce Příběh a jako plovoucí kartu.",
+  "dnes": null,
+  "historie": []
+}

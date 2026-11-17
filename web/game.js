@@ -116,8 +116,11 @@ async function loadModels(){
  const bl="abcdgjhkmr".split("");const jobs=[];
  bl.forEach(l=>jobs.push(load("m/building-type-"+l+".json").then(g=>MODELS.b[l]=meshOf(g))));
  [["tree","m/tree-large.json"],["treeS","m/tree-small.json"],["lamp","r/light-square.json"],["dumpster","r/dumpster.json"],["planter","m/planter.json"]].forEach(([k,u])=>jobs.push(load(u).then(g=>{const m=meshOf(g);MODELS.p[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})));
- ["sedan","suv","taxi","van","firetruck","hatchback-sports","suv-luxury","delivery","police","truck"].forEach(k=>jobs.push(load("c/"+k+".json").then(g=>{const m=meshOf(g);MODELS.c[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})));
+ if(LAZYCARS)MODELS.carsLater=[];else jobs.push(loadCars());
  await Promise.all(jobs)}
+/* auta (půl MB) nejsou potřeba k prvnímu pohledu: hráčům se dotáhnou až po startu; admin a render je mají hned, ať je video stejné */
+const LAZYCARS=!QS.get("admin")&&!QS.get("render");
+function loadCars(){return Promise.all(["sedan","suv","taxi","van","firetruck","hatchback-sports","suv-luxury","delivery","truck"].map(k=>load("c/"+k+".json").then(g=>{const m=meshOf(g);MODELS.c[k]={geo:m.geo,mat:new T.MeshLambertMaterial({map:m.map})}})))}
 
 /* ---------- obce ---------- */
 const TOWNS=MAP.towns.map((t,i)=>({i,n:t.n,x:t.c[0],y:t.c[1],church:t.church,mem:t.mem,cross:t.cross,R:12,d0:12/L,P:0,F:0,players:[],items:[],group:null}));
@@ -536,8 +539,9 @@ const SIGNS=[{txt:"↖ Praha",get:()=>D1ends.nw},{txt:"Benešov ↘",get:()=>D1e
 
 /* ---------- auta a vlak ---------- */
 let cars=[];let train=null;
-function initCars(){const kinds=["sedan","suv","taxi","van","hatchback-sports","suv-luxury","delivery","truck","sedan","suv"];const r=rng(21);
- for(let i=0;i<70;i++){const c=MODELS.c[kinds[i%kinds.length]];const m=new T.Mesh(c.geo,c.mat);m.scale.setScalar(.62);m.castShadow=true;scene.add(m);cars.push({m,p:Math.floor(r()*1e6),u:r(),dir:r()<.5?1:-1,v:9+r()*7})}
+function addCars(){if(cars.length)return;const kinds=["sedan","suv","taxi","van","hatchback-sports","suv-luxury","delivery","truck","sedan","suv"];const r=rng(21);
+ for(let i=0;i<70;i++){const c=MODELS.c[kinds[i%kinds.length]];const m=new T.Mesh(c.geo,c.mat);m.scale.setScalar(.62);m.castShadow=true;scene.add(m);cars.push({m,p:Math.floor(r()*1e6),u:r(),dir:r()<.5?1:-1,v:9+r()*7})}}
+function initCars(){if(LAZYCARS)setTimeout(()=>loadCars().then(()=>{addCars();(MODELS.carsLater||[]).splice(0).forEach(f=>{try{f()}catch(e){}});MODELS.carsLater=null}).catch(()=>{}),1200);else addCars();
  train=KIT.train();train.scale.setScalar(.55);train.traverse(m=>{if(m.isMesh)m.castShadow=true});scene.add(train)}
 function posOn(pts,dist,out){let acc=0;for(let i=2;i<pts.length;i+=2){const d=Math.hypot(pts[i]-pts[i-2],pts[i+1]-pts[i-1]);if(acc+d>=dist){const f=(dist-acc)/d;out.x=pts[i-2]+(pts[i]-pts[i-2])*f;out.z=pts[i-1]+(pts[i+1]-pts[i-1])*f;out.dx=(pts[i]-pts[i-2])/d;out.dz=(pts[i+1]-pts[i-1])/d;return out}acc+=d}out.x=pts[pts.length-2];out.z=pts[pts.length-1];out.dx=1;out.dz=0;return out}
 const cp={};let trainU=0;
@@ -563,7 +567,7 @@ function applyEvents(ev,anim){const d0=ev.length?Date.parse(ev[0].d)||Date.now()
   if(e.k==="h"){const od=e.h.odznaky||[];newPlayer(t,day,{ig:e.h.ig,job:e.h.povolani,first:od.includes("prvni_v_obci")||t.players.length<5,active:true,badges:od,follow:od.includes("follow_overen")});const idx=addItem(t,{k:"h",p:t.players[t.players.length-1]});if(anim)born.set(t.n+"#"+idx,now+(k++)*120);const jb=jobBuild(t,day);if(jb>=0&&anim)born.set(t.n+"#"+jb,now+(k++)*120)}
   else{const id=SPECIALS.CAT.find(c=>c.id===(TYPE_MAP[norm(e.b.typ).replace(/ /g,"")]||"hospoda"))?(TYPE_MAP[norm(e.b.typ).replace(/ /g,"")]||"hospoda"):"hospoda";const idx=addItem(t,{k:"s",id,text:e.b.nazev_cedule||SPECIALS.CAT.find(c=>c.id===id).example,author:e.b.autor?"@"+String(e.b.autor).replace(/^@/,""):"komunita",day});if(anim)born.set(t.n+"#"+idx,now+(k++)*120)}
   changed.add(t)});return changed}
-async function fetchWorld(){const urls=QS.get("data")?[CONFIG.DATA_URL]:["world.json","../world.json"];for(const u of urls){try{const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});if(!r.ok)continue;const w=await r.json();if(!w||!Array.isArray(w.obce)||w.ukazka)continue;CONFIG.DATA_URL=u;QS.set("data",u);return w}catch(e){}}return null}
+async function fetchWorld(){if(window.REZIE){try{const p=await REZIE.pkg;if(p&&p.svet&&Array.isArray(p.svet.obce))return p.svet}catch(e){}}const urls=QS.get("data")?[CONFIG.DATA_URL]:["world.json","../world.json"];for(const u of urls){try{const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});if(!r.ok)continue;const w=await r.json();if(!w||!Array.isArray(w.obce)||w.ukazka)continue;CONFIG.DATA_URL=u;QS.set("data",u);return w}catch(e){}}return null}
 /* nový stát: název do hlavičky, vlajka na stožáry u návsí a na Náměstí sjednocení (world.stat, pro náhled ?stat=Název) */
 const STAT={nazev:"",svg:""};const FLAG_TEX=new T.CanvasTexture(Object.assign(document.createElement("canvas"),{width:384,height:256}));
 const FLAG_MAT=new T.MeshLambertMaterial({map:FLAG_TEX,side:T.DoubleSide,visible:false}),POLE_MAT=new T.MeshLambertMaterial({color:0xd9dde6});
