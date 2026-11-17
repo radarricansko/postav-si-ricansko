@@ -169,7 +169,7 @@ function plaza(opts){const G=new T.Group();const P=window.MODELS&&window.MODELS.
  if(opts.signTex){[[0,HZ+1.2,Math.PI],[H+1.2,0,-Math.PI/2]].forEach(([x,z,ry])=>{const s=new T.Mesh(new T.PlaneGeometry(5,1.3),new T.MeshBasicMaterial({map:opts.signTex,transparent:true}));s.position.set(x,2.3,z);s.rotation.y=ry;G.add(s);const p=mesh(new T.CylinderGeometry(.08,.08,2.3,6),M.granite,x,1.15,z);G.add(p)})}
  return G}
 
-N.build=function(opts){if(N.group&&N.group.parent)N.group.parent.remove(N.group);N.plaques={};const G=plaza(opts);G.position.set(opts.x||0,0,opts.z||0);G.scale.setScalar(opts.scale||1);N.scale=opts.scale||1;opts.scene.add(G);N.group=G;return G};
+N.build=function(opts){if(N.group&&N.group.parent)N.group.parent.remove(N.group);N.plaques={};const G=plaza(opts);if(window.KIT&&KIT.mergeStatic)N.merged=KIT.mergeStatic(G,new Set([N.flame].concat(Object.values(N.plaques)).filter(Boolean)));/* přes tisíc dílků náměstí → pár sítí */G.position.set(opts.x||0,0,opts.z||0);G.scale.setScalar(opts.scale||1);N.scale=opts.scale||1;opts.scene.add(G);N.group=G;return G};
 N.setPlaque=function(name,texture,gray){const pl=N.plaques[name];if(!pl)return;pl.material.map=texture;pl.material.color.set(gray?"#8a8a8a":"#ffffff");pl.material.needsUpdate=true};
 N.update=function(now){if(N.flame)N.flame.scale.setScalar(1+Math.sin(now*.006)*.08)};
 window.NAMESTI=N;

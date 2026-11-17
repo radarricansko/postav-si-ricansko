@@ -237,6 +237,18 @@ KIT.building=(type,accent="#48b0ff")=>{const m=new Model();const A=accent;
   return m};
 
 // ---------- PAMÁTKY (realističtější) ----------
+/* Statický model z desítek dílků → pár sítí (jedna na materiál). Obraz stejný, vykreslovacích příkazů řádově míň.
+   Vynechá: průhledné a jedinečné materiály, dílky s userData (hra s nimi ještě pracuje) a vše v `keep`. */
+KIT.mergeStatic=(G,keep)=>{keep=keep||new Set();G.updateMatrixWorld(true);const inv=new T.Matrix4().copy(G.matrixWorld).invert(),by=new Map(),M=new T.Matrix4();
+ const dyn=o=>{for(let p=o;p&&p!==G;p=p.parent)if(keep.has(p)||!p.visible||Object.keys(p.userData).length)return true;return false};
+ G.traverse(o=>{if(!o.isMesh||o.isInstancedMesh||o===G||Array.isArray(o.material)||o.material.transparent||o.material.vertexColors||dyn(o))return;const g=o.geometry,A=g.attributes;
+  if(!A.position||!A.normal||!A.uv||A.position.isInterleavedBufferAttribute)return;const k=o.material.uuid+(o.castShadow?1:0)+(o.receiveShadow?1:0);let a=by.get(k);if(!a)by.set(k,a=[]);a.push(o)});
+ let saved=0;by.forEach(list=>{if(list.length<2)return;let n=0;const parts=list.map(o=>{const g=o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone();M.multiplyMatrices(inv,o.matrixWorld);g.applyMatrix4(M);
+   if(M.determinant()<0)["position","normal","uv"].forEach(nm=>{const at=g.attributes[nm],sz=at.itemSize,ar=at.array;for(let i=0;i+3*sz<=ar.length;i+=3*sz)for(let j=0;j<sz;j++){const t=ar[i+sz+j];ar[i+sz+j]=ar[i+2*sz+j];ar[i+2*sz+j]=t}});
+   n+=g.attributes.position.count;return g});
+  const P=new Float32Array(n*3),N=new Float32Array(n*3),U=new Float32Array(n*2);let off=0;parts.forEach(g=>{P.set(g.attributes.position.array,off*3);N.set(g.attributes.normal.array,off*3);U.set(g.attributes.uv.array,off*2);off+=g.attributes.position.count;g.dispose()});
+  const geo=new T.BufferGeometry();geo.setAttribute("position",new T.BufferAttribute(P,3));geo.setAttribute("normal",new T.BufferAttribute(N,3));geo.setAttribute("uv",new T.BufferAttribute(U,2));
+  const m=new T.Mesh(geo,list[0].material);m.castShadow=list[0].castShadow;m.receiveShadow=list[0].receiveShadow;list.forEach(o=>o.parent.remove(o));G.add(m);saved+=list.length-1});return saved};
 KIT.landmark=(type,name)=>{const g=new T.Group();const P=(geo,mat,x=0,y=0,z=0,ry=0,rx=0,rz=0)=>{const me=new T.Mesh(geo,typeof mat==="string"?KIT.mat(mat):mat);me.position.set(x,y,z);me.rotation.set(rx,ry,rz);g.add(me);return me};
   switch(type){
   case"hrad":{// Zřícenina hradu Říčany: travnatý pahorek, jednolitá zeď paláce s okenními otvory, navazující boční zeď a torza hradby

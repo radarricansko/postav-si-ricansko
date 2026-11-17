@@ -329,8 +329,8 @@ const TREEK=[[0,PAL.trees[0]],[0,PAL.trees[1]],[1,PAL.trees[2]],[1,PAL.trees[3]]
 const FTILE=480,TREEGEO=TREEK.map(([k,c])=>{const g=treeGeo(k,c);g.boundingSphere=new T.Sphere(new T.Vector3(0,6,0),FTILE*.75+24);return g});let FOREST=[],forestShadow=true;
 /* vzdálené lesy: strom z 6–8 trojúhelníků místo 83 (z dálky není rozdíl vidět, kreslí se desetkrát míň) */
 function treeGeoLo(kind,leaf){const g=kind===0?new T.ConeGeometry(.8,3.05,6,1,true):new T.OctahedronGeometry(1.05,0);g.translate(0,kind===0?1.95:1.9,0);const n=g.attributes.position.count,a=new Float32Array(n*3),cc=new T.Color(leaf);for(let i=0;i<n;i++){a[i*3]=cc.r;a[i*3+1]=cc.g;a[i*3+2]=cc.b}g.setAttribute("color",new T.BufferAttribute(a,3));g.setAttribute("uv",new T.BufferAttribute(new Float32Array(n*2),2));return g}
-const TREEGEO_LO=TREEK.map(([k,c])=>{const g=treeGeoLo(k,c);g.boundingSphere=new T.Sphere(new T.Vector3(0,6,0),FTILE*.75+24);return g}),LOD2=1250*1250;
-function forestLod(){const cp=cam.position,y2=cp.y*cp.y;for(let i=0;i<FOREST.length;i++){const m=FOREST[i],dx=m.position.x-cp.x,dz=m.position.z-cp.z,lo=dx*dx+dz*dz+y2>LOD2;if(lo!==m.userData.lo){m.userData.lo=lo;m.geometry=(lo?TREEGEO_LO:TREEGEO)[m.userData.k]}}}
+const TREEGEO_LO=(()=>{const g=treeGeoLo(0,"#ffffff");g.boundingSphere=new T.Sphere(new T.Vector3(0,6,0),FTILE*.75+24);return g})(),TREECOL=TREEK.map(([k,c])=>new T.Color(c)),LOD2=1250*1250;let FTILES=[];
+function forestLod(){const cp=cam.position,y2=cp.y*cp.y;for(let i=0;i<FTILES.length;i++){const t=FTILES[i],dx=t.x-cp.x,dz=t.z-cp.z,lo=dx*dx+dz*dz+y2>LOD2;if(lo!==t.isLo){t.isLo=lo;t.lo.visible=lo;for(let j=0;j<t.hi.length;j++)t.hi[j].visible=!lo}}}
 let forestPts=null;
 function sampleForest(){const r=rng(9);forestPts=[];const sp=(S>.15?13:7.2)/S;
  LAND.F.forEach(a=>{const p=polyFromFlat(a);const b=bbox(p);for(let x=b[0];x<b[2];x+=sp)for(let y=b[1];y<b[3];y+=sp){const px=x+r()*sp*.8,py=y+r()*sp*.8;if(inPoly(px,py,p))forestPts.push(px,py,r()<.62?0:1,r())}});
@@ -339,13 +339,17 @@ function sampleForest(){const r=rng(9);forestPts=[];const sp=(S>.15?13:7.2)/S;
 const GREENS=["#3f7a3a","#4b8a3e","#57943f","#35703a","#6a9a45","#2f6436"].map(c=>new T.Color(c));
 const M4=new T.Matrix4(),Q=new T.Quaternion(),V=new T.Vector3(),SC=new T.Vector3(),UP=new T.Vector3(0,1,0);
 let roadHash=null;
-function placeForest(){FOREST.forEach(m=>{scene.remove(m);m.dispose&&m.dispose()});FOREST=[];const B=new Map();const tcs=TOWNS.map(t=>[tc(t),t.R+2.5,t]);if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);tcs.push([{x:tmp2[0],z:tmp2[1]},(NAMESTI.HZ||NAMESTI.H)*(CENTER.scale||1)*1.45])}
+function placeForest(){FOREST.forEach(m=>{scene.remove(m);m.dispose&&m.dispose()});FOREST=[];FTILES=[];const B=new Map(),TL=new Map();const tcs=TOWNS.map(t=>[tc(t),t.R+2.5,t]);if(window.NAMESTI){F(CENTER.x,CENTER.y,tmp2);tcs.push([{x:tmp2[0],z:tmp2[1]},(NAMESTI.HZ||NAMESTI.H)*(CENTER.scale||1)*1.45])}
  for(let i=0;i<forestPts.length;i+=4){F(forestPts[i],forestPts[i+1],tmp2);const X=tmp2[0],Z=tmp2[1];let bad=false;
   for(const [c,rad,tw] of tcs){if((c.x-X)**2+(c.z-Z)**2<rad*rad){if(tw&&tw.ZH&&tw.ZH.near(X-c.x,Z-c.z,17)===null&&(X-c.x-tw.lm.x)**2+(Z-c.z-tw.lm.z)**2>(tw.lm.r+16)**2&&!tw.slots.some(q=>q.big&&(q.x-X+c.x)**2+(q.z-Z+c.z)**2<(q.big+6)**2))continue;bad=true;break}}if(bad)continue;if(roadHash&&roadHash.near(X,Z,3.2)!==null)continue;
   const s=forestPts[i+3];const k=forestPts[i+2]*2+(s*997%1<.5?0:1);const tx=Math.floor(X/FTILE),tz=Math.floor(Z/FTILE),key=k+":"+tx+":"+tz;let a=B.get(key);if(!a)B.set(key,a={k,tx,tz,d:[]});a.d.push(X,Z,s)}
  B.forEach(a=>{const n=a.d.length/3,cx=(a.tx+.5)*FTILE,cz=(a.tz+.5)*FTILE;const m=new T.InstancedMesh(TREEGEO[a.k],treeMat,n);m.position.set(cx,0,cz);
   for(let i=0;i<n;i++){const s=a.d[i*3+2];Q.setFromAxisAngle(UP,s*6.28);V.set(a.d[i*3]-cx,0,a.d[i*3+1]-cz);const h=S>.15?2.3+s*1.6:1.25+s*.9;SC.set(h,h*(0.9+s*.3),h);M4.compose(V,Q,SC);m.setMatrixAt(i,M4)}
-  m.castShadow=forestShadow;m.receiveShadow=true;m.frustumCulled=true;m.userData.k=a.k;m.userData.lo=false;m.updateMatrixWorld();scene.add(m);FOREST.push(m)})}// InstancedMesh má v r128 ořez záběrem vypnutý, proto frustumCulled=true ručně
+  m.castShadow=forestShadow;m.receiveShadow=true;m.frustumCulled=true;m.userData.k=a.k;m.updateMatrixWorld();scene.add(m);FOREST.push(m);// InstancedMesh má v r128 ořez záběrem vypnutý, proto frustumCulled=true ručně
+  const tk=a.tx+":"+a.tz;let tl=TL.get(tk);if(!tl)TL.set(tk,tl={x:cx,z:cz,hi:[],lo:null,isLo:false});tl.hi.push(m)});
+ // vzdálená podoba dlaždice: všechny její stromy v jedné síti, barvu nese instance
+ TL.forEach(tl=>{const n=tl.hi.reduce((s,m)=>s+m.count,0),lo=new T.InstancedMesh(TREEGEO_LO,treeMat,n);lo.position.set(tl.x,0,tl.z);let k=0;tl.hi.forEach(m=>{const c=TREECOL[m.userData.k];for(let i=0;i<m.count;i++){m.getMatrixAt(i,M4);lo.setMatrixAt(k,M4);lo.setColorAt(k,c);k++}});
+  lo.instanceColor.needsUpdate=true;lo.castShadow=false;lo.receiveShadow=true;lo.frustumCulled=true;lo.visible=false;lo.userData.k=-1;lo.updateMatrixWorld();scene.add(lo);FOREST.push(lo);tl.lo=lo;FTILES.push(tl)})}
 
 /* ---------- silnice: vykreslení ---------- */
 let roadGroup=new T.Group();scene.add(roadGroup);let carPaths=[],railPath=null;
@@ -445,7 +449,7 @@ function buildTown(t){if(t.group){scene.remove(t.group)}const g=new T.Group();t.
  const pl=new T.Mesh(new T.CircleGeometry(lm.r+1.6,40).rotateX(-Math.PI/2),MAT.plaza);pl.position.set(lm.x,.08,lm.z);pl.receiveShadow=true;g.add(pl);
  const rim=new T.Mesh(new T.RingGeometry(lm.r+1.6,lm.r+2.3,40).rotateX(-Math.PI/2),MAT.plazaRim);rim.position.set(lm.x,.081,lm.z);g.add(rim);
  let o;if(lm.type==="pomnik")o=monument(lm);else{o=KIT.landmark(lm.type,lm.name);o.scale.setScalar(lm.type==="kaple"?1.15:lm.type==="kostel"?.95:.78)}
- o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});o.position.set(lm.x,0,lm.z);o.rotation.y=lm.ry;g.add(o);t.lmObj=o;
+ o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});if(KIT.mergeStatic)KIT.mergeStatic(o);o.position.set(lm.x,0,lm.z);o.rotation.y=lm.ry;g.add(o);t.lmObj=o;
  for(let i=0;i<4;i++){const a=lm.ry+Math.PI/4+i*Math.PI/2;const x=lm.x+Math.cos(a)*(lm.r+1.2),z=lm.z+Math.sin(a)*(lm.r+1.2);const l=new T.Mesh(MODELS.p.lamp.geo,MODELS.p.lamp.mat);l.scale.setScalar(4.2);l.position.set(x,0,z);l.rotation.y=-a;l.castShadow=true;g.add(l)}
  t.dyn=new T.Group();g.add(t.dyn);t.specialObjs=[];refreshTown(t)}
 function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.userData.lbl.remove()});const g=t.dyn;g.children.forEach(c=>{c.traverse(m=>{if(m.geometry&&m.userData.tmp)m.geometry.dispose()})});g.clear();t.specialObjs=[];
@@ -790,7 +794,7 @@ function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const
  if(orbitSpeed){const off=cam.position.clone().sub(ctr.target);off.applyAxisAngle(UP,orbitSpeed*dt);cam.position.copy(ctr.target).add(off)}
  if(!fly)keyMove(dt);ctr.update();moveCars(dt);
  const dist=cam.position.distanceTo(ctr.target);updClouds(now,dist);cam.near=Math.max(.8,dist*.02);cam.far=Math.max(3000,dist*12);cam.updateProjectionMatrix();
- {const fs=PERF.lvl<3&&dist<420*S/0.09;if(fs!==forestShadow){forestShadow=fs;FOREST.forEach(m=>m.castShadow=fs)}}forestLod();scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
+ {const fs=PERF.lvl<3&&dist<420*S/0.09;if(fs!==forestShadow){forestShadow=fs;FOREST.forEach(m=>m.castShadow=fs&&m.userData.k>=0)}}forestLod();scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
  const sh0=Math.min(Math.max(dist*.9,18),700),sh=Math.min(700,18*Math.pow(1.25,Math.ceil(Math.log(sh0/18)/Math.log(1.25)-1e-6)));/* zblízka menší výřez stínů = ostré stíny na domku; po krocích, ať se stíny při jízdě kamery nechvějí */const sc=sun.shadow.camera;if(Math.abs(sc.right-sh)>.01){sc.left=-sh;sc.right=sh;sc.top=sh;sc.bottom=-sh;sc.near=1;sc.far=sh*4;sc.updateProjectionMatrix()}
  sun.position.copy(ctr.target).addScaledVector(SUNDIR,sh*1.8);sun.target.position.copy(ctr.target);
  if(ring.visible){const k=1+.08*Math.sin(now/180);ring.scale.set(k,1,k)}
