@@ -40,7 +40,7 @@ Instagramová hra RADARu Říčansko (regionální médium pro mladé, Radar s.r
 - **Voiceover si tým přidává sám** ve střihu, neřešit. AI hlas je jen vodítko pro tempo. Trendy zvuk (Timeless, Runaway…) se přidává až v Instagramu; do souboru chráněnou hudbu nevkládat.
 - Varianty dílu 1: `dil-1` (dům, příběh se státem), `dil-1b` (rychlá), `dil-1c` (bez státu), `dil-1d` (verze komise: jedna výzva „napiš obec“, háček „JSI Z ŘÍČANSKA?“, asi 24 s). Vzory: reels @nahotovo_mesto.
 - Maty k první sadě: "záběry mapy se bugují". Příčiny: problikávání ploch (viz níže), ztmavnutí u každého střihu (ve stylu `v2` zrušeno, střihy jsou ostré) a panáček, který v dalším záběru znovu vyskočil (`pop:false`). Režie má kontrolu plynulosti (`REZIE.diag`): skok uvnitř záběru znamená chybu, výjimkou je nájezd závěrečné karty.
-- Soubory z režie se jmenují `postav-si-ricansko-dil-N[-bez-hlasu|-ciste-zabery].mp4`; při nové sadě přidávám příponu verze (poslední je `-v5`). Všechny tři soubory jedné varianty dělat z jednoho načtení stránky, ať mají stejné časování hlasu. Po každé změně vzhledu mapy je sada stará.
+- Soubory z režie se jmenují `postav-si-ricansko-dil-N[-bez-hlasu|-ciste-zabery].mp4`; při nové sadě přidávám příponu verze (poslední je `-v7` pro 1, 1c, 1d a `-v5` pro 1b). Všechny tři soubory jedné varianty dělat z jednoho načtení stránky, ať mají stejné časování hlasu. Po každé změně vzhledu mapy je sada stará.
 - Když mám propojený Matyho počítač a Chrome, můžu se na video i mapu dívat na skutečné grafice (snímky během přehrávání). Bez toho stavím naslepo.
 
 ## Vzhled mapy a výkon
