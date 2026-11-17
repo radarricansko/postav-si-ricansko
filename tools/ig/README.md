@@ -29,7 +29,7 @@ Když se žádný post nenajde, skript vypíše posledních 10 médií (ID, datu
 |---|---|
 | 9:00 | vyjde díl (post s `#postavsiricansko`). Do půl hodiny web skočí na stav k včerejší uzávěrce + stavby přidané večer. |
 | 9:00–17:00 | lidi komentují. Web se nemění. Komentáře se průběžně sbírají do konceptu. |
-| 17:00 | uzávěrka. Uloží se `tools/ig/navrhy/DATUM.json` (nejlajkovanější komentáře dne) a `world-dil.json` (kdo stihl uzávěrku). V 17:20 se z něj vyrenderuje první verze videa. |
+| 17:00 | uzávěrka. Uloží se `tools/ig/navrhy/DATUM.json` (nejlajkovanější komentáře dne) a `world-dil.json` (kdo stihl uzávěrku). Video dílu se z něj vyrábí ručně (workflow „Díl“, režie v prohlížeči). |
 | 17:00–20:00 | ladíme vítězný nápad: stavba se přidá do `world.json` (`specialni_budovy`), video se přerenderuje. Náhled mapy dalšího dílu: `…/postav-si-ricansko/?data=world-dil.json`. |
 | po 17:00 | komentáře se sbírají dál, ale patří už do pozítřejšího dílu. |
 

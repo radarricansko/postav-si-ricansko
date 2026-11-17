@@ -4,9 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Postav si Říčansko</title>
+<meta name="description" content="Napiš svou obec pod reel @radar_ricansko a ráno máš na 3D mapě Říčanska domek se svým nickem.">
+<meta property="og:title" content="Postav si Říčansko">
+<meta property="og:description" content="Napiš svou obec pod reel @radar_ricansko a ráno máš na 3D mapě domek se svým nickem. Co se postaví, rozhodují lajky.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://radarricansko.github.io/postav-si-ricansko/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Archivo:wdth,wght@125,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+[hidden]{display:none!important}
 :root{--ink:#0d1838;--mut:#5a6688;--panel:rgba(255,255,255,.94);--navy:#0b1430;--blue:#2f72d6;--sky:#5fa8e8;--acc:#ffd23f;--bg:#cfe3ef}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#cfe3ef}}
 :root[data-theme="dark"]{--bg:#cfe3ef}
@@ -186,6 +193,30 @@ body.card-open #pDec,#pSide.sheet~#pDec,#pTop.open~#pDec{display:none}
 #pCta b{color:var(--lime)}#pCta .arr{font-weight:700}#pCta .dot{width:9px;height:9px;border-radius:50%;background:#ff4f6a;box-shadow:0 0 0 0 #ff4f6a99;animation:ping 1.6s infinite}
 @keyframes ping{70%{box-shadow:0 0 0 10px #ff4f6a00}100%{box-shadow:0 0 0 0 #ff4f6a00}}
 #pNav{display:none}#pCta .short{display:none}
+.rkMore{display:block;width:100%;margin:10px 0 4px;padding:12px;border:0;border-radius:14px;background:rgba(10,18,51,.06);color:var(--ink);font:600 13px Inter,system-ui;cursor:pointer}
+#pWelcome .wFind{display:block;width:100%;margin-top:9px;background:none;border:1.5px solid var(--noc);color:var(--noc);font:600 14px Inter,system-ui;padding:12px;border-radius:999px;cursor:pointer}
+#pWelcome{overflow:auto}
+#pMine{position:fixed;left:12px;bottom:76px;z-index:30;display:flex;align-items:center;gap:9px;max-width:min(320px,calc(100vw - 24px));text-align:left;border:0;cursor:pointer;background:#fff;color:var(--noc);font:500 12.5px Inter,system-ui;padding:9px 13px;border-radius:16px;box-shadow:0 8px 26px rgba(10,18,51,.28)}
+#pMine i{font-style:normal;font-size:18px}#pMine span{display:flex;flex-direction:column;gap:1px;min-width:0}#pMine small{opacity:.7;font-size:11px}#pMine b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.card-open #pMine,#pSide.sheet~#pMine,#pTop.open~#pMine{display:none}
+#load ol{list-style:none;margin:18px auto 0;padding:0;max-width:300px;text-align:left;font:500 13.5px Inter,system-ui;line-height:1.35;opacity:.92}#load ol li{margin:8px 0;padding-left:30px;position:relative}#load ol li b{position:absolute;left:0;top:0;width:21px;height:21px;border-radius:50%;background:#c6ff3d;color:#0a1233;font:700 12px Inter,system-ui;display:flex;align-items:center;justify-content:center}
+#load button{margin-top:16px;border:0;border-radius:999px;background:#c6ff3d;color:#0a1233;font:700 14px Inter,system-ui;padding:11px 20px;cursor:pointer}
+@media (max-width:760px){
+ /* písmo 16 px: iOS jinak při klepnutí do pole přiblíží celou stránku */
+ .pSearch input{font-size:16px;padding:11px 12px 11px 36px}
+ .pTitle .ico,.pBrand .x,#pTown .x,#info .x{min-width:44px;min-height:44px}
+ #pCta{padding:12px 16px;font-size:13px}
+ #pWelcome .wSkip{padding:14px}
+ .lbl::after{content:"";position:absolute;inset:-12px -10px}
+ .pStats{-webkit-mask-image:linear-gradient(90deg,#000 86%,transparent);mask-image:linear-gradient(90deg,#000 86%,transparent)}
+ #pTop.open .pStats{-webkit-mask-image:none;mask-image:none}
+ #pDec{max-width:calc(100vw - 92px)}#pMine{left:10px;bottom:calc(124px + env(safe-area-inset-bottom));max-width:calc(100vw - 92px)}
+ body.has-dec #pMine{bottom:calc(186px + env(safe-area-inset-bottom))}
+ /* karta obce nízká, ať je obec nad ní vidět; rozmazání pozadí nad 3D plátnem je na telefonu drahé a zhoršuje čitelnost */
+ #pTown{max-height:min(46vh,340px)!important}#tSpark,#pTown .fd,#pTown .sp,#pTown .nx,#pTown .lm{display:none}
+ #pTown,body.player #info{background:rgba(255,255,255,.93)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ #pNav,#pSide,#pTop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}#pTop{background:rgba(255,255,255,.9)}
+}
 body.player #compass{left:auto;right:16px;bottom:16px}body.player #attr{left:16px}
 body.player #info{right:16px;top:14px;background:var(--glassBg);border:1px solid var(--glassBd);backdrop-filter:blur(22px) saturate(1.6);border-radius:22px}
 @media (max-width:760px){
@@ -212,7 +243,13 @@ body.player #info{right:16px;top:14px;background:var(--glassBg);border:1px solid
 <body>
 <canvas id="gl"></canvas>
 <div id="warm"></div><div id="grade"></div>
-<div id="load">Načítám Říčansko…<small id="loadMsg">mapa, modely, obce</small></div>
+<div id="load">Načítám Říčansko…<small id="loadMsg">mapa, modely, obce</small>
+<ol><li><b>1</b>Napiš svou obec do komentáře pod nejnovější díl @radar_ricansko</li><li><b>2</b>Druhý den ráno tu stojí tvůj domek</li><li><b>3</b>Co se postaví, rozhodují lajky</li></ol></div>
+<script>/* když se mapa nenačte (výpadek sítě, chyba skriptu, telefon bez WebGL), nenechat člověka čekat donekonečna */
+(function(){var hotovo=false;function selhalo(proc){if(hotovo||window.done)return;hotovo=true;var l=document.getElementById("load");if(!l)return;l.innerHTML="Mapa se nenačetla<small>"+proc+"</small><button type=\"button\" onclick=\"location.reload()\">Zkusit znovu</button><small style=\"margin-top:12px\">Když to nepomůže, otevři odkaz v Safari nebo Chromu.</small>"}
+window.addEventListener("error",function(e){if(window.done)return;var t=e&&e.target;if(t&&t.tagName==="SCRIPT")selhalo("nepodařilo se stáhnout část hry");else if(e&&e.message)setTimeout(function(){selhalo("chyba při spuštění")},12000)},true);
+window.addEventListener("unhandledrejection",function(){setTimeout(function(){selhalo("chyba při načítání")},12000)});
+setTimeout(function(){selhalo("trvá to moc dlouho")},30000)})()</script>
 <div id="hud" class="card">
  <div id="brand"><span class="logo">RADAR</span><h1>Postav si Říčansko</h1></div><div id="demoTag" style="display:none;margin-top:8px;font:600 11px Inter;color:#8a5a00;background:#fff1bf;border-radius:8px;padding:4px 8px">Ukázková data · skutečná hra načte world.json</div>
  <div id="stats">
@@ -242,13 +279,14 @@ body.player #info{right:16px;top:14px;background:var(--glassBg);border:1px solid
 <div id="cat"><div class="wrap"><button class="close alt" id="catX">Zavřít</button><h2>Katalog speciálních budov</h2>
 <p>Obec si budovu odemkne počtem obyvatel. Co se postaví, vybírá nejlajkovanější komentář, a každá budova má vlastní ceduli s názvem.</p><div class="grid" id="catGrid"></div></div></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script src="vendor/GLTFLoader.js"></script>
 <script>/* režie dílu (?admin=…&rezie=N): svět a scénář z balíčku, který ukládá workflow „Díl“ do větve previews */
 (function(){var q=new URLSearchParams(location.search),n=q.get("rezie");if(!n||!q.get("admin"))return;
 if(q.get("mlha")!=="0"||q.get("perf")!=="0"){q.set("mlha","0");q.set("perf","0");location.replace(location.pathname+"?"+q.toString());return}
-var u=q.get("balik")||"https://raw.githubusercontent.com/radarricansko/postav-si-ricansko/previews/nahledy/dil-"+encodeURIComponent(n)+".rezie.json?t="+Date.now();
+var vlastni="https://raw.githubusercontent.com/radarricansko/",b=q.get("balik")||"";if(b&&b.indexOf(vlastni)!==0&&!/^[\w.\-\/]+\.json$/.test(b))b="";
+var u=b||"https://raw.githubusercontent.com/radarricansko/postav-si-ricansko/previews/nahledy/dil-"+encodeURIComponent(n)+".rezie.json?t="+Date.now();
 window.REZIE={dil:n,url:u,pkg:fetch(u,{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("balíček dílu "+n+" nenalezen ("+r.status+")");return r.json()})};
 window.REZIE.pkg.catch(function(){})})()</script>
 <script src="kit.js"></script>

@@ -37,4 +37,4 @@ Scénář, hlas a popisek dílu 1 i dalších šesti dílů jsou v `pribeh-hry.m
 - **Web hry:** https://radarricansko.github.io/postav-si-ricansko/ Nasazuje se sám z repa při změně ve `web/`, `world-live.json` nebo `world-dil.json`.
 - **Komentáře:** Actions → „Komentáře → world.json“, běží každých 30 minut (ráno po 9:00 každých 10). Popis v `tools/ig/README.md`.
 - **Díl:** Actions → „Díl (rychlý render po částech)“, `dil` = číslo. Scénáře a návod: `tools/video/dily/`.
-- **Starý denní reel z dat:** Actions → „Denní reel a klipy“, běží sám v 17:20.
+- **Starý denní reel z dat:** Actions → „Denní reel a klipy“, spouští se jen ručně (denní automat je vypnutý, bral kvótu hlasu).

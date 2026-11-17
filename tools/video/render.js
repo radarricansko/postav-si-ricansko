@@ -132,6 +132,6 @@ function orez(mp3){const a=path.join(OUT,'v-in.mp3'),b=path.join(OUT,'v-out.mp3'
  const wav=await p.evaluate(async()=>{const bl=await REEL.renderAudio(window.__script);const ab=await bl.arrayBuffer();let s='';const u=new Uint8Array(ab);for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)});
  const wavPath=path.join(OUT,tag+'.wav');fs.writeFileSync(wavPath,Buffer.from(wav,'base64'));
  const mp4=path.join(OUT,tag+'.mp4');
- execFileSync('ffmpeg',['-y','-framerate',String(FPS),'-i',path.join(fdir,'%05d.jpg'),'-i',wavPath,'-c:v','libx264','-preset','veryfast','-crf','19','-pix_fmt','yuv420p','-r',String(FPS),'-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart',mp4],{stdio:'inherit'});
+ execFileSync('ffmpeg',['-y','-framerate',String(FPS),'-i',path.join(fdir,'%05d.jpg'),'-i',wavPath,'-vf','scale=in_range=full:out_range=tv:out_color_matrix=bt709,format=yuv420p','-c:v','libx264','-preset','veryfast','-crf','19','-pix_fmt','yuv420p','-color_range','tv','-colorspace','bt709','-color_primaries','bt709','-color_trc','bt709','-r',String(FPS),'-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart',mp4],{stdio:'inherit'});
  fs.rmSync(fdir,{recursive:true,force:true});fs.unlinkSync(wavPath);console.log('hotovo:',mp4,'hlas:',voiced?ttsVia:'bez hlasu');
  await b.close();srv.close()})().catch(e=>{console.error(e);process.exit(1)});

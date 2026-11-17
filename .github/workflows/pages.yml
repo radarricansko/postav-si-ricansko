@@ -19,6 +19,11 @@ jobs:
       - run: mkdir -p site && cp -r web/. site/ && cp "$([ -f world-live.json ] && echo world-live.json || echo world.json)" site/world.json && cp "$([ -f world-dil.json ] && echo world-dil.json || echo world.json)" site/world-dil.json && cp rozhodnuti.json site/rozhodnuti.json && touch site/.nojekyll
       - name: Verze skriptů (aby prohlížeč nenačítal staré soubory z mezipaměti)
         run: sed -i -E 's#<script src="([a-z-]+\.js)"></script>#<script src="\1?v='"${GITHUB_SHA::7}"'"></script>#' site/index.html && grep -c "?v=" site/index.html
+      - name: Kontrola před nasazením (rozbitý skript nebo neplatná data se na web nedostanou)
+        run: |
+          for f in web/*.js; do node --check "$f"; done
+          node -e 'for(const f of ["site/world.json","site/world-dil.json","site/rozhodnuti.json"])JSON.parse(require("fs").readFileSync(f,"utf8"))'
+          node tools/ig/test.js
       - uses: actions/configure-pages@v5
         with: { enablement: true }
       - uses: actions/upload-pages-artifact@v3

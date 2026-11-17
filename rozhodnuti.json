@@ -1,5 +1,6 @@
 {
-  "_navod": "Plní se večer s dílem. 'dnes' = co se rozhoduje (null = skryté), 'historie' = co už rozhodnuto bylo. Web to ukáže v záložce Příběh a jako plovoucí kartu.",
-  "dnes": null,
-  "historie": []
+ "_navod": "Plní se večer s dílem. 'dil_url' = odkaz přímo na nejnovější díl (https://www.instagram.com/reel/…/), tlačítka na webu pak vedou pod něj místo na profil. 'dnes' = co se rozhoduje (null = skryté; s polem 'den' se ukáže jen ten den hry), 'historie' = co už rozhodnuto bylo. Web to ukáže v záložce Příběh a jako plovoucí kartu.",
+ "dil_url": "",
+ "dnes": null,
+ "historie": []
 }

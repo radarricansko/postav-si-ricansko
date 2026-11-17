@@ -6,6 +6,8 @@ const $=id=>document.getElementById(id);
 document.body.classList.add(ADMIN?"admin":"player");
 if(ADMIN)return;
 const IG="https://www.instagram.com/radar_ricansko/";
+/* odkaz přímo pod nejnovější díl (rozhodnuti.json: "dil_url"); dokud není, vede na profil */
+let DILURL="";const IGD=()=>DILURL||IG;const relinkIG=()=>{if(DILURL)document.querySelectorAll('a[href="'+IG+'"]').forEach(a=>a.href=DILURL)};
 const START=new Date(2026,10,16);// den 1 = po 16. 11. 2026
 const dayDate=d=>{const x=new Date(START);x.setDate(x.getDate()+d-1);return x.toLocaleDateString("cs-CZ",{weekday:"short",day:"numeric",month:"numeric"})};
 const TIERN={wood:"Osada",silver:"Ves",gold:"Městys",plat:"Město"};
@@ -32,9 +34,9 @@ const root=document.createElement("div");root.id="pui";root.innerHTML=`
  <div class="pStats">
   <span class="chip"><b id="kPop">0</b>obyvatel</span>
   <span class="chip"><b id="kAlive">0<i id="kTot"></i></b>oživených obcí</span>
-  <button id="pCrown" class="chip crown" hidden></button>
+  <button id="pCrown" class="chip crown" hidden></button><span id="pDemo" class="chip" hidden title="Hra ještě nezačala, na mapě jsou vymyšlení hráči">🧪 ukázková data</span>
   <button id="pCenter" class="chip center" title="Střed nového státu">⛪ Náměstí sjednocení</button>
-  <div class="pSearch"><input id="pQ" type="search" placeholder="Najdi svůj domek…" autocomplete="off" spellcheck="false"><div id="pRes"></div></div>
+  <div class="pSearch"><input id="pQ" type="search" placeholder="Tvůj nick z IG nebo obec" autocomplete="off" spellcheck="false"><div id="pRes"></div></div>
  </div>
 </div>
 <div id="pSide" class="glass">
@@ -43,15 +45,15 @@ const root=document.createElement("div");root.id="pui";root.innerHTML=`
  ${TABS.map(t=>`<div id="pane-${t}" class="pPane"${t==="rank"?"":" hidden"}></div>`).join("")}
 </div>
 <div id="pTown" class="glass" hidden></div>
-<a id="pCta" href="${IG}" target="_blank" rel="noopener"><span class="dot"></span><span class="long"><b>Chceš domek?</b> Sleduj @radar_ricansko a napiš svou obec pod nejnovější díl</span><span class="short"><b>Chceš domek?</b> Napiš obec pod nejnovější díl</span><span class="arr">→</span></a>
-<nav id="pNav">${TABS.map(t=>`<button data-s="${t}"><i>${TABI[t]}</i><span>${TABN[t]}</span></button>`).join("")}</nav>`;
+<a id="pCta" href="${IGD()}" target="_blank" rel="noopener"><span class="dot"></span><span class="long"><b>Chceš domek?</b> Sleduj @radar_ricansko a napiš svou obec pod nejnovější díl</span><span class="short"><b>Chceš domek?</b> Napiš obec pod nejnovější díl</span><span class="arr">→</span></a>
+<nav id="pNav">${["rank","story","find","build","info"].map(t=>`<button data-s="${t}"><i>${t==="find"?"🔍":TABI[t]}</i><span>${t==="find"?"Můj domek":TABN[t]}</span></button>`).join("")}</nav>`;
 document.body.appendChild(root);
 
 /* ---------- záložky ---------- */
 let curTab="rank";
 root.querySelectorAll(".pTabs button").forEach(b=>b.onclick=()=>tab(b.dataset.t));
 function tab(t){curTab=t;root.querySelectorAll(".pTabs button").forEach(x=>x.classList.toggle("on",x.dataset.t===t));TABS.forEach(k=>$("pane-"+k).hidden=k!==t);render(t)}
-root.querySelectorAll("#pNav button").forEach(b=>b.onclick=()=>{const s=b.dataset.s;const open=$("pSide").classList.contains("sheet")&&curTab===s;closeSheets();if(open)return;tab(s);$("pSide").classList.add("sheet");root.querySelectorAll("#pNav button").forEach(x=>x.classList.toggle("on",x===b))});
+root.querySelectorAll("#pNav button").forEach(b=>b.onclick=()=>{const s=b.dataset.s;if(s==="find"){const o=!$("pTop").classList.contains("open");closeSheets(true);$("pTop").classList.toggle("open",o);if(o)$("pQ").focus();return}const open=$("pSide").classList.contains("sheet")&&curTab===s;closeSheets();if(open)return;tab(s);$("pSide").classList.add("sheet");root.querySelectorAll("#pNav button").forEach(x=>x.classList.toggle("on",x===b))});
 $("pSideX").onclick=()=>closeSheets();
 $("pCenter").onclick=()=>{closeSheets();if(GAME.focusCenter)GAME.focusCenter()};
 $("pSearchBtn").onclick=()=>{const o=$("pTop").classList.toggle("open");if(o){closeSheets(true);$("pQ").focus()}};
@@ -61,11 +63,11 @@ function erbImg(u,cls){return u?`<img class="${cls||"erb"}" src="${u}" alt="">`:
 function render(t){if(t==="rank")renderRank();else if(t==="story")renderStory();else if(t==="build")renderBuild();else if(t==="stats")renderStats();else renderInfo()}
 
 /* ---------- obce ---------- */
-function renderRank(){const r=GAME.ranking();const rv=GAME.revive();$("pane-rank").innerHTML=`<div class="paneHead"><b>Žebříček obcí</b><small>podle počtu obyvatel · zeleně přírůstek za 7 dní</small></div>`+r.map((t,i)=>{
+function renderRank(){const r=GAME.ranking();const rv=GAME.revive();$("pane-rank").innerHTML=`<div class="paneHead"><b>Žebříček obcí</b><small>${r.some(t=>t.players>=rv)?"podle počtu obyvatel · zeleně přírůstek za týden":"Obec ožije při "+rv+" obyvatelích. Najdi tu svoji:"}</small></div>`+r.map((t,i)=>{
  const alive=t.players>=rv;const nt=alive?nextTier(t.players):{to:rv,lab:"do oživení"};const pct=nt?Math.min(100,t.players/nt.to*100):100;
  return`<button class="rk${alive?"":" dead"}${t.crown?" crowned":""}" data-n="${esc(t.name)}"><span class="pos">${i+1}</span>${erbImg(t.erbUrl)}<span class="nm"><b>${t.crown?"👑 ":""}${esc(t.name)}</b>
- <span class="bar"><i style="width:${pct}%;background:${alive?TIERC[t.tier]:"#b8a990"}"></i></span><small>${alive?(nt?`${t.players} obyvatel · ${nt.to-t.players} ${nt.lab}`:`${t.players} obyvatel · město`):(t.players?`🏚️ opuštěná · ${t.players}/${rv} obyvatel`:`🏚️ opuštěná · buď první`)}</small></span>${t.week?`<span class="wk">+${t.week}</span>`:""}</button>`}).join("");
- $("pane-rank").querySelectorAll(".rk").forEach(b=>b.onclick=()=>{closeSheets();GAME.focusTown(b.dataset.n)})}
+ <span class="bar"><i style="width:${pct}%;background:${alive?TIERC[t.tier]:"#b8a990"}"></i></span><small>${alive?(nt?`${t.players} obyvatel · ještě ${nt.to-t.players} ${nt.lab}`:`${t.players} obyvatel · město`):(t.players?`🏚️ chybí ${rv-t.players} do oživení`:`zatím nikdo · buď první`)}</small></span>${t.week?`<span class="wk" title="přírůstek za týden">+${t.week}</span>`:""}</button>`}).join("")+`<button class="rkMore" type="button">Grafy a čísla →</button>`;
+ $("pane-rank").querySelectorAll(".rk").forEach(b=>b.onclick=()=>{closeSheets();GAME.focusTown(b.dataset.n)});const rm=$("pane-rank").querySelector(".rkMore");if(rm)rm.onclick=()=>tab("stats")}
 
 /* ---------- příběh po dnech ---------- */
 function storyFacts(d,latest){const L=GAME.dayLog(d);const f=[];
@@ -79,7 +81,7 @@ function storyDay(d,latest){const s=STORY[d];const facts=storyFacts(d,latest);
  return`<div class="day${latest?" today":""}"><div class="dn"><b>Den ${d}</b><small>${dayDate(d)}</small></div><div class="dc">${s&&s.ph?`<span class="ph">${s.ph}</span>`:""}${s?`<h4>${esc(s.t)}</h4><p>${esc(s.x)}</p>`:""}${facts.length?`<ul>${facts.join("")}</ul>`:(s?"":`<p class="q">Klidný den na radaru.</p>`)}</div></div>`}
 function renderStory(){const d0=GAME.info().day;let h=`<div class="paneHead"><b>Příběh Říčanska</b><small>co se dnes stalo na mapě</small></div>${decisionsHtml()}<div class="tl">${storyDay(d0,true)}</div>`;
  if(d0>1){h+=`<details class="old"><summary><span>Starší dny</span><em>${d0-1}</em></summary><div class="tl">`;for(let d=d0-1;d>=1;d--)h+=storyDay(d,false);h+=`</div></details>`}
- h+=`<p class="next">Co bude dál? Sleduj reely na <a href="${IG}" target="_blank" rel="noopener">@radar_ricansko</a>.</p>`;$("pane-story").innerHTML=h}
+ h+=`<p class="next">Co bude dál? Sleduj reely na <a href="${IGD()}" target="_blank" rel="noopener">@radar_ricansko</a>.</p>`;$("pane-story").innerHTML=h}
 
 /* ---------- katalog staveb ---------- */
 let buildDone=false;
@@ -120,7 +122,7 @@ function renderInfo(){if(infoDone)return;infoDone=true;const rv=GAME.revive();co
  <h5>👑 Koruna</h5><p>Vznáší se nad obcí s <b>nejvíc obyvateli</b>. Kdo ji předběhne, ten ji vezme.</p>
  <h5>🏅 Zakladatelé</h5><p>Prvních 5 obyvatel každé obce jsou její zakladatelé.</p>
  <h5>🏗️ Nápad dne</h5><p>Napiš pod díl, co má nový stát postavit: „nápad - metro do Mukařova“. Hlasuje se lajky do 17:00, vítěz se postaví i s cedulí a tvým nickem.</p>
- <a class="cta" href="${IG}" target="_blank" rel="noopener">Hrát na Instagramu</a>
+ <a class="cta" href="${IGD()}" target="_blank" rel="noopener">Hrát na Instagramu</a>
  <p class="fine">Nechceš být ve hře? Napiš nám DM a domek odstraníme. Hra je fikce a zábava: žádné skutečné osamostatnění ani slučování obcí, bez cen. Mapa © OpenStreetMap.</p>`}
 
 /* ---------- karta obce ---------- */
@@ -138,7 +140,8 @@ function renderTown(){document.body.classList.toggle("card-open",!!curTown||info
  ${t.specials.length?`<div class="sp">${t.specials.map(x=>`<span>🏗️ ${esc(x.text)}</span>`).join("")}</div>`:""}
  ${t.next?`<p class="nx">Další stavba se odemkne při <b>${t.next.th} obyvatelích</b> ${t.next.emoji}</p>`:""}
  ${t.founders.length?`<p class="fd"><small>Zakladatelé</small>${t.founders.map(esc).join(" · ")}</p>`:""}
- <a class="cta" href="${IG}" target="_blank" rel="noopener">Bydlím tady → napiš „${esc(t.name)}“ do komentářů</a>`;
+ <a class="cta" id="pTownGo" href="${IGD()}" target="_blank" rel="noopener">Bydlím tady · zkopírovat „${esc(t.name)}“</a>`;
+ {const go=$("pTownGo");if(go)go.addEventListener("click",()=>{try{navigator.clipboard&&navigator.clipboard.writeText(t.name)}catch(e){}go.textContent="Zkopírováno ✓ vlož do komentáře pod díl"})}
  $("pTownX").onclick=()=>{el.hidden=true;curTown=null;renderTown()};
  const sp=$("tSpark");if(sp)drawChart(sp,H.days,[{v:ser,c:alive?TIERC[t.tier]:"#9b8b6e",fill:true}])}
 const info=$("info");new MutationObserver(()=>{if(info.classList.contains("on")){$("pTown").hidden=true;curTown=null}document.body.classList.toggle("card-open",!!curTown||info.classList.contains("on"))}).observe(info,{attributes:true,attributeFilter:["class"]});
@@ -146,13 +149,18 @@ const info=$("info");new MutationObserver(()=>{if(info.classList.contains("on"))
 /* ---------- hledání ---------- */
 /* mapa se mění jednou denně v 9:00; kdo napsal obec do 17:00, je tam další ráno, po 17:00 o den později */
 const pragueHour=()=>{try{return +new Intl.DateTimeFormat("cs-CZ",{timeZone:"Europe/Prague",hour:"numeric",hourCycle:"h23"}).format(new Date())}catch(e){return new Date().getHours()}};
-const waitMsg=()=>`<b>Zatím tě tu nevidíme.</b> Mapa se mění jednou denně v 9:00 s novým dílem. ${pragueHour()<17?"Napsal(a) jsi obec dnes před 17:00? Pak tu tvůj domek stojí <b>zítra v 9:00</b>.":"Obec napsaná po 17:00 se staví až <b>pozítří v 9:00</b>. Co jsi napsal(a) před 17:00 včera nebo dřív, už tu být má, zkus jiný zápis nicku."} Ještě jsi nenapsal(a)? <a href="${IG}" target="_blank" rel="noopener">Napiš obec pod nejnovější díl.</a>`;
+const waitMsg=()=>{const h=pragueHour(),go=` Ještě nemáš napsáno? <a href="${IGD()}" target="_blank" rel="noopener">Napiš obec pod nejnovější díl.</a>`;
+ if(h<9)return`<b>Zatím tě tu nevidíme.</b> Dnešní mapa vyjde po 9:00. Kdo napsal obec včera do 17:00, bude tu ráno.`+go;
+ if(h<10)return`<b>Mapa se právě mění.</b> Nové domky naskakují mezi 9:00 a 9:30, zkus to za chvíli znovu.`+go;
+ if(h<17)return`<b>Zatím tě tu nevidíme.</b> Obec napsaná včera do 17:00 už tu má být: zkus nick přesně jako na Instagramu. Obec napsaná dnes do 17:00 tu bude <b>zítra ráno</b>.`+go;
+ return`<b>Zatím tě tu nevidíme.</b> Obec napsaná dnes po 17:00 se staví až <b>pozítří ráno</b>. Dřívější komentáře už tu být mají: zkus nick přesně jako na Instagramu.`+go};
+const rememberNick=v=>{try{if(v&&v.length>=3)localStorage.setItem("psr_nick",v.replace(/^@/,""))}catch(e){}};
 const q=$("pQ"),res=$("pRes");
 const fold=x=>x.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
 q.addEventListener("input",()=>{const v=q.value.trim();if(!v){res.innerHTML="";return}
  const towns=GAME.ranking().filter(t=>fold(t.name).includes(fold(v))).slice(0,4);const ppl=GAME.find(v);
  res.innerHTML=(towns.map(t=>`<button data-k="t" data-n="${esc(t.name)}">${erbImg(t.erbUrl,"erbS")}<span><b>${esc(t.name)}</b><small>${t.players} obyvatel</small></span></button>`).join("")+
-  ppl.map(p=>`<button data-k="h" data-n="${esc(p.town)}" data-i="${p.idx}"><span class="hs">🏠</span><span><b>${esc(p.nick)}</b><small>${esc(p.town)} · obyvatel č. ${String(p.no).padStart(4,"0")}</small></span></button>`).join(""))||`<div class="empty">${waitMsg()}</div>`;
+  ppl.map(p=>`<button data-k="h" data-n="${esc(p.town)}" data-i="${p.idx}"><span class="hs">🏠</span><span><b>${esc(p.nick)}</b><small>${esc(p.town)} · obyvatel č. ${String(p.no).padStart(4,"0")}</small></span></button>`).join(""))||`<div class="empty">${waitMsg()}<br><small>Nick si pamatujeme, příště ti domek ukážeme hned.</small></div>`;if(!towns.length&&!ppl.length)rememberNick(v);
  res.querySelectorAll("button").forEach(b=>b.onclick=()=>{q.value="";res.innerHTML="";closeSheets();q.blur();if(b.dataset.k==="t")GAME.focusTown(b.dataset.n);else{$("pTown").hidden=true;curTown=null;GAME.select(b.dataset.n,+b.dataset.i)}})});
 q.addEventListener("keydown",e=>{if(e.key==="Enter"){const b=res.querySelector("button");if(b)b.click()}if(e.key==="Escape"){q.value="";res.innerHTML="";q.blur()}});
 document.addEventListener("pointerdown",e=>{if(res.innerHTML&&!e.target.closest(".pSearch"))res.innerHTML=""});
@@ -167,33 +175,42 @@ document.addEventListener("pointerdown",e=>{if(res.innerHTML&&!e.target.closest(
 
 /* ---------- rozhodnutí: co se dnes rozhoduje a co už rozhodnuto bylo (rozhodnuti.json, plní se večer s dílem) ---------- */
 let DEC=null;
-function decisionsHtml(){if(!DEC)return"";let h="";const d=DEC.dnes;
- if(d&&d.otazka)h+=`<div class="decNow"><small>Dnes se rozhoduje${d.den?" · den "+esc(d.den):""}</small><b>${esc(d.otazka)}</b>${d.detail?`<span>${esc(d.detail)}</span>`:""}<a href="${IG}" target="_blank" rel="noopener">Napsat pod díl</a><em>Hlasuje se do ${esc(d.do||"17:00")}</em></div>`;
+/* otázka patří ke dni hry: když je v souboru včerejší, neukazuje se jako dnešní */
+const decToday=()=>{const d=DEC&&DEC.dnes;if(!d||!d.otazka)return null;try{const day=GAME.info().day;if(d.den&&day&&+d.den!==+day)return null}catch(e){}return d};
+function decisionsHtml(){if(!DEC)return"";let h="";const d=decToday();
+ if(d&&d.otazka)h+=`<div class="decNow"><small>Dnes se rozhoduje${d.den?" · den "+esc(d.den):""}</small><b>${esc(d.otazka)}</b>${d.detail?`<span>${esc(d.detail)}</span>`:""}<a href="${IGD()}" target="_blank" rel="noopener">Napsat pod díl</a><em>Hlasuje se do ${esc(d.do||"17:00")}</em></div>`;
  const H=(DEC.historie||[]).slice().reverse();
  if(H.length)h+=`<details class="old" open><summary><span>Síň rozhodnutí</span><em>${H.length}</em></summary><div class="decList">${H.map(x=>`<div><small>Den ${esc(x.den)}</small><b>${esc(x.otazka)}</b><span>Vyhrálo: <b>${esc(x.vitez)}</b>${x.autor?` · navrhl(a) ${esc(x.autor)}`:""}${x.hlasy?` · ${esc(x.hlasy)} lajků`:""}</span></div>`).join("")}</div></details>`;
  return h}
-fetch("rozhodnuti.json?t="+Math.floor(Date.now()/60000),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&typeof j==="object"){DEC=j;if(curTab==="story")render("story");showDecChip()}}).catch(()=>{});
-function showDecChip(){const d=DEC&&DEC.dnes;if(!d||!d.otazka||$("pDec"))return;const b=document.createElement("button");b.id="pDec";b.type="button";b.innerHTML=`<i>🗳️</i><span><small>Dnes se rozhoduje</small><b>${esc(d.otazka)}</b></span>`;b.onclick=()=>{closeSheets();tab("story");$("pSide").classList.add("sheet")};root.appendChild(b)}
+fetch("rozhodnuti.json?t="+Math.floor(Date.now()/60000),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&typeof j==="object"){DEC=j;if(typeof j.dil_url==="string"&&/^https:\/\/(www\.)?instagram\.com\//.test(j.dil_url)){DILURL=j.dil_url;relinkIG()}if(curTab==="story")render("story");showDecChip()}}).catch(()=>{});
+function showDecChip(){const d=decToday();if(!d||$("pDec"))return;document.body.classList.add("has-dec");const b=document.createElement("button");b.id="pDec";b.type="button";b.innerHTML=`<i>🗳️</i><span><small>Dnes se rozhoduje</small><b>${esc(d.otazka)}</b></span>`;b.onclick=()=>{closeSheets();tab("story");$("pSide").classList.add("sheet")};root.appendChild(b)}
 
 /* ---------- uvítání pro nové lidi (jednou; ?uvod=1 ho vynutí, ?uvod=0 vypne) ---------- */
 (function(){const f=QS.get("uvod");let seen=false;try{seen=!!localStorage.getItem("psr_uvod")}catch(e){}
  if(f==="0"||(seen&&f!=="1"))return;
  const w=setInterval(()=>{if(!window.done)return;clearInterval(w);setTimeout(()=>{
   const el=document.createElement("div");el.id="pWelcome";el.setAttribute("role","dialog");el.setAttribute("aria-label","Jak to funguje");
+  const late=pragueHour()>=17;
   el.innerHTML=`<div class="wCard"><small>#postavsiricansko</small><h2>Postav si Říčansko</h2>
-   <p>Tohle je mapa našeho regionu, 52 obcí. Každý, kdo se přidá, tu má <b>domek se svým nickem</b>. A <b>co se tu postaví, rozhodujete vy</b> v komentářích.</p>
    <ol><li><b>Napiš svou obec</b><span>do komentáře pod nejnovější díl na Instagramu @radar_ricansko</span></li>
-   <li><b>Zítra v 9:00 tu stojí tvůj domek</b><span>mapa se mění jednou denně, s novým dílem</span></li>
+   <li><b>${late?"Pozítří":"Zítra"} ráno tu stojí tvůj domek</b><span>${late?"dnešní uzávěrka v 17:00 už byla":"stačí napsat dnes do 17:00"}, mapa se mění jednou denně po 9:00</span></li>
    <li><b>Rozhoduj komentářem</b><span>nejlajkovanější nápad dne se postaví</span></li></ol>
-   <a class="wGo" href="${IG}" target="_blank" rel="noopener">Napsat obec na Instagramu</a><button class="wSkip" type="button">Nejdřív se podívám na mapu</button></div>`;
+   <a class="wGo" href="${IGD()}" target="_blank" rel="noopener">Napsat obec pod díl</a><button class="wFind" type="button">Už mám napsáno · najít můj domek</button><button class="wSkip" type="button">Jen se rozhlédnu</button></div>`;
   const close=()=>{el.classList.add("out");try{localStorage.setItem("psr_uvod","1")}catch(e){}setTimeout(()=>el.remove(),300)};
   el.querySelector(".wSkip").onclick=close;el.querySelector(".wGo").addEventListener("click",()=>{try{localStorage.setItem("psr_uvod","1")}catch(e){}});
+  el.querySelector(".wFind").onclick=()=>{close();$("pTop").classList.add("open");setTimeout(()=>$("pQ").focus(),320)};
   el.addEventListener("keydown",e=>{if(e.key==="Escape")close()});document.body.appendChild(el);el.querySelector(".wSkip").focus({preventScroll:true})},700)},250)})();
+
+/* ---------- můj domek: odkaz ?nick=… nebo nick zapamatovaný z hledání ---------- */
+(function(){const w=setInterval(()=>{if(!window.done)return;clearInterval(w);let n=QS.get("nick")||"",fromLink=!!n;if(!n){try{n=localStorage.getItem("psr_nick")||""}catch(e){}}n=n.replace(/^@/,"").trim();if(!n)return;
+ let hit=null;try{hit=(GAME.find(n)||[]).find(p=>fold(String(p.nick).replace(/^@/,""))===fold(n))}catch(e){}if(!hit)return;
+ if(fromLink){setTimeout(()=>{$("pTown").hidden=true;curTown=null;GAME.select(hit.town,hit.idx)},900);return}
+ const b=document.createElement("button");b.id="pMine";b.type="button";b.innerHTML=`<i>🏠</i><span><small>Tvůj domek stojí</small><b>${esc(hit.nick)} · ${esc(hit.town)}</b></span>`;b.onclick=()=>{b.remove();closeSheets();$("pTown").hidden=true;curTown=null;GAME.select(hit.town,hit.idx)};root.appendChild(b)},300)})();
 
 /* ---------- aktualizace ---------- */
 function upd(){const i=GAME.info();const r=GAME.ranking();const rv=GAME.revive();$("pSub").textContent=`Den ${i.day} · ${dayDate(i.day)}`;
  $("kPop").textContent=i.pop.toLocaleString("cs-CZ");$("kAlive").firstChild.textContent=r.filter(t=>t.players>=rv).length;$("kTot").textContent="/"+i.total;
- const cr=GAME.crown();const cb=$("pCrown");cb.hidden=!cr;if(cr){cb.innerHTML=`<i>👑</i><b>${esc(cr.name)}</b><span>největší obec</span>`;cb.title="Korunu má "+cr.name;cb.onclick=()=>{closeSheets();GAME.focusTown(cr.name)}}
+ {const dt=$("demoTag"),pd=$("pDemo");if(dt&&pd)pd.hidden=dt.style.display==="none"}const cr=GAME.crown();const cb=$("pCrown");cb.hidden=!cr;if(cr){cb.innerHTML=`<i>👑</i><b>${esc(cr.name)}</b><span>největší obec</span>`;cb.title="Korunu má "+cr.name;cb.onclick=()=>{closeSheets();GAME.focusTown(cr.name)}}
  if(curTab==="rank"||curTab==="story"||curTab==="stats")render(curTab);renderTown();fitTop()}
 function fitTop(){document.documentElement.style.setProperty("--topB",($("pTop").offsetTop+$("pTop").offsetHeight+12)+"px")}
 new ResizeObserver(fitTop).observe($("pTop"));addEventListener("resize",fitTop);fitTop();

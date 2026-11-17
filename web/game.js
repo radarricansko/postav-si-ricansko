@@ -36,7 +36,7 @@ const L=0.23;              // měřítko uvnitř obce (jednotek na metr)
 const GAP=5, SPREAD=1.15;  // rozestup obcí při roztahování světa
 const LOT=6.6, MAXR=170, HOUSE_S=3.6;
 const V2=QS.get("vzhled")!=="1";
-const PAL=V2?{sky:["#5fa4e2","#a8cff0","#dfeaf0","#c6dcd8"],fog:"#c6dcd8",fogK:[1.7,5.2,320],hemi:["#e2ecff","#7f7c55",.62],sun:["#fff0d2",.68],fill:["#b4caff",.18],
+const PAL=V2?{sky:["#5fa4e2","#a8cff0","#dfeaf0","#c6dcd8"],fog:"#c6dcd8",fogK:[1.7,5.2,320],hemi:["#e2ecff","#7f7c55",.66],sun:["#fff0d2",.76],fill:["#b4caff",.18],
   /* světlo: součet na osluněné ploše drží pod 1,2, jinak se barvy v 8 bitech oříznou (přepálené střechy, bílý kostel bez tvaru) a tráva zežloutne */
   ground:"#78a258",meadow:["#97b962","#89b058"],orchard:"#81a854",forest:"#456e36",water:"#366779",waterSpec:"#8fa6b0",shore:"#4f7436",
   field:["#cdbd78","#bfc27a","#a6ba66","#b3b96a","#9ab45f","#c4b06e","#8fae5a","#a6ba66","#9ab45f","#8fae5a"],
@@ -346,7 +346,7 @@ function mapLand(){const pa=landMesh.geometry.attributes.position.array,m=landSr
  if(shoreMesh){const sa=shoreMesh.geometry.attributes.position.array,sm=shoreSrc.m;for(let i=0,j=0;i<sm.length;i+=2,j+=3){F(sm[i],sm[i+1],tmp2);sa[j]=tmp2[0];sa[j+1]=.04;sa[j+2]=tmp2[1]}shoreMesh.geometry.attributes.position.needsUpdate=true}}
 /* Zem je jedna obří plocha. Ze dvou trojúhelníků o hraně tisíců jednotek vychází hloubka zblízka nepřesně a tráva na jednotlivých snímcích „zaplaví“ silnici a desku pod domkem (ověřeno komisí 17. 11.). Proto je dělená. */
 const GSEG=+QS.get("zem")||64;
-const groundTex=V2?bladesTex(57):null,patchTex=V2?softTex(9,.72,58):null,shadeTex=V2?softTex(5,.8,61):null;const ground=new T.Mesh(new T.PlaneGeometry(1,1,GSEG,GSEG),new T.MeshLambertMaterial({color:PAL.ground,map:groundTex}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.renderOrder=-10;scene.add(ground);
+const groundTex=V2?bladesTex(57):null,patchTex=V2?softTex(9,.79,58):null,shadeTex=V2?softTex(5,.85,61):null;const ground=new T.Mesh(new T.PlaneGeometry(1,1,GSEG,GSEG),new T.MeshLambertMaterial({color:PAL.ground,map:groundTex}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.renderOrder=-10;scene.add(ground);
 /* velké světlejší a tmavší plochy přes trávu (násobí barvu pod sebou) */
 const groundPatch=V2?new T.Mesh(new T.PlaneGeometry(1,1,GSEG,GSEG),new T.MeshBasicMaterial({map:patchTex,blending:T.MultiplyBlending,transparent:true,depthWrite:false,fog:false,polygonOffset:true,polygonOffsetFactor:-.2,polygonOffsetUnits:-.2})):null;if(groundPatch){groundPatch.rotation.x=-Math.PI/2;groundPatch.position.y=.004;groundPatch.renderOrder=-1;scene.add(groundPatch)}
 /* stíny mraků: velké pomalu plující tmavší plochy místo bílých obláčků, které z výšky jen šednuly */
@@ -475,7 +475,7 @@ function placeHouses(now){{let tot=0;TOWNS.forEach(t=>{tot+=t.items.length});if(
    Q.setFromAxisAngle(UP,s.ry-Math.PI/2+(j1-.5)*.14);V.set(c.x+s.x+(j2-.5)*.5,0,c.z+s.z+(j3-.5)*.5);SC.set(HOUSE_S*k*(V2?.93+j2*.16:1),HOUSE_S*k*(V2?.9+j1*.24:1),HOUSE_S*k*(V2?.93+j3*.16:1));M4.compose(V,Q,SC);houseRef[s.roof][cnt[s.roof]]={t,idx};HOUSE[s.roof].setMatrixAt(cnt[s.roof]++,M4);
    Q.setFromAxisAngle(UP,s.ry);SC.set(1,1,1);V.set(c.x+s.x,.02,c.z+s.z);M4.compose(V,Q,SC);GARDEN.setMatrixAt(gi++,M4);
    const dx=s.sx-s.x,dz=s.sz-s.z,Ld=Math.hypot(dx,dz);const len=Math.max(.3,Ld-1.9);V.set(c.x+s.x+dx/Ld*(1.9+len/2),.03,c.z+s.z+dz/Ld*(1.9+len/2));SC.set(1.25,1,len);M4.compose(V,Q,SC);DRIVE.setMatrixAt(di++,M4);
-   if(s.tree){const side=s.tr<.5?1:-1;const fx=dx/Ld,fz=dz/Ld;V.set(c.x+s.x-fx*2.3+fz*2.2*side,0,c.z+s.z-fz*2.3-fx*2.2*side);const h=V2?1.15+s.tr*.7:3.6+s.tr*1.6;SC.set(h*k,h*k,h*k);M4.compose(V,Q,SC);YARD.setMatrixAt(yi++,M4)}
+   if(s.tree){const side=s.tr<.5?1:-1;const fx=dx/Ld,fz=dz/Ld;V.set(c.x+s.x-fx*2.3+fz*2.2*side,0,c.z+s.z-fz*2.3-fx*2.2*side);const h=V2?.95+s.tr*.5:3.6+s.tr*1.6;SC.set(h*k,h*k,h*k);M4.compose(V,Q,SC);YARD.setMatrixAt(yi++,M4)}
    if(s.lamp){const fx=dx/Ld,fz=dz/Ld;V.set(c.x+s.sx+fz*2.9-fx*.35,0,c.z+s.sz-fx*2.9-fz*.35);Q.setFromAxisAngle(UP,Math.atan2(fx,fz)+Math.PI/2);SC.set(4.2,4.2,4.2);M4.compose(V,Q,SC);LAMPS.setMatrixAt(li++,M4)}})});
  HOUSE.forEach((h,i)=>{h.count=cnt[i];h.instanceMatrix.needsUpdate=true});[[GARDEN,gi],[DRIVE,di],[YARD,yi],[LAMPS,li]].forEach(([m,n])=>{m.count=n;m.instanceMatrix.needsUpdate=true})}
 
@@ -570,7 +570,7 @@ function townDecor(t){const cuts=t.cutsOk||[];const key=Math.round(t.R)+"|"+t.sl
  {const LH=new Hash(6),STH=new Hash(6);t.slots.forEach(s=>{if(!s.big)LH.add(s.x,s.z,1)});(t.builtPts||[]).forEach(q=>STH.add(q.x,q.z,1));const lm=t.lm;const UB=t.usedB||[];
   for(let i=0;i<np*3&&k<np&&UB.length;i++){const b=UB[Math.floor(r()*UB.length)];const x=b.cx+(r()-.5)*2*b.lr,z=b.cz+(r()-.5)*2*b.lr;
    if(LH.near(x,z,5.2)!==null||STH.near(x,z,3.3)!==null||Math.hypot(x-lm.x,z-lm.z)<lm.r+3.5||big.some(s=>Math.hypot(s.x-x,s.z-z)<s.big+1.5)||t.wet(x,z))continue;if(roadHash&&roadHash.near(c0.x+x,c0.z+z,3.2)!==null)continue;
-   Q.setFromAxisAngle(UP,r()*6.3);V.set(x,0,z);const h=V2?1.5+r()*1.1:3.2+r()*2.4;SC.set(h,h,h);M4.compose(V,Q,SC);im.setMatrixAt(k++,M4)}}
+   Q.setFromAxisAngle(UP,r()*6.3);V.set(x,0,z);const h=V2?1.15+r()*.8:3.2+r()*2.4;SC.set(h,h,h);M4.compose(V,Q,SC);im.setMatrixAt(k++,M4)}}
  const k0=k;
  im.count=k;im.castShadow=true;g.add(im)}
 const fpOf=id=>(SPECIALS.fp?SPECIALS.fp(id):null)||2.4;
@@ -894,7 +894,7 @@ window.GAME={canvas,THREE:T,look:()=>({scene,cam,ctr,sun,hemi,fill,ground,landMe
   const ms=[100,250,500,1000,1500,2000,2026,3000].map(m=>ALLP.find(p=>p.no===m&&p.day===DAY)).filter(Boolean).map(p=>({no:p.no,owner:p.nick.slice(1),town:p.town}))[0]||null;
   const nt=TOWNS.filter(t=>t.players.length&&t.players[0].day===DAY).map(t=>t.n);
   const auth=(ALLP[ALLP.length-1]||{nick:"@hrac_0001"}).nick;
-  return{day:DAY,date:new Date().toISOString().slice(0,10),crown:crownT?{name:crownT.n,week:weekGain(crownT),prev:(crownAt(DAY-1)||{}).n||null,changed:(crownAt(DAY-1)||{}).n!==crownT.n}:null,newPlayers:np,topComment:sp[0]?{author:auth,text:"Postavte "+sp[0].name+"!",likes:87}:{author:auth,text:"Chceme v obci hospodu U Zlatého Radaru 🍺",likes:64},newBuilding:sp[0]||null,expanded:false,
+  return{day:DAY,date:new Date().toISOString().slice(0,10),crown:crownT?{name:crownT.n,week:weekGain(crownT),prev:(crownAt(DAY-1)||{}).n||null,changed:(crownAt(DAY-1)||{}).n!==crownT.n}:null,newPlayers:np,topComment:!window.PSR_DEMO?null:sp[0]?{author:auth,text:"Postavte "+sp[0].name+"!",likes:87}:{author:auth,text:"Chceme v obci hospodu U Zlatého Radaru 🍺",likes:64},/* vymyšlený citát jen v ukázkových datech */newBuilding:sp[0]||null,expanded:false,
    jobs,jobBuilt:jb[0]||null,milestone:ms,newTowns:nt,links:[...LINKS].map(k=>k.split('|')),fullTowns:[],findMe:np.slice(0,12).map(p=>p.owner)}}};
 
 /* ---------- start ---------- */
@@ -903,7 +903,7 @@ window.GAME={canvas,THREE:T,look:()=>({scene,cam,ctr,sun,hemi,fill,ground,landMe
  TOWNS.forEach(planTown);initInstanced();
  setMsg("načítám herní data…");let real=CONFIG.DEMO?null:await fetchWorld();
  applyStat(QS.get("stat")&&(QS.get("admin")||QS.get("render"))?{nazev:QS.get("stat"),vlajka:{pruhy:["#2F4AA8","#C6FF3D"],symbol:"⭐"}}:real&&real.stat);
- if(real){WORLD_REV=real.revize;applyEvents(worldEvents(real),false);DAY=real.den_hry||DAY}else{seedDemo();document.getElementById("demoTag").style.display=""}if(+QS.get("den")>0&&(QS.get("admin")||QS.get("render")))DAY=+QS.get("den");
+ if(real){WORLD_REV=real.revize;applyEvents(worldEvents(real),false);DAY=real.den_hry||DAY}else{window.PSR_DEMO=true;seedDemo();document.getElementById("demoTag").style.display=""}if(+QS.get("den")>0&&(QS.get("admin")||QS.get("render")))DAY=+QS.get("den");
  TOWNS.forEach(t=>{t.open=t.players.length>=CONFIG.OPEN_AT;layoutTown(t);t.R=townRadius(t)});
  S=Starget=S0=+QS.get("s")||L;updTownParams();// celá mapa v měřítku domků: nic se nenafukuje (?s=0.05 = staré rybí oko)
  setMsg("krajina, lesy a pole…");await new Promise(r=>setTimeout(r,20));

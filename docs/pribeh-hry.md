@@ -14,7 +14,7 @@ Verze 4 (10. 11. 2026): **Co kdyby se Říčansko osamostatnilo.** Vypráví Pan
 |---|---|---|
 | **9:00** | Vychází díl (reel s `#PostavSiŘíčansko`). Do půl hodiny se na webu najednou změní mapa: domky všech, kdo stihli včerejší uzávěrku, a stavba, kterou jsme večer postavili. | Maty naplánuje reel na 9:00, mapa se překlopí sama |
 | 9:00–17:00 | Lidi komentují: obec = domek, k tomu hlas nebo nápad dne. Mapa se přes den nemění. | – |
-| **17:00** | Uzávěrka. Sečtou se hlasy a nejlajkovanější komentáře, v 17:20 se vyrenderuje první verze videa. | automat |
+| **17:00** | Uzávěrka. Sečtou se hlasy a nejlajkovanější komentáře, video dílu se pak vyrábí ručně (workflow „Díl“ a režie v prohlížeči). | automat + Maty |
 | 17:00–20:00 | Vybereme vítěze (Maty schvaluje), vymyslíme, jak bude vypadat, postavíme ho do mapy, přerenderujeme video. | Maty + Claude |
 | do 20:00 | Hotový díl naplánovaný na 9:00. | Maty |
 
