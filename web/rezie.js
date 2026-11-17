@@ -32,7 +32,7 @@
     '<div class="row"><button id="rzClean" class="alt" disabled>▶ Přehrát</button><button id="rzCleanRec" class="rec" disabled>⏺ Vyrobit čisté záběry</button><button id="rzStop" class="alt" disabled>■ Stop</button></div>' +
     '<div id="rzDl"></div>' +
     '<h3>Hlas</h3><p>AI hlas je jen vodítko pro tempo. Vlastní voiceover a zvuk z Instagramu se přidávají až ve střihu.</p>' +
-    '<div class="row"><button id="rzAi" class="alt" disabled>AI hlas</button><button id="rzNoVoice" class="alt" disabled>Bez hlasu</button></div>' +
+    '<div class="row"><button id="rzAi" class="alt" disabled>AI hlas</button><button id="rzMute" class="alt" disabled>Ztlumený (časování zůstává)</button><button id="rzNoVoice" class="alt" disabled>Bez hlasu</button></div>' +
     '<div class="row"><span>Hudba</span><select id="rzMusic"></select></div>' +
     '<h3>Text k namluvení</h3><textarea id="rzText" readonly></textarea>' +
     '<div class="row"><button id="rzTxt" class="alt" disabled>Stáhnout text</button><button id="rzSrt" class="alt" disabled>Stáhnout titulky .srt</button><button id="rzClose" class="alt">Zavřít režii</button></div>' +
@@ -42,7 +42,7 @@
   REEL.musicStyles.forEach(function (m) { var o = document.createElement("option"); o.value = m; o.textContent = m; $("rzMusic").appendChild(o); });
 
   function msg(t, err) { var m = $("rzMsg"); m.textContent = t || ""; m.className = err ? "err" : ""; }
-  function lock(b) { busy = b; ["rzPlay", "rzRec", "rzClean", "rzCleanRec", "rzAi", "rzNoVoice", "rzTxt", "rzSrt"].forEach(function (i) { $(i).disabled = b || !script; }); $("rzStop").disabled = !b; $("rzAi").disabled = b || !script || voice === "ai"; $("rzNoVoice").disabled = b || !script || voice === "bez"; }
+  function lock(b) { busy = b; ["rzPlay", "rzRec", "rzClean", "rzCleanRec", "rzAi", "rzMute", "rzNoVoice", "rzTxt", "rzSrt"].forEach(function (i) { $(i).disabled = b || !script; }); $("rzStop").disabled = !b; $("rzAi").disabled = b || !script || voice === "ai"; $("rzNoVoice").disabled = b || !script || voice === "bez"; $("rzMute").disabled = b || !script || voice === "tichy"; }
   function b64blob(c) { var s = atob(c), u = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return new Blob([u], { type: "audio/mpeg" }); }
   function save(name, text, type) { var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: type || "text/plain;charset=utf-8" })); a.download = name; a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000); }
   function sec(ms) { return (ms / 1000).toFixed(1).replace(".", ",") + " s"; }
@@ -50,14 +50,14 @@
   /* scénář se staví znovu před každým během: záběry si drží rozpracovaný stav a detailní domek se vrací na začátek */
   function build() {
     script = REEL.scriptFromShots(JSON.parse(JSON.stringify(pkg.def)), { handle: HANDLE });
-    var clips = voice === "ai" ? (pkg.clips || []).map(function (c) { return c ? b64blob(c) : null; }) : [];
+    var clips = voice !== "bez" ? (pkg.clips || []).map(function (c) { return c ? b64blob(c) : null; }) : [];
     var p = clips.some(Boolean) ? REEL.setVoiceSegments(script, clips, { padMs: 140 }) : REEL.setVoiceTrack(null);
-    return Promise.resolve(p).then(function () {
+    return Promise.resolve(p).then(function () { return voice === "tichy" ? REEL.setVoiceTrack(null) : null; }).then(function () {   // ztlumený: délky záběrů podle AI hlasu, ale hlas ve videu není (pod vlastní voiceover)
       REEL.setMusic($("rzMusic").value);
       var v = REEL.voiceScript(script), n = script.scenes.filter(function (s) { return s.vo; }).length;
       $("rzText").value = (v.segments || []).map(function (s, i) { return (i + 1) + ". " + s.text; }).join("\n\n");
       $("rzStat").innerHTML = "<b>" + sec(script.total) + "</b> · " + script.scenes.length + " záběrů · " + n + " vět · hlas: <b>" +
-        (voice === "ai" ? (clips.some(Boolean) ? "AI (" + (pkg.via || "?") + ")" : "v balíčku žádný není") : "bez hlasu") + "</b>";
+        (!clips.some(Boolean) ? (voice === "bez" ? "bez hlasu" : "v balíčku žádný není") : voice === "ai" ? "AI (" + (pkg.via || "?") + ")" : "ztlumený, časování podle AI") + "</b>";
       return v;
     });
   }
@@ -99,7 +99,7 @@
       msg("Vyrábím video…");
       offRun = true;
       return offline(clean).then(function (blob) {
-        lastUrl = URL.createObjectURL(blob); var name = "dil-" + Z.dil + (clean ? "-ciste-zabery" : "") + "." + (blob.extension || "mp4");
+        lastUrl = URL.createObjectURL(blob); var name = "dil-" + Z.dil + (clean ? "-ciste-zabery" : voice === "ai" ? "" : "-bez-hlasu") + "." + (blob.extension || "mp4");
         $("rzDl").innerHTML = '<a href="' + lastUrl + '" download="' + name + '">Stáhnout ' + name + " (" + (blob.size / 1048576).toFixed(1).replace(".", ",") + " MB)</a>";
         msg(stopAsk ? "Zastaveno, video je kratší." : "Hotovo za " + Math.round((performance.now() - t0) / 1000) + " s.");
       });
@@ -107,6 +107,7 @@
   }
 
   $("rzAi").onclick = function () { voice = "ai"; lock(true); build().then(function () { msg("Zpátky AI hlas."); lock(false); }); };
+  $("rzMute").onclick = function () { voice = "tichy"; lock(true); build().then(function () { msg("Hlas je ztlumený, záběry mají délku podle AI hlasu."); lock(false); }); };
   $("rzNoVoice").onclick = function () { voice = "bez"; lock(true); build().then(function () { msg("Bez hlasu: záběry mají délku podle textu."); lock(false); }); };
   $("rzMusic").onchange = function () { REEL.setMusic(this.value); };
   $("rzPlay").onclick = function () { run("play"); }; $("rzRec").onclick = function () { run("rec"); };
