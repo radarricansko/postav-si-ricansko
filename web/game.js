@@ -330,6 +330,8 @@ const FTILE=480,TREEGEO=TREEK.map(([k,c])=>{const g=treeGeo(k,c);g.boundingSpher
 /* vzdálené lesy: strom z 6–8 trojúhelníků místo 83 (z dálky není rozdíl vidět, kreslí se desetkrát míň) */
 function treeGeoLo(kind,leaf){const g=kind===0?new T.ConeGeometry(.8,3.05,6,1,true):new T.OctahedronGeometry(1.05,0);g.translate(0,kind===0?1.95:1.9,0);const n=g.attributes.position.count,a=new Float32Array(n*3),cc=new T.Color(leaf);for(let i=0;i<n;i++){a[i*3]=cc.r;a[i*3+1]=cc.g;a[i*3+2]=cc.b}g.setAttribute("color",new T.BufferAttribute(a,3));g.setAttribute("uv",new T.BufferAttribute(new Float32Array(n*2),2));return g}
 const TREEGEO_LO=(()=>{const g=treeGeoLo(0,"#ffffff");g.boundingSphere=new T.Sphere(new T.Vector3(0,6,0),FTILE*.75+24);return g})(),TREECOL=TREEK.map(([k,c])=>new T.Color(c)),LOD2=1250*1250;let FTILES=[];
+/* drobnosti obce (lampy, stromky na zahradách) se z velké dálky nekreslí */
+function townLod(){const cp=cam.position,y2=cp.y*cp.y;for(let i=0;i<TOWNS.length;i++){const t=TOWNS[i];if(!t.group)continue;const p=t.group.position,dx=p.x-cp.x,dz=p.z-cp.z,far=dx*dx+dz*dz+y2>1500*1500;if(far!==t.far){t.far=far;if(t.decor)t.decor.visible=!far;if(t.lamps)for(let j=0;j<t.lamps.length;j++)t.lamps[j].visible=!far}}}
 function forestLod(){const cp=cam.position,y2=cp.y*cp.y;for(let i=0;i<FTILES.length;i++){const t=FTILES[i],dx=t.x-cp.x,dz=t.z-cp.z,lo=dx*dx+dz*dz+y2>LOD2;if(lo!==t.isLo){t.isLo=lo;t.lo.visible=lo;for(let j=0;j<t.hi.length;j++)t.hi[j].visible=!lo}}}
 let forestPts=null;
 function sampleForest(){const r=rng(9);forestPts=[];const sp=(S>.15?13:7.2)/S;
@@ -445,12 +447,12 @@ function monument(lm){const g=new T.Group();const Mm=SPECIALS.M;const add=(geo,c
  bx(1.7,.3,1.7,"#b9b1a3",0,0,0);bx(1.2,.45,1.2,"#a39b8c",0,.3,0);
  if(lm.cross){bx(.22,2.6,.22,"#c9c2b5",0,.75,0);bx(1.1,.22,.22,"#c9c2b5",0,2.55,0)}else{bx(.6,2.5,.6,"#c9c2b5",0,.75,0);const p=new T.ConeGeometry(.45,.6,4);p.rotateY(Math.PI/4);p.translate(0,3.55,0);add(p,"#c9c2b5")}
  [[-1.3,1.1],[1.3,1.1],[-1.3,-1.1],[1.3,-1.1]].forEach(([x,z])=>{const f=new T.SphereGeometry(.3,8,6);f.translate(0,.32,0);add(f,"#d6506d",x,0,z);const p=new T.CylinderGeometry(.32,.28,.25,8);p.translate(0,.12,0);add(p,"#7a6a58",x,0,z)});return g}
-function buildTown(t){if(t.group){scene.remove(t.group)}const g=new T.Group();t.group=g;scene.add(g);const lm=t.lm;
+function buildTown(t){if(t.group){scene.remove(t.group)}const g=new T.Group();t.group=g;scene.add(g);const lm=t.lm;t.lamps=[];t.far=null;
  const pl=new T.Mesh(new T.CircleGeometry(lm.r+1.6,40).rotateX(-Math.PI/2),MAT.plaza);pl.position.set(lm.x,.08,lm.z);pl.receiveShadow=true;g.add(pl);
  const rim=new T.Mesh(new T.RingGeometry(lm.r+1.6,lm.r+2.3,40).rotateX(-Math.PI/2),MAT.plazaRim);rim.position.set(lm.x,.081,lm.z);g.add(rim);
  let o;if(lm.type==="pomnik")o=monument(lm);else{o=KIT.landmark(lm.type,lm.name);o.scale.setScalar(lm.type==="kaple"?1.15:lm.type==="kostel"?.95:.78)}
  o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});if(KIT.mergeStatic)KIT.mergeStatic(o);o.position.set(lm.x,0,lm.z);o.rotation.y=lm.ry;g.add(o);t.lmObj=o;
- for(let i=0;i<4;i++){const a=lm.ry+Math.PI/4+i*Math.PI/2;const x=lm.x+Math.cos(a)*(lm.r+1.2),z=lm.z+Math.sin(a)*(lm.r+1.2);const l=new T.Mesh(MODELS.p.lamp.geo,MODELS.p.lamp.mat);l.scale.setScalar(4.2);l.position.set(x,0,z);l.rotation.y=-a;l.castShadow=true;g.add(l)}
+ for(let i=0;i<4;i++){const a=lm.ry+Math.PI/4+i*Math.PI/2;const x=lm.x+Math.cos(a)*(lm.r+1.2),z=lm.z+Math.sin(a)*(lm.r+1.2);const l=new T.Mesh(MODELS.p.lamp.geo,MODELS.p.lamp.mat);l.scale.setScalar(4.2);l.position.set(x,0,z);l.rotation.y=-a;l.castShadow=true;g.add(l);t.lamps.push(l)}
  t.dyn=new T.Group();g.add(t.dyn);t.specialObjs=[];refreshTown(t)}
 function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.userData.lbl.remove()});const g=t.dyn;g.children.forEach(c=>{c.traverse(m=>{if(m.geometry&&m.userData.tmp)m.geometry.dispose()})});g.clear();t.specialObjs=[];
  const used=Math.min(t.items.length,t.slots.length);
@@ -509,7 +511,7 @@ function refreshTown(t){(t.specialObjs||[]).forEach(o=>{if(o.userData.lbl)o.user
  if(P.length){const m=new T.Mesh(geoFrom(P,U,I),MAT.G);m.receiveShadow=true;m.userData.tmp=1;g.add(m)}
  if(cP.length){const m=new T.Mesh(geoFrom(cP,cU,cI),new T.MeshLambertMaterial({color:"#7d828c",polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));m.userData.tmp=1;m.receiveShadow=true;g.add(m)}
  // speciální budovy
- for(let i=0;i<used;i++){const it=t.items[i];if(it.k!=="s")continue;const s=itemPos(t,i);const o=SPECIALS.build(it.id,it.text);o.position.set(s.x,0,s.z);o.rotation.y=s.ry;o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});
+ for(let i=0;i<used;i++){const it=t.items[i];if(it.k!=="s")continue;const s=itemPos(t,i);const o=SPECIALS.build(it.id,it.text);o.position.set(s.x,0,s.z);o.rotation.y=s.ry;o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true}});if(KIT.mergeStatic)KIT.mergeStatic(o);
   o.userData.ref={t,idx:i};const key=t.n+"#"+i;if(born.has(key)){o.scale.setScalar(.01);o.userData.grow=born.get(key)}g.add(o);t.specialObjs.push(o)}
  t.decorKey=null}
 const signTexC={};
@@ -517,7 +519,7 @@ function townSignTex(n){if(signTexC[n])return signTexC[n];return signTexC[n]=can
  g.fillStyle="#111";let f=96;g.font=`700 ${f}px Arial`;while(g.measureText(n).width>w-70&&f>30){f-=4;g.font=`700 ${f}px Arial`}g.textAlign="center";g.textBaseline="middle";g.fillText(n,w/2,h/2+4)})}
 /* cedule u příjezdů a stromy kolem obce – staví se až po silnicích (podle míst, kde silnice vstupují do obce) */
 function townDecor(t){const cuts=t.cutsOk||[];const key=Math.round(t.R)+"|"+t.slots.length+"|"+cuts.map(c=>Math.round(c.x)+","+Math.round(c.z)).join(";");if(t.decorKey===key)return;t.decorKey=key;
- if(t.decor){t.group.remove(t.decor);t.decor.traverse(m=>{if(m.isInstancedMesh)m.dispose()})}const g=t.decor=new T.Group();t.group.add(g);const c0=t.group.position;
+ if(t.decor){t.group.remove(t.decor);t.decor.traverse(m=>{if(m.isInstancedMesh)m.dispose()})}const g=t.decor=new T.Group();t.group.add(g);t.far=null;const c0=t.group.position;
  const tex=townSignTex(t.n);const face=new T.MeshLambertMaterial({map:tex});const back=new T.MeshLambertMaterial({color:"#e7e9ee"});
  cuts.slice(0,3).forEach(c=>{const x=c.x-c0.x,z=c.z-c0.z;const l=Math.hypot(x,z)||1;const ox=x/l,oz=z/l;const sg=new T.Group();
   const board=new T.Mesh(new T.BoxGeometry(2.6,1.02,.08),[back,back,back,back,face,back]);board.position.y=2.25;board.castShadow=true;sg.add(board);
@@ -794,7 +796,7 @@ function loop(now){requestAnimationFrame(loop);const rawDt=(now-last)/1000;const
  if(orbitSpeed){const off=cam.position.clone().sub(ctr.target);off.applyAxisAngle(UP,orbitSpeed*dt);cam.position.copy(ctr.target).add(off)}
  if(!fly)keyMove(dt);ctr.update();moveCars(dt);
  const dist=cam.position.distanceTo(ctr.target);updClouds(now,dist);cam.near=Math.max(.8,dist*.02);cam.far=Math.max(3000,dist*12);cam.updateProjectionMatrix();
- {const fs=PERF.lvl<3&&dist<420*S/0.09;if(fs!==forestShadow){forestShadow=fs;FOREST.forEach(m=>m.castShadow=fs&&m.userData.k>=0)}}forestLod();scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
+ {const fs=PERF.lvl<3&&dist<420*S/0.09;if(fs!==forestShadow){forestShadow=fs;FOREST.forEach(m=>m.castShadow=fs&&m.userData.k>=0)}}forestLod();townLod();scene.fog.near=dist*.9;scene.fog.far=dist*3.2+200;
  const sh0=Math.min(Math.max(dist*.9,18),700),sh=Math.min(700,18*Math.pow(1.25,Math.ceil(Math.log(sh0/18)/Math.log(1.25)-1e-6)));/* zblízka menší výřez stínů = ostré stíny na domku; po krocích, ať se stíny při jízdě kamery nechvějí */const sc=sun.shadow.camera;if(Math.abs(sc.right-sh)>.01){sc.left=-sh;sc.right=sh;sc.top=sh;sc.bottom=-sh;sc.near=1;sc.far=sh*4;sc.updateProjectionMatrix()}
  sun.position.copy(ctr.target).addScaledVector(SUNDIR,sh*1.8);sun.target.position.copy(ctr.target);
  if(ring.visible){const k=1+.08*Math.sin(now/180);ring.scale.set(k,1,k)}
