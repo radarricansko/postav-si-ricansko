@@ -24,6 +24,7 @@ jobs:
         with: { node-version: 20 }
       - name: Komentáře z Instagramu
         id: k
+        continue-on-error: true   # chyba čtení (vypršený token) neshodí celý běh, aby GitHub neposílal e-mail každou půlhodinu; místo toho vznikne jedno upozornění níže
         env:
           IG_TOKEN: ${{ secrets.IG_TOKEN }}
           IG_MEDIA_ID: ${{ inputs.media || vars.IG_MEDIA_ID }}
@@ -36,7 +37,7 @@ jobs:
         run: node tools/ig/komentare.js ${{ inputs.token && 'token-info' || '' }} ${{ inputs.dry && '--dry' || '' }} ${{ inputs.publikovat && '--publikovat' || '' }}
       - name: Commit a push
         id: push
-        if: ${{ !inputs.dry && !inputs.token }}
+        if: ${{ !inputs.dry && !inputs.token && steps.k.outcome == 'success' }}
         env:
           NOVI: ${{ steps.k.outputs.novi }}
         run: |
@@ -57,7 +58,7 @@ jobs:
         run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"
       # když čtení komentářů selže (nejčastěji vypršel IG_TOKEN, platí 60 dní), založí se upozornění; majitel repa dostane e-mail
       - name: Upozornění při chybě
-        if: ${{ failure() && !inputs.dry && !inputs.token }}
+        if: ${{ steps.k.outcome == 'failure' && !inputs.dry && !inputs.token }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -65,4 +66,5 @@ jobs:
           URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           N=$(gh issue list --state open --search "$T in:title" --json number -q '.[0].number' || true)
           BODY="Běh selhal: $URL. Skutečnou chybu ukáže log běhu. Možné příčiny: vypršel IG_TOKEN (platí 60 dní, prodloužení popisuje tools/ig/README.md), limit nebo výpadek Instagram API, konflikt při zápisu do repozitáře. Dokud to nepůjde, hra nepřijímá nové obyvatele."
-          if [ -z "$N" ]; then gh issue create --title "$T" --body "$BODY"; else gh issue comment "$N" --body "$BODY"; fi
+          # jen jedno upozornění: když už je otevřené, nepřidává se další komentář (každý by poslal e-mail)
+          if [ -z "$N" ]; then gh issue create --title "$T" --body "$BODY"; else echo "upozornění #$N už je otevřené"; fi
